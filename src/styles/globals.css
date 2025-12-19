@@ -1,0 +1,51 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Brand Colors */
+  --color-sunburst-yellow: #FFD44E;
+  --color-abacus-red: #E34234;
+  --color-deep-blue: #1A3E68;
+  --color-aqua-blue: #3BB5C5;
+  --color-warm-neutral: #F5F1E6;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Nunito', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+
+  h1 {
+    @apply scroll-m-20 text-5xl font-extrabold tracking-tight;
+  }
+
+  h2 {
+    @apply scroll-m-20 text-3xl font-semibold tracking-tight;
+  }
+
+  h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+  }
+
+  p {
+    @apply leading-7;
+  }
+}
+
+/* Custom animations */
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-gentle {
+  animation: bounce-gentle 2s infinite;
+}
