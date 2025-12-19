@@ -182,13 +182,12 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : showFeedback === 'skip'
-                      ? 'bg-blue-100 border-3 border-blue-400'
-                      : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                        ? 'bg-blue-100 border-3 border-blue-400'
+                        : 'bg-orange-100 border-3 border-orange-400'
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -284,13 +283,12 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
                 <button
                   key={p.part}
                   onClick={() => handlePartClick(p.part)}
-                  className={`p-6 rounded-2xl border-4 transition-all ${
-                    currentPart === p.part
+                  className={`p-6 rounded-2xl border-4 transition-all ${currentPart === p.part
                       ? 'border-sunburst-yellow bg-sunburst-yellow/10 scale-105'
                       : completedParts.includes(p.part)
-                      ? 'border-green-400 bg-green-50'
-                      : 'border-gray-200 hover:border-aqua-blue'
-                  }`}
+                        ? 'border-green-400 bg-green-50'
+                        : 'border-gray-200 hover:border-aqua-blue'
+                    }`}
                 >
                   <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${p.color} mx-auto mb-2`}></div>
                   <p className="text-deep-blue font-semibold">{p.name}</p>
@@ -445,11 +443,10 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -557,11 +554,10 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -589,10 +585,6 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
     const postTestScore = calculateScore(postTestAnswers);
     const learningGain = postTestScore - preTestScore;
 
-    useEffect(() => {
-      completeQuest(preTestScore, postTestScore);
-    }, []);
-
     return (
       <QuestClose
         questTitle="Quest 2: Parts of the Counter"
@@ -602,7 +594,10 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
         coinsEarned={25}
         learningGain={learningGain}
         summary="You've mastered the three parts of your Junior Counter: the Upper Bead (Head), Lower Beads (Legs), and Answer Rod (Body)! Now you're ready to learn how numbers live on your counter!"
-        onNext={onComplete}
+        onNext={() => {
+          completeQuest(preTestScore, postTestScore);
+          onComplete();
+        }}
       />
     );
   }
