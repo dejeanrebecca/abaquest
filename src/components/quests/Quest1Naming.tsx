@@ -43,14 +43,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
     setStartTime(Date.now());
   }, [currentQuestion, step]);
 
-  // Complete quest when reaching close step
-  useEffect(() => {
-    if (step === 'close') {
-      const preTestScore = calculateScore(preTestAnswers);
-      const postTestScore = calculateScore(postTestAnswers);
-      completeQuest(preTestScore, postTestScore);
-    }
-  }, [step, preTestAnswers, postTestAnswers]);
+  // Complete quest logic moved to close step interaction
 
   const calculateScore = (answers: boolean[]): number => {
     if (answers.length === 0) return 0;
@@ -205,13 +198,12 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : showFeedback === 'skip'
-                      ? 'bg-blue-100 border-3 border-blue-400'
-                      : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                        ? 'bg-blue-100 border-3 border-blue-400'
+                        : 'bg-orange-100 border-3 border-orange-400'
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -479,11 +471,10 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                       onClick={() => {
                         setCounterName(name);
                       }}
-                      className={`p-4 rounded-xl border-4 transition-all ${
-                        counterName === name
+                      className={`p-4 rounded-xl border-4 transition-all ${counterName === name
                           ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
                           : 'border-gray-200 hover:border-sunburst-yellow'
-                      }`}
+                        }`}
                     >
                       <p className="text-deep-blue">{name}</p>
                     </button>
@@ -645,11 +636,10 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -686,7 +676,10 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         coinsEarned={20}
         learningGain={learningGain}
         summary={`You named your Junior Counter "${counterName}" and learned that it's a special tool for thinking about math! You're now an official student at Mistress Creola's School of Mental Math!`}
-        onNext={onComplete}
+        onNext={() => {
+          completeQuest(preTestScore, postTestScore);
+          onComplete();
+        }}
       />
     );
   }
