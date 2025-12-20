@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DataLoggerProvider } from './components/DataLogger';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuestEngineProvider, useQuestEngine } from './components/QuestEngine';
 import { Library } from './components/screens/Library';
 import { Settings } from './components/screens/Settings';
@@ -76,7 +77,9 @@ export default function App() {
   return (
     <DataLoggerProvider>
       <QuestEngineProvider>
-        <AppContent />
+        <ErrorBoundary>
+          <AppContent />
+        </ErrorBoundary>
       </QuestEngineProvider>
     </DataLoggerProvider>
   );
