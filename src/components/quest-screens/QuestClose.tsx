@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { Trophy, Star, Coins, ArrowRight } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface QuestCloseProps {
   questTitle: string;
@@ -98,19 +98,17 @@ export function QuestClose({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.5 }}
-            className={`rounded-2xl p-6 mb-8 border-4 ${
-              learningGain > 0
+            className={`rounded-2xl p-6 mb-8 border-4 ${learningGain > 0
                 ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-green-500'
                 : learningGain < 0
-                ? 'bg-gradient-to-r from-orange-100 to-red-100 border-orange-500'
-                : 'bg-gradient-to-r from-gray-100 to-gray-200 border-gray-400'
-            }`}
+                  ? 'bg-gradient-to-r from-orange-100 to-red-100 border-orange-500'
+                  : 'bg-gradient-to-r from-gray-100 to-gray-200 border-gray-400'
+              }`}
           >
             <div className="flex items-center justify-center gap-4">
               <Trophy
-                className={`w-10 h-10 ${
-                  learningGain > 0 ? 'text-green-600' : 'text-gray-600'
-                }`}
+                className={`w-10 h-10 ${learningGain > 0 ? 'text-green-600' : 'text-gray-600'
+                  }`}
               />
               <div>
                 <p className="text-deep-blue/70 text-sm mb-1">Learning Gain</p>
@@ -146,8 +144,8 @@ export function QuestClose({
               {learningGain > 20
                 ? '🌟 Amazing growth! You are becoming a math master!'
                 : learningGain > 0
-                ? '💪 Great work! You learned something new today!'
-                : '🎯 Keep practicing! Every AbaQuester grows at their own pace!'}
+                  ? '💪 Great work! You learned something new today!'
+                  : '🎯 Keep practicing! Every AbaQuester grows at their own pace!'}
             </p>
           </div>
 
@@ -163,14 +161,7 @@ export function QuestClose({
         </motion.div>
       </div>
 
-      {/* Logo in corner */}
-      <div className="absolute bottom-8 right-8">
-        <img
-          src={logo}
-          alt="AbaQuest"
-          className="w-24 h-24 object-cover rounded-full drop-shadow-lg border-4 border-white opacity-50"
-        />
-      </div>
+
     </motion.div>
   );
 }

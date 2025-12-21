@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Volume2, ChevronRight, Ship, ArrowRight } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface NameCounterProps {
   onNext: (name: string) => void;
@@ -15,7 +15,7 @@ export function NameCounter({ onNext }: NameCounterProps) {
   const [selectedAvatar, setSelectedAvatar] = useState('');
   const [customName, setCustomName] = useState('');
   const [boatPath, setBoatPath] = useState<string[]>([]);
-  const [selectedChoice, setSelectedChoice] = useState('');
+
   const { setStudentName } = useDataLogger();
 
   const avatarFriends = [
@@ -170,7 +170,7 @@ export function NameCounter({ onNext }: NameCounterProps) {
                 ↓ Steer South
               </Button>
               <Button
-                onClick={() => {}}
+                onClick={() => { }}
                 className="bg-gray-400 hover:bg-gray-500 text-white py-8 rounded-2xl shadow-lg"
                 size="lg"
               >
@@ -500,11 +500,10 @@ export function NameCounter({ onNext }: NameCounterProps) {
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative p-4 rounded-2xl border-4 transition-all duration-300 group ${
-                    selectedAvatar === friend.name
-                      ? 'border-aqua-blue scale-110 shadow-xl'
-                      : 'border-gray-200 hover:border-sunburst-yellow'
-                  }`}
+                  className={`relative p-4 rounded-2xl border-4 transition-all duration-300 group ${selectedAvatar === friend.name
+                    ? 'border-aqua-blue scale-110 shadow-xl'
+                    : 'border-gray-200 hover:border-sunburst-yellow'
+                    }`}
                 >
                   <button
                     onClick={() => {
@@ -584,7 +583,7 @@ export function NameCounter({ onNext }: NameCounterProps) {
     >
       {/* Header with Logo */}
       <div className="flex justify-center mb-6">
-        <img src={logo} alt="AbaQuest" className="w-40 h-40 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+        {/* Logo removed */}
       </div>
 
       {/* Story Content */}

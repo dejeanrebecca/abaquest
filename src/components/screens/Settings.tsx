@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { Volume2, VolumeX, Type, Globe, Info, Shield, BarChart2 } from 'lucide-react';
-import { Label } from '../ui/label';
+
 import { Switch } from '../ui/switch';
 import { Slider } from '../ui/slider';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 export function Settings() {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
@@ -32,9 +32,7 @@ export function Settings() {
       className="min-h-screen bg-warm-neutral p-8"
     >
       {/* Header */}
-      <div className="flex justify-center mb-6">
-        <img src={logo} alt="AbaQuest" className="w-40 h-40 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-      </div>
+
 
       <div className="max-w-4xl mx-auto">
         <motion.div
@@ -150,7 +148,7 @@ export function Settings() {
                 step={25}
                 className="mb-4"
               />
-              <p 
+              <p
                 className="text-deep-blue/80 text-center p-4 bg-gray-50 rounded-xl"
                 style={{ fontSize: `${textSize[0]}%` }}
               >
@@ -178,11 +176,10 @@ export function Settings() {
                 <button
                   key={lang.value}
                   onClick={() => setLanguage(lang.value)}
-                  className={`p-4 rounded-2xl border-4 transition-all ${
-                    language === lang.value
-                      ? 'border-deep-blue bg-deep-blue/10 scale-105 shadow-lg'
-                      : 'border-gray-200 hover:border-sunburst-yellow'
-                  }`}
+                  className={`p-4 rounded-2xl border-4 transition-all ${language === lang.value
+                    ? 'border-deep-blue bg-deep-blue/10 scale-105 shadow-lg'
+                    : 'border-gray-200 hover:border-sunburst-yellow'
+                    }`}
                 >
                   <div className="text-4xl mb-2">{lang.flag}</div>
                   <p className="text-deep-blue">{lang.label}</p>

@@ -1,12 +1,12 @@
-import { useState } from 'react';
+
 import { motion } from 'motion/react';
-import { Card } from '../ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+
+
 import { TrendingUp, Award, Trophy, Download, RefreshCw, ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useDataLogger } from '../DataLogger';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface TeacherDashboardProps {
   onBack?: () => void;
@@ -85,7 +85,7 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
           </Button>
         )}
         <div className="flex-1 flex justify-center">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+          {/* Logo removed */}
         </div>
         <div className="w-32"></div> {/* Spacer for alignment */}
       </div>
@@ -173,19 +173,17 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className={`rounded-2xl shadow-xl p-6 mb-6 border-4 ${
-            learningGain > 0
-              ? 'bg-green-50 border-green-500'
-              : learningGain < 0
+          className={`rounded-2xl shadow-xl p-6 mb-6 border-4 ${learningGain > 0
+            ? 'bg-green-50 border-green-500'
+            : learningGain < 0
               ? 'bg-red-50 border-red-500'
               : 'bg-gray-50 border-gray-400'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-center gap-4">
             <TrendingUp
-              className={`w-8 h-8 ${
-                learningGain > 0 ? 'text-green-600' : 'text-gray-600'
-              }`}
+              className={`w-8 h-8 ${learningGain > 0 ? 'text-green-600' : 'text-gray-600'
+                }`}
             />
             <div className="text-center">
               <p className="text-deep-blue/70 text-sm mb-1">Learning Gain</p>

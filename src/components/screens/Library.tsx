@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Lock, CheckCircle, Play } from 'lucide-react';
 import { useQuestEngine } from '../QuestEngine';
 import { QUESTS, QuestId } from '../../types/quest';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface LibraryProps {
   onSelectQuest: (questId: QuestId) => void;
@@ -18,14 +18,7 @@ export function Library({ onSelectQuest }: LibraryProps) {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-gradient-to-b from-deep-blue via-aqua-blue to-warm-neutral p-8"
     >
-      {/* Header */}
-      <div className="flex justify-center mb-8">
-        <img
-          src={logo}
-          alt="AbaQuest"
-          className="w-40 h-40 object-cover rounded-full drop-shadow-xl border-4 border-white"
-        />
-      </div>
+
 
       <div className="max-w-5xl mx-auto">
         <motion.div
@@ -70,17 +63,15 @@ export function Library({ onSelectQuest }: LibraryProps) {
                 className={`relative ${!isUnlocked ? 'opacity-60' : ''}`}
               >
                 <div
-                  className={`bg-white rounded-3xl shadow-2xl p-8 border-4 ${
-                    isInProgress
-                      ? 'border-sunburst-yellow'
-                      : isCompleted
+                  className={`bg-white rounded-3xl shadow-2xl p-8 border-4 ${isInProgress
+                    ? 'border-sunburst-yellow'
+                    : isCompleted
                       ? 'border-green-500'
                       : isUnlocked
-                      ? 'border-aqua-blue'
-                      : 'border-gray-300'
-                  } transition-all duration-300 ${
-                    isUnlocked ? 'hover:scale-105 cursor-pointer' : ''
-                  }`}
+                        ? 'border-aqua-blue'
+                        : 'border-gray-300'
+                    } transition-all duration-300 ${isUnlocked ? 'hover:scale-105 cursor-pointer' : ''
+                    }`}
                   onClick={() => isUnlocked && onSelectQuest(quest.id)}
                 >
                   {/* Quest Icon & Status */}
@@ -127,15 +118,14 @@ export function Library({ onSelectQuest }: LibraryProps) {
                   {/* CTA Button */}
                   {isUnlocked && !isCompleted && (
                     <Button
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         onSelectQuest(quest.id);
                       }}
-                      className={`w-full mt-4 ${
-                        isInProgress
-                          ? 'bg-sunburst-yellow hover:bg-sunburst-yellow/90 text-deep-blue'
-                          : 'bg-abacus-red hover:bg-abacus-red/90 text-white'
-                      } py-4 rounded-2xl shadow-xl`}
+                      className={`w-full mt-4 ${isInProgress
+                        ? 'bg-sunburst-yellow hover:bg-sunburst-yellow/90 text-deep-blue'
+                        : 'bg-abacus-red hover:bg-abacus-red/90 text-white'
+                        } py-4 rounded-2xl shadow-xl`}
                     >
                       <Play className="w-5 h-5 mr-2" />
                       {isInProgress ? 'Continue Quest' : 'Start Quest'}
@@ -144,7 +134,7 @@ export function Library({ onSelectQuest }: LibraryProps) {
 
                   {isCompleted && (
                     <Button
-                      onClick={(e) => {
+                      onClick={(e: React.MouseEvent) => {
                         e.stopPropagation();
                         onSelectQuest(quest.id);
                       }}

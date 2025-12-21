@@ -235,7 +235,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         className="min-h-screen bg-warm-neutral p-8"
       >
         <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+          {/* Logo removed */}
         </div>
 
         <div className="max-w-4xl mx-auto">
@@ -321,7 +321,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           className="min-h-screen bg-gradient-to-b from-sky-200 to-warm-neutral p-8"
         >
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+            {/* Logo removed */}
           </div>
 
           <div className="max-w-3xl mx-auto">
@@ -390,7 +390,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           className="min-h-screen bg-warm-neutral p-8"
         >
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+            {/* Logo removed */}
           </div>
 
           <div className="max-w-4xl mx-auto">
@@ -447,7 +447,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           className="min-h-screen bg-warm-neutral p-8"
         >
           <div className="flex justify-center mb-4">
-            <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+            {/* Logo removed */}
           </div>
 
           <div className="max-w-3xl mx-auto">
@@ -527,7 +527,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         className="min-h-screen bg-gradient-to-b from-purple-100 to-warm-neutral p-8"
       >
         <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+          {/* Logo removed */}
         </div>
 
         <div className="max-w-3xl mx-auto">
@@ -588,7 +588,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         className="min-h-screen bg-warm-neutral p-8"
       >
         <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+          {/* Logo removed */}
         </div>
 
         <div className="max-w-3xl mx-auto">

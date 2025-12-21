@@ -5,7 +5,7 @@ import { AudioNarration } from '../AudioNarration';
 import { JuniorCounter } from '../JuniorCounter';
 import { useDataLogger } from '../DataLogger';
 import { CheckCircle, XCircle } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 type Part = 'upper' | 'lower' | 'rod';
 
@@ -16,7 +16,7 @@ interface Quest2StoryProps {
 export function Quest2Story({ onComplete }: Quest2StoryProps) {
     const [storyStep, setStoryStep] = useState(0);
     const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | null>(null);
-    const [startTime] = useState(Date.now()); // Start time usually irrelevant for story unless per-question? Assuming shared start time ok, or we can use per-render.
+
 
     // Actually, we should track response time per question
     // So we might want a new startTime ref or state reset when storyStep changes.
@@ -80,7 +80,7 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
             className="min-h-screen bg-gradient-to-br from-purple-100 via-warm-neutral to-pink-100 p-8"
         >
             <div className="flex justify-center mb-4">
-                <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+                {/* Logo removed */}
             </div>
 
             <div className="max-w-4xl mx-auto">
@@ -137,8 +137,8 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0, y: 20 }}
                                 className={`p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                                        ? 'bg-green-100 border-3 border-green-500'
-                                        : 'bg-orange-100 border-3 border-orange-400'
+                                    ? 'bg-green-100 border-3 border-green-500'
+                                    : 'bg-orange-100 border-3 border-orange-400'
                                     }`}
                             >
                                 {showFeedback === 'correct' ? (

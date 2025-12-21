@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { Trophy, Star, Coins } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface RewardsProps {
   coins: number;
@@ -12,7 +12,7 @@ interface RewardsProps {
 export function Rewards({ coins, onNext }: RewardsProps) {
   const { getPostTestScore } = useDataLogger();
   const postTestScore = getPostTestScore();
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -22,7 +22,7 @@ export function Rewards({ coins, onNext }: RewardsProps) {
       <div className="max-w-3xl w-full">
         {/* Logo */}
         <div className="flex justify-center mb-8">
-          <img src={logo} alt="AbaQuest" className="w-48 h-48 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+          {/* Logo removed */}
         </div>
 
         {/* Main Reward Card */}
@@ -101,7 +101,7 @@ export function Rewards({ coins, onNext }: RewardsProps) {
               >
                 View All Quests 📚
               </Button>
-              
+
               <p className="text-deep-blue/60">Keep learning to unlock more adventures!</p>
             </div>
           </div>

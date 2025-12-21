@@ -4,7 +4,7 @@ import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
 import { JuniorCounter } from '../JuniorCounter';
 import { Sparkles } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 type Part = 'upper' | 'lower' | 'rod';
 
@@ -49,7 +49,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-warm-neutral p-8">
             <div className="flex justify-center mb-4">
-                <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+                {/* Logo removed */}
             </div>
 
             <div className="max-w-4xl mx-auto">
@@ -81,10 +81,10 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                                 key={p.part}
                                 onClick={() => handlePartClick(p.part)}
                                 className={`p-6 rounded-2xl border-4 transition-all ${currentPart === p.part
-                                        ? 'border-sunburst-yellow bg-sunburst-yellow/10 scale-105'
-                                        : completedParts.includes(p.part)
-                                            ? 'border-green-400 bg-green-50'
-                                            : 'border-gray-200 hover:border-aqua-blue'
+                                    ? 'border-sunburst-yellow bg-sunburst-yellow/10 scale-105'
+                                    : completedParts.includes(p.part)
+                                        ? 'border-green-400 bg-green-50'
+                                        : 'border-gray-200 hover:border-aqua-blue'
                                     }`}
                             >
                                 <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${p.color} mx-auto mb-2`}></div>

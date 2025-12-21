@@ -71,7 +71,7 @@ function AppContent() {
   return (
     <div className="relative w-full min-h-screen bg-warm-neutral overflow-hidden">
       {/* Tablet Frame - 1024x768 optimized */}
-      <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden">
+      <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden flex flex-col">
 
         {/* Global Breadcrumbs Navigation */}
         <Breadcrumbs
@@ -81,7 +81,7 @@ function AppContent() {
         />
 
         {/* Main Content Area */}
-        <main className="pb-24 min-h-screen bg-warm-neutral">
+        <main className="pb-24 flex-1 bg-warm-neutral">
           {renderContent()}
         </main>
 

@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
 import { JuniorCounter } from '../JuniorCounter';
-import { DataLoggerProvider, useDataLogger } from '../DataLogger'; // Ensure import
+import { useDataLogger } from '../DataLogger'; // Ensure import
+
 import { HelpCircle, CheckCircle, XCircle } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 type Part = 'upper' | 'lower' | 'rod';
 
@@ -67,7 +68,7 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
         return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-warm-neutral p-8">
                 <div className="flex justify-center mb-4">
-                    <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+                    {/* Logo removed */}
                 </div>
 
                 <div className="max-w-3xl mx-auto">
@@ -102,7 +103,7 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-warm-neutral p-8">
             <div className="flex justify-center mb-4">
-                <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
+                {/* Logo removed */}
             </div>
 
             <div className="max-w-3xl mx-auto">
@@ -158,10 +159,10 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
                                 animate={{ scale: 1, y: 0 }}
                                 exit={{ scale: 0, y: 20 }}
                                 className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                                        ? 'bg-green-100 border-3 border-green-500'
-                                        : showFeedback === 'skip'
-                                            ? 'bg-blue-100 border-3 border-blue-400'
-                                            : 'bg-orange-100 border-3 border-orange-400'
+                                    ? 'bg-green-100 border-3 border-green-500'
+                                    : showFeedback === 'skip'
+                                        ? 'bg-blue-100 border-3 border-blue-400'
+                                        : 'bg-orange-100 border-3 border-orange-400'
                                     }`}
                             >
                                 {showFeedback === 'correct' ? (

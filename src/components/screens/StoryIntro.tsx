@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { Volume2, ChevronRight } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface StoryIntroProps {
   onNext: () => void;
@@ -44,10 +44,7 @@ export function StoryIntro({ onNext }: StoryIntroProps) {
       exit={{ opacity: 0 }}
       className="min-h-screen bg-gradient-to-b from-deep-blue via-aqua-blue to-warm-neutral p-8"
     >
-      {/* Logo */}
-      <div className="flex justify-center mb-8">
-        <img src={logo} alt="AbaQuest" className="w-40 h-40 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-      </div>
+
 
       {/* Story Content */}
       <div className="max-w-4xl mx-auto">
@@ -89,13 +86,12 @@ export function StoryIntro({ onNext }: StoryIntroProps) {
               {scenes.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentScene
+                  className={`h-2 rounded-full transition-all ${index === currentScene
                       ? 'w-8 bg-abacus-red'
                       : index < currentScene
-                      ? 'w-2 bg-aqua-blue'
-                      : 'w-2 bg-gray-300'
-                  }`}
+                        ? 'w-2 bg-aqua-blue'
+                        : 'w-2 bg-gray-300'
+                    }`}
                 />
               ))}
             </div>

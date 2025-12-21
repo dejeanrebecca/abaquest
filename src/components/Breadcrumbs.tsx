@@ -13,7 +13,7 @@ export function Breadcrumbs({ currentScreen, currentQuest, onHome }: Breadcrumbs
     // Per plan: "If on Library (Home): Show Home (or nothing)" -> Let's show "Home" as a non-clickable text to indicate location.
     if (currentScreen === 'library' && !currentQuest) {
         return (
-            <div className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm text-deep-blue font-medium">
+            <div className="w-full flex items-center gap-2 px-6 py-4 bg-white/80 backdrop-blur-sm border-b-2 border-warm-neutral text-deep-blue font-medium z-50">
                 <Home className="w-4 h-4" />
                 <span>Home</span>
             </div>
@@ -21,7 +21,7 @@ export function Breadcrumbs({ currentScreen, currentQuest, onHome }: Breadcrumbs
     }
 
     return (
-        <div className="absolute top-4 left-4 z-50 flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full shadow-md text-deep-blue animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="w-full flex items-center gap-2 px-6 py-4 bg-white/90 backdrop-blur-md border-b-2 border-warm-neutral z-50 animate-in fade-in slide-in-from-top-4 duration-300">
             <button
                 onClick={onHome}
                 className="flex items-center gap-1 hover:text-abacus-red transition-colors font-medium"

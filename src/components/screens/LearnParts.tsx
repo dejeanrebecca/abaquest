@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { Volume2, CheckCircle } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface LearnPartsProps {
   onNext: () => void;
@@ -43,10 +44,7 @@ export function LearnParts({ onNext }: LearnPartsProps) {
       exit={{ opacity: 0, x: -100 }}
       className="min-h-screen bg-warm-neutral p-8"
     >
-      {/* Header */}
-      <div className="flex justify-center mb-6">
-        <img src={logo} alt="AbaQuest" className="w-40 h-40 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-      </div>
+
 
       <div className="max-w-4xl mx-auto">
         {/* Instruction Panel */}
@@ -67,9 +65,8 @@ export function LearnParts({ onNext }: LearnPartsProps) {
               {tasks.map((_, index) => (
                 <div
                   key={index}
-                  className={`w-3 h-3 rounded-full ${
-                    index < completedTasks.length ? 'bg-sunburst-yellow' : 'bg-white/30'
-                  }`}
+                  className={`w-3 h-3 rounded-full ${index < completedTasks.length ? 'bg-sunburst-yellow' : 'bg-white/30'
+                    }`}
                 />
               ))}
             </div>
@@ -87,11 +84,10 @@ export function LearnParts({ onNext }: LearnPartsProps) {
               onClick={() => handlePartClick('rod')}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className={`absolute w-6 rounded-full shadow-lg transition-all duration-300 ${
-                selectedPart === 'rod' || completedTasks.includes('rod')
-                  ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
-                  : 'bg-gradient-to-b from-gray-700 to-gray-900'
-              }`}
+              className={`absolute w-6 rounded-full shadow-lg transition-all duration-300 ${selectedPart === 'rod' || completedTasks.includes('rod')
+                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
+                : 'bg-gradient-to-b from-gray-700 to-gray-900'
+                }`}
               style={{ height: '360px', top: '20px' }}
             >
               {completedTasks.includes('rod') && (
@@ -113,11 +109,10 @@ export function LearnParts({ onNext }: LearnPartsProps) {
               animate={{
                 y: selectedPart === 'upper' ? 10 : 0,
               }}
-              className={`absolute w-20 h-20 rounded-full shadow-2xl transition-all duration-300 ${
-                selectedPart === 'upper' || completedTasks.includes('upper')
-                  ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
-                  : 'bg-gradient-to-br from-abacus-red to-red-700'
-              }`}
+              className={`absolute w-20 h-20 rounded-full shadow-2xl transition-all duration-300 ${selectedPart === 'upper' || completedTasks.includes('upper')
+                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
+                : 'bg-gradient-to-br from-abacus-red to-red-700'
+                }`}
               style={{ top: '20px' }}
             >
               {completedTasks.includes('upper') && (
@@ -142,11 +137,10 @@ export function LearnParts({ onNext }: LearnPartsProps) {
                   animate={{
                     x: selectedPart === 'lower' ? -10 : 0,
                   }}
-                  className={`w-16 h-16 rounded-full shadow-xl transition-all duration-300 ${
-                    selectedPart === 'lower' || completedTasks.includes('lower')
-                      ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
-                      : 'bg-gradient-to-br from-aqua-blue to-blue-600'
-                  }`}
+                  className={`w-16 h-16 rounded-full shadow-xl transition-all duration-300 ${selectedPart === 'lower' || completedTasks.includes('lower')
+                    ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
+                    : 'bg-gradient-to-br from-aqua-blue to-blue-600'
+                    }`}
                 >
                   {index === 0 && completedTasks.includes('lower') && (
                     <motion.div
