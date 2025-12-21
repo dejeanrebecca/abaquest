@@ -25,7 +25,7 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
   const handleFreeze = () => {
     const startTime = Date.now();
     setIsFrozen(true);
-    
+
     // Log the interaction
     logInteraction({
       quest_id: 4,
@@ -51,6 +51,7 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
   if (showCelebration) {
     return (
       <motion.div
+        key="celebration"
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="min-h-screen bg-gradient-to-br from-sunburst-yellow via-warm-neutral to-aqua-blue p-8 flex items-center justify-center relative overflow-hidden"
@@ -115,6 +116,7 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
 
   return (
     <motion.div
+      key="lesson"
       initial={{ opacity: 0, x: 100 }}
       animate={{ opacity: 1, x: 0 }}
       className="min-h-screen bg-warm-neutral p-8"
@@ -195,6 +197,7 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
                     transition={{
                       duration: 1.5,
                       repeat: Infinity,
+                      delay: 0
                     }}
                   >
                     <Snowflake className="w-24 h-24 text-aqua-blue" />
@@ -234,9 +237,8 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
             {lessons.map((_, index) => (
               <div
                 key={index}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index <= currentLesson ? 'bg-aqua-blue scale-110' : 'bg-gray-300'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all ${index <= currentLesson ? 'bg-aqua-blue scale-110' : 'bg-gray-300'
+                  }`}
               />
             ))}
           </div>

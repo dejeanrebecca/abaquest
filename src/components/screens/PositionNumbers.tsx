@@ -70,13 +70,12 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
       <div className="flex flex-col items-center gap-1">
         {/* Top bead (represents 5) */}
         <div
-          className={`w-10 h-10 rounded-full transition-all shadow-lg ${
-            position === 'top' && isHighlighted
+          className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'top' && isHighlighted
               ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
               : position === 'top'
-              ? 'bg-sunburst-yellow'
-              : 'bg-gray-300'
-          }`}
+                ? 'bg-sunburst-yellow'
+                : 'bg-gray-300'
+            }`}
         ></div>
 
         <div className="w-1 h-6 bg-gray-700 rounded"></div>
@@ -86,13 +85,12 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
           {[0, 1].map((i) => (
             <div
               key={`upper-${i}`}
-              className={`w-8 h-8 rounded-full transition-all shadow-lg ${
-                position === 'middle-upper' && isHighlighted
+              className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-upper' && isHighlighted
                   ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
                   : position === 'middle-upper'
-                  ? 'bg-sunburst-yellow'
-                  : 'bg-gray-400'
-              }`}
+                    ? 'bg-sunburst-yellow'
+                    : 'bg-gray-400'
+                }`}
             ></div>
           ))}
         </div>
@@ -104,13 +102,12 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
           {[0, 1].map((i) => (
             <div
               key={`lower-${i}`}
-              className={`w-8 h-8 rounded-full transition-all shadow-lg ${
-                position === 'middle-lower' && isHighlighted
+              className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-lower' && isHighlighted
                   ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
                   : position === 'middle-lower'
-                  ? 'bg-sunburst-yellow'
-                  : 'bg-gray-400'
-              }`}
+                    ? 'bg-sunburst-yellow'
+                    : 'bg-gray-400'
+                }`}
             ></div>
           ))}
         </div>
@@ -119,13 +116,12 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
 
         {/* Bottom bead (represents 9) */}
         <div
-          className={`w-10 h-10 rounded-full transition-all shadow-lg ${
-            position === 'bottom' && isHighlighted
+          className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'bottom' && isHighlighted
               ? 'bg-abacus-red ring-4 ring-aqua-blue scale-110'
               : position === 'bottom'
-              ? 'bg-abacus-red'
-              : 'bg-gray-300'
-          }`}
+                ? 'bg-abacus-red'
+                : 'bg-gray-300'
+            }`}
         ></div>
       </div>
     );
@@ -138,6 +134,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
 
     return (
       <motion.div
+        key={phase} // Force remount on phase change
         initial={{ opacity: 0, x: 100 }}
         animate={{ opacity: 1, x: 0 }}
         className="min-h-screen bg-warm-neutral p-8"
@@ -206,13 +203,12 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : showFeedback === 'skip'
-                      ? 'bg-blue-100 border-3 border-blue-400'
-                      : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                        ? 'bg-blue-100 border-3 border-blue-400'
+                        : 'bg-orange-100 border-3 border-orange-400'
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -243,6 +239,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
   if (phase === 'learn') {
     return (
       <motion.div
+        key="learn" // Force remount
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen bg-warm-neutral p-8"
@@ -354,6 +351,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
 
     return (
       <motion.div
+        key="practice" // Force remount
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen bg-warm-neutral p-8"
@@ -404,11 +402,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
@@ -485,6 +482,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
 
     return (
       <motion.div
+        key="story" // Force remount
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="min-h-screen bg-gradient-to-br from-purple-100 via-warm-neutral to-pink-100 p-8"
@@ -539,11 +537,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
                   initial={{ scale: 0, y: 20 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
-                  className={`p-4 rounded-xl flex items-center justify-center gap-3 ${
-                    showFeedback === 'correct'
+                  className={`p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
                       ? 'bg-green-100 border-3 border-green-500'
                       : 'bg-orange-100 border-3 border-orange-400'
-                  }`}
+                    }`}
                 >
                   {showFeedback === 'correct' ? (
                     <>
