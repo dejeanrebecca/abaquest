@@ -41,6 +41,7 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
   if (step === 'welcome') {
     return (
       <QuestWelcome
+        key="welcome"
         questTitle="Quest 2: Parts of the Counter"
         questIcon="🧩"
         welcomeMessage="Great work so far, AbaQuester! Now that you've named your Junior Counter, it's time to learn about its special parts. Every part has a job to do — and they all work together to help you think about numbers!"
@@ -54,6 +55,7 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
   if (step === 'pretest') {
     return (
       <Quest2Assessment
+        key="pretest"
         type="pretest"
         onComplete={handlePreTestComplete}
       />
@@ -62,18 +64,19 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
 
   // STEP 3: MINI-LESSON
   if (step === 'learn') {
-    return <Quest2Learn onComplete={() => setStep('story')} />;
+    return <Quest2Learn key="learn" onComplete={() => setStep('story')} />;
   }
 
   // STEP 4: STORY MODE
   if (step === 'story') {
-    return <Quest2Story onComplete={() => setStep('posttest')} />;
+    return <Quest2Story key="story" onComplete={() => setStep('posttest')} />;
   }
 
   // STEP 5: POST-TEST
   if (step === 'posttest') {
     return (
       <Quest2Assessment
+        key="posttest"
         type="posttest"
         onComplete={handlePostTestComplete}
       />
@@ -86,6 +89,7 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
 
     return (
       <QuestClose
+        key="close"
         questTitle="Quest 2: Parts of the Counter"
         questIcon="🧩"
         preTestScore={preTestScore}
