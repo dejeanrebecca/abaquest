@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { CheckCircle, XCircle, HelpCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface PositionNumbersProps {
   onNext: () => void;
@@ -71,10 +71,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         {/* Top bead (represents 5) */}
         <div
           className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'top' && isHighlighted
-              ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-              : position === 'top'
-                ? 'bg-sunburst-yellow'
-                : 'bg-gray-300'
+            ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
+            : position === 'top'
+              ? 'bg-sunburst-yellow'
+              : 'bg-gray-300'
             }`}
         ></div>
 
@@ -86,10 +86,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
             <div
               key={`upper-${i}`}
               className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-upper' && isHighlighted
-                  ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                  : position === 'middle-upper'
-                    ? 'bg-sunburst-yellow'
-                    : 'bg-gray-400'
+                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
+                : position === 'middle-upper'
+                  ? 'bg-sunburst-yellow'
+                  : 'bg-gray-400'
                 }`}
             ></div>
           ))}
@@ -103,10 +103,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
             <div
               key={`lower-${i}`}
               className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-lower' && isHighlighted
-                  ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                  : position === 'middle-lower'
-                    ? 'bg-sunburst-yellow'
-                    : 'bg-gray-400'
+                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
+                : position === 'middle-lower'
+                  ? 'bg-sunburst-yellow'
+                  : 'bg-gray-400'
                 }`}
             ></div>
           ))}
@@ -117,10 +117,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         {/* Bottom bead (represents 9) */}
         <div
           className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'bottom' && isHighlighted
-              ? 'bg-abacus-red ring-4 ring-aqua-blue scale-110'
-              : position === 'bottom'
-                ? 'bg-abacus-red'
-                : 'bg-gray-300'
+            ? 'bg-abacus-red ring-4 ring-aqua-blue scale-110'
+            : position === 'bottom'
+              ? 'bg-abacus-red'
+              : 'bg-gray-300'
             }`}
         ></div>
       </div>
@@ -139,9 +139,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         animate={{ opacity: 1, x: 0 }}
         className="min-h-screen bg-warm-neutral p-8"
       >
-        <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-        </div>
+
 
         <div className="max-w-4xl mx-auto">
           <div className="bg-deep-blue text-white rounded-2xl p-4 mb-4 shadow-xl">
@@ -204,10 +202,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
                   className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                      ? 'bg-green-100 border-3 border-green-500'
-                      : showFeedback === 'skip'
-                        ? 'bg-blue-100 border-3 border-blue-400'
-                        : 'bg-orange-100 border-3 border-orange-400'
+                    ? 'bg-green-100 border-3 border-green-500'
+                    : showFeedback === 'skip'
+                      ? 'bg-blue-100 border-3 border-blue-400'
+                      : 'bg-orange-100 border-3 border-orange-400'
                     }`}
                 >
                   {showFeedback === 'correct' ? (
@@ -244,9 +242,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         animate={{ opacity: 1 }}
         className="min-h-screen bg-warm-neutral p-8"
       >
-        <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-        </div>
+
 
         <div className="max-w-5xl mx-auto">
           <div className="bg-gradient-to-r from-aqua-blue to-deep-blue rounded-2xl p-4 mb-6 shadow-xl text-white">
@@ -356,9 +352,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         animate={{ opacity: 1 }}
         className="min-h-screen bg-warm-neutral p-8"
       >
-        <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-        </div>
+
 
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 mb-4 shadow-xl text-white">
@@ -403,8 +397,8 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
                   className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                      ? 'bg-green-100 border-3 border-green-500'
-                      : 'bg-orange-100 border-3 border-orange-400'
+                    ? 'bg-green-100 border-3 border-green-500'
+                    : 'bg-orange-100 border-3 border-orange-400'
                     }`}
                 >
                   {showFeedback === 'correct' ? (
@@ -487,9 +481,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         animate={{ opacity: 1 }}
         className="min-h-screen bg-gradient-to-br from-purple-100 via-warm-neutral to-pink-100 p-8"
       >
-        <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-        </div>
+
 
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-deep-blue">
@@ -538,8 +530,8 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
                   className={`p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                      ? 'bg-green-100 border-3 border-green-500'
-                      : 'bg-orange-100 border-3 border-orange-400'
+                    ? 'bg-green-100 border-3 border-green-500'
+                    : 'bg-orange-100 border-3 border-orange-400'
                     }`}
                 >
                   {showFeedback === 'correct' ? (

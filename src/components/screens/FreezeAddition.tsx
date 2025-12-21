@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { Volume2, Snowflake } from 'lucide-react';
-import { useDataLogger } from '../DataLogger';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface FreezeAdditionProps {
   onNext: (coins: number) => void;
@@ -121,9 +120,7 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
       animate={{ opacity: 1, x: 0 }}
       className="min-h-screen bg-warm-neutral p-8"
     >
-      <div className="flex justify-center mb-6">
-        <img src={logo} alt="AbaQuest" className="w-40 h-40 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-      </div>
+
 
       <div className="max-w-4xl mx-auto">
         {/* Instruction */}

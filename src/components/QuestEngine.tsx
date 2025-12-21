@@ -14,6 +14,7 @@ interface QuestEngineContextType {
   addCoins: (amount: number) => void;
   resetProgress: () => void;
   goToStep: (step: QuestStep) => void;
+  exitQuest: () => void;
 }
 
 const QuestEngineContext = createContext<QuestEngineContextType | undefined>(undefined);
@@ -178,6 +179,13 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('abaquest_progress');
   };
 
+  const exitQuest = () => {
+    setStudentProgress(prev => ({
+      ...prev,
+      currentQuestId: null,
+    }));
+  };
+
   return (
     <QuestEngineContext.Provider
       value={{
@@ -193,6 +201,7 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
         addCoins,
         resetProgress,
         goToStep,
+        exitQuest,
       }}
     >
       {children}

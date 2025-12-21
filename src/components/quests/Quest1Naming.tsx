@@ -9,7 +9,7 @@ import { JuniorCounter } from '../JuniorCounter';
 import { useDataLogger } from '../DataLogger';
 import { useQuestEngine } from '../QuestEngine';
 import { HelpCircle, CheckCircle, XCircle, Ship, ArrowRight, Volume2 } from 'lucide-react';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 interface Quest1NamingProps {
   onComplete: () => void;
@@ -75,9 +75,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           animate={{ opacity: 1 }}
           className="min-h-screen bg-warm-neutral p-8"
         >
-          <div className="flex justify-center mb-4">
-            <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-          </div>
+
 
           <div className="max-w-3xl mx-auto">
             <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-aqua-blue">
@@ -148,9 +146,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         animate={{ opacity: 1 }}
         className="min-h-screen bg-warm-neutral p-8"
       >
-        <div className="flex justify-center mb-4">
-          <img src={logo} alt="AbaQuest" className="w-32 h-32 object-cover rounded-full drop-shadow-lg border-4 border-white" />
-        </div>
+
 
         <div className="max-w-3xl mx-auto">
           <div className="bg-deep-blue text-white rounded-2xl p-4 mb-4 shadow-xl">
@@ -199,10 +195,10 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
                   className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                      ? 'bg-green-100 border-3 border-green-500'
-                      : showFeedback === 'skip'
-                        ? 'bg-blue-100 border-3 border-blue-400'
-                        : 'bg-orange-100 border-3 border-orange-400'
+                    ? 'bg-green-100 border-3 border-green-500'
+                    : showFeedback === 'skip'
+                      ? 'bg-blue-100 border-3 border-blue-400'
+                      : 'bg-orange-100 border-3 border-orange-400'
                     }`}
                 >
                   {showFeedback === 'correct' ? (
@@ -472,8 +468,8 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                         setCounterName(name);
                       }}
                       className={`p-4 rounded-xl border-4 transition-all ${counterName === name
-                          ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
-                          : 'border-gray-200 hover:border-sunburst-yellow'
+                        ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
+                        : 'border-gray-200 hover:border-sunburst-yellow'
                         }`}
                     >
                       <p className="text-deep-blue">{name}</p>
@@ -637,8 +633,8 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0, y: 20 }}
                   className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                      ? 'bg-green-100 border-3 border-green-500'
-                      : 'bg-orange-100 border-3 border-orange-400'
+                    ? 'bg-green-100 border-3 border-green-500'
+                    : 'bg-orange-100 border-3 border-orange-400'
                     }`}
                 >
                   {showFeedback === 'correct' ? (
