@@ -11,8 +11,9 @@ import { Quest1Naming } from './components/quests/Quest1Naming';
 import { Quest2Parts } from './components/quests/Quest2Parts';
 import { Quest3Positioning } from './components/quests/Quest3Positioning';
 import { Quest4Freeze } from './components/quests/Quest4Freeze';
+import { Breadcrumbs } from './components/Breadcrumbs';
 import { QuestId } from './types/quest';
-import logo from 'figma:asset/14748deabced6f36e28c26602e29604c9ffd627a.png';
+
 
 export type Screen = 'library' | 'settings' | 'dashboard';
 
@@ -72,20 +73,12 @@ function AppContent() {
       {/* Tablet Frame - 1024x768 optimized */}
       <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden">
 
-        {/* Global Header / Home Button */}
-        <div className="absolute top-4 left-4 z-50">
-          <button
-            onClick={handleHomeClick}
-            className="hover:scale-105 transition-transform active:scale-95"
-            aria-label="Back to Dashboard"
-          >
-            <img
-              src={logo}
-              alt="AbaQuest Home"
-              className="w-16 h-16 object-cover rounded-full border-2 border-white drop-shadow-lg"
-            />
-          </button>
-        </div>
+        {/* Global Breadcrumbs Navigation */}
+        <Breadcrumbs
+          currentScreen={currentScreen}
+          currentQuest={currentQuest}
+          onHome={handleHomeClick}
+        />
 
         {/* Main Content Area */}
         <main className="pb-24 min-h-screen bg-warm-neutral">
