@@ -23,7 +23,8 @@ export type Screen = 'library' | 'settings' | 'dashboard';
 function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('library');
-  const { currentQuest, startQuest, exitQuest } = useQuestEngine();
+  const { currentQuest, startQuest, exitQuest, completeQuest } = useQuestEngine();
+
 
 
 
@@ -31,11 +32,19 @@ function AppContent() {
     startQuest(questId);
   };
 
-  const handleQuestComplete = () => {
-    // Return to library after quest completion
+  const handleQuestComplete = (results?: { pre: number; post: number }) => {
+    // Determine scores (default to 100 if not provided, e.g. for non-scored quests)
+    const preScore = results?.pre ?? 100;
+    const postScore = results?.post ?? 100;
+
+    // Persist completion state
+    completeQuest(preScore, postScore);
+
+    // Return to library
     exitQuest();
     setCurrentScreen('library');
   };
+
 
   const handleHomeClick = () => {
     if (currentQuest) {

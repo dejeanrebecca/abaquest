@@ -12,8 +12,9 @@ import { HelpCircle, CheckCircle, XCircle, Ship, ArrowRight, Volume2 } from 'luc
 
 
 interface Quest1NamingProps {
-  onComplete: () => void;
+  onComplete: (results?: { pre: number; post: number }) => void;
 }
+
 
 type Step = 'welcome' | 'pretest' | 'learn' | 'story' | 'posttest' | 'close';
 
@@ -30,7 +31,8 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [navComplete, setNavComplete] = useState(false);
 
   const { logInteraction } = useDataLogger();
-  const { setEmotionalState, setStudentName, completeQuest } = useQuestEngine();
+  const { setEmotionalState, setStudentName } = useQuestEngine();
+
 
   // Pre-test and Post-test questions (MUST BE IDENTICAL)
   const testQuestions = [
@@ -673,9 +675,9 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         learningGain={learningGain}
         summary={`You named your Junior Counter "${counterName}" and learned that it's a special tool for thinking about math! You're now an official student at Mistress Creola's School of Mental Math!`}
         onNext={() => {
-          completeQuest(preTestScore, postTestScore);
-          onComplete();
+          onComplete({ pre: preTestScore, post: postTestScore });
         }}
+
       />
     );
   }

@@ -2,8 +2,9 @@
 import { PositionNumbers } from '../screens/PositionNumbers';
 
 interface Quest3PositioningProps {
-  onComplete: () => void;
+  onComplete: (results?: { pre: number; post: number }) => void;
 }
+
 
 export function Quest3Positioning({ onComplete }: Quest3PositioningProps) {
   return <PositionNumbers onNext={onComplete} />;

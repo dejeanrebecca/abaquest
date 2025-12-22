@@ -7,8 +7,9 @@ import { Quest2Story } from './Quest2Story';
 import { useQuestEngine } from '../QuestEngine';
 
 interface Quest2PartsProps {
-  onComplete: () => void;
+  onComplete: (results?: { pre: number; post: number }) => void;
 }
+
 
 type Step = 'welcome' | 'pretest' | 'learn' | 'story' | 'posttest' | 'close';
 
@@ -17,7 +18,6 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
   const [preTestScore, setPreTestScore] = useState(0);
   const [postTestScore, setPostTestScore] = useState(0);
 
-  const { completeQuest } = useQuestEngine();
 
   const calculateScore = (answers: boolean[]): number => {
     if (answers.length === 0) return 0;
@@ -98,9 +98,9 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
         learningGain={learningGain}
         summary="You've mastered the three parts of your Junior Counter: the Upper Bead (Head), Lower Beads (Legs), and Answer Rod (Body)! Now you're ready to learn how numbers live on your counter!"
         onNext={() => {
-          completeQuest(preTestScore, postTestScore);
-          onComplete();
+          onComplete({ pre: preTestScore, post: postTestScore });
         }}
+
       />
     );
   }

@@ -3,18 +3,19 @@ import { Quest3PreTest } from '../quests/Quest3PreTest';
 import { Quest3Learn } from '../quests/Quest3Learn';
 import { Quest3Practice } from '../quests/Quest3Practice';
 import { Quest3Story } from '../quests/Quest3Story';
-import { useQuestEngine } from '../QuestEngine';
+
 
 
 interface PositionNumbersProps {
-  onNext: () => void;
+  onNext: (results?: { pre: number; post: number }) => void;
 }
+
 
 type Phase = 'pretest' | 'learn' | 'practice' | 'posttest' | 'story';
 
 export function PositionNumbers({ onNext }: PositionNumbersProps) {
   const [phase, setPhase] = useState<Phase>('pretest');
-  const { completeQuest } = useQuestEngine();
+
 
   const handleNextPhase = (nextPhase?: Phase) => {
     if (nextPhase) {
@@ -25,11 +26,10 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
       if (phase === 'pretest') setPhase('learn');
       else if (phase === 'learn') setPhase('practice');
       else if (phase === 'practice') setPhase('posttest');
-      else if (phase === 'posttest') setPhase('story');
       else if (phase === 'story') {
-        completeQuest(100, 100); // Placeholder scores until we implement scoring bubbling
-        onNext();
+        onNext({ pre: 100, post: 100 });
       }
+
     }
   };
 
