@@ -12,14 +12,20 @@ import { Quest2Parts } from './components/quests/Quest2Parts';
 import { Quest3Positioning } from './components/quests/Quest3Positioning';
 import { Quest4Freeze } from './components/quests/Quest4Freeze';
 import { Breadcrumbs } from './components/Breadcrumbs';
+import { SplashScreen } from './components/SplashScreen';
 import { QuestId } from './types/quest';
+import { AnimatePresence } from 'motion/react';
+
 
 
 export type Screen = 'library' | 'settings' | 'dashboard';
 
 function AppContent() {
+  const [showSplash, setShowSplash] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<Screen>('library');
   const { currentQuest, startQuest, exitQuest } = useQuestEngine();
+
+
 
   const handleQuestSelect = (questId: QuestId) => {
     startQuest(questId);
@@ -70,31 +76,41 @@ function AppContent() {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-warm-neutral overflow-hidden">
-      {/* Tablet Frame - 1024x768 optimized */}
-      <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden flex flex-col">
-
-        {/* Global Breadcrumbs Navigation */}
-        <Breadcrumbs
-          currentScreen={currentScreen}
-          currentQuest={currentQuest}
-          onHome={handleHomeClick}
-        />
-
-        {/* Main Content Area */}
-        <main className="pb-24 flex-1 bg-warm-neutral">
-          {renderContent()}
-        </main>
-
-        {/* Bottom Navigation - Only show when NOT in a quest */}
-        {!currentQuest && (
-          <Navigation currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+    <>
+      <AnimatePresence mode="wait">
+        {showSplash && (
+          <SplashScreen key="splash" onComplete={() => setShowSplash(false)} />
         )}
+      </AnimatePresence>
 
-        {/* Floating Abby Avatar */}
-        <AbbyAvatar />
-      </div>
-    </div>
+      {!showSplash && (
+        <div className="relative w-full min-h-screen bg-warm-neutral overflow-hidden">
+          {/* Tablet Frame - 1024x768 optimized */}
+          <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden flex flex-col">
+
+            {/* Global Breadcrumbs Navigation */}
+            <Breadcrumbs
+              currentScreen={currentScreen}
+              currentQuest={currentQuest}
+              onHome={handleHomeClick}
+            />
+
+            {/* Main Content Area */}
+            <main className="pb-24 flex-1 bg-warm-neutral">
+              {renderContent()}
+            </main>
+
+            {/* Bottom Navigation - Only show when NOT in a quest */}
+            {!currentQuest && (
+              <Navigation currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+            )}
+
+            {/* Floating Abby Avatar */}
+            <AbbyAvatar />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 

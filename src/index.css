@@ -176,11 +176,23 @@
     --default-mono-font-family: var(--font-mono);
     --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
     --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
-    --color-sunburst-yellow: #ffd44e;
-    --color-abacus-red: #e34234;
-    --color-deep-blue: #1a3e68;
-    --color-aqua-blue: #3bb5c5;
-    --color-warm-neutral: #f5f1e6;
+    --color-brand-teal: #2FC1A4;
+    --color-brand-purple: #3A1B5A;
+    --color-brand-yellow: #F6C23E;
+    --color-brand-orange: #F15A24;
+    --color-brand-magenta: #B62AAE;
+    --color-brand-cream: #FAF3E6;
+    --color-brand-text: #2A1445;
+    --color-brand-text-muted: #5F4B7A;
+    --color-brand-success: #1E8F7A;
+    --color-brand-error: #C73A2B;
+    
+    /* Legacy mappings to ease transition (optional, but keeping for now) */
+    --color-warm-neutral: var(--color-brand-cream);
+    --color-deep-blue: var(--color-brand-purple); /* Mapping deep-blue to new purple structure */
+    --color-aqua-blue: var(--color-brand-teal);   /* Mapping aqua-blue to new teal */
+    --color-sunburst-yellow: var(--color-brand-yellow);
+    --color-abacus-red: var(--color-brand-error);
   }
 }
 
