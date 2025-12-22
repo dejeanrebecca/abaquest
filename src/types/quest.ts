@@ -51,8 +51,10 @@ export interface StudentProfile {
   beadPassHash: string; // SHA-256 hash of the sequence
   gradeLevel: 'K' | '1-2';
   role?: 'student' | 'teacher'; // Default is 'student'
+  lastLogin?: string; // ISO timestamp
   progress: StudentProgress;
 }
+
 
 
 

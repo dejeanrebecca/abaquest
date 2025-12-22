@@ -137,7 +137,20 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                         {selectedStudent && (
                             <BeadPassChallenge
                                 student={selectedStudent}
-                                onSuccess={() => onAuthenticated(selectedStudent)}
+                                onSuccess={() => {
+                                    // Update last login time
+                                    const now = new Date().toISOString();
+                                    const updatedStudent = { ...selectedStudent, lastLogin: now };
+
+                                    // Update local storage
+                                    const updatedStudents = students.map(s =>
+                                        s.id === selectedStudent.id ? updatedStudent : s
+                                    );
+                                    setStudents(updatedStudents);
+                                    localStorage.setItem('abaquest_students', JSON.stringify(updatedStudents));
+
+                                    onAuthenticated(updatedStudent);
+                                }}
                                 onBack={() => {
                                     setSelectedStudent(null);
                                     setView('select');
