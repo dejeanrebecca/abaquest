@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
+import { InteractiveAbacus } from '../InteractiveAbacus';
+import { useAbacusSound } from '../../hooks/useAbacusSound';
+
+
 
 
 interface Quest3PracticeProps {
@@ -13,34 +17,44 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
     const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | null>(null);
     const [startTime, setStartTime] = useState(Date.now());
     const { logInteraction } = useDataLogger();
+    const { playSuccess } = useAbacusSound();
+
 
     const practiceNumbers = [1, 5];
+    const currentPractice = practiceNumbers[currentQuestion];
+
 
     useEffect(() => {
         setStartTime(Date.now());
     }, [currentQuestion]);
 
 
-    const handlePracticeAnswer = (answer: string) => {
-        const currentPractice = practiceNumbers[currentQuestion];
-        const correctPosition =
-            currentPractice === 1 ? 'middle-lower' : 'middle-upper';
-        const isCorrect = answer === correctPosition;
-        const timeSpent = Date.now() - startTime;
+    const handleAbacusChange = (value: number) => {
+        if (value === currentPractice) {
+            // Debounce success slightly
+            setTimeout(() => {
+                handlePracticeSuccess(value);
+            }, 500);
+        }
+    };
 
+    const handlePracticeSuccess = (value: number) => {
+        const timeSpent = Date.now() - startTime;
         logInteraction({
             quest_id: 3,
             scene_id: `practice_${currentPractice}`,
             number: currentPractice,
-            correct_flag: isCorrect,
+            correct_flag: true,
             time_ms: timeSpent,
             interaction_type: 'practice',
-            student_response: answer,
+            student_response: value.toString(),
         });
 
-        setShowFeedback(isCorrect ? 'correct' : 'wrong');
+        playSuccess();
+        setShowFeedback('correct');
 
         setTimeout(() => {
+
             if (currentQuestion < practiceNumbers.length - 1) {
                 setCurrentQuestion(currentQuestion + 1);
                 setShowFeedback(null);
@@ -50,71 +64,17 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
         }, 1500);
     };
 
-    const renderAbacusPosition = (position: string, isHighlighted: boolean = false) => {
-        return (
-            <div className="flex flex-col items-center gap-1">
-                <div
-                    className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'top' && isHighlighted
-                        ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                        : position === 'top'
-                            ? 'bg-sunburst-yellow'
-                            : 'bg-gray-300'
-                        }`}
-                ></div>
-                <div className="w-1 h-6 bg-gray-700 rounded"></div>
-                <div className="flex flex-col gap-1">
-                    {[0, 1].map((i) => (
-                        <div
-                            key={`upper-${i}`}
-                            className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-upper' && isHighlighted
-                                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                                : position === 'middle-upper'
-                                    ? 'bg-sunburst-yellow'
-                                    : 'bg-gray-400'
-                                }`}
-                        ></div>
-                    ))}
-                </div>
-                <div className="w-1 h-4 bg-gray-700 rounded"></div>
-                <div className="flex flex-col gap-1">
-                    {[0, 1].map((i) => (
-                        <div
-                            key={`lower-${i}`}
-                            className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-lower' && isHighlighted
-                                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                                : position === 'middle-lower'
-                                    ? 'bg-sunburst-yellow'
-                                    : 'bg-gray-400'
-                                }`}
-                        ></div>
-                    ))}
-                </div>
-                <div className="w-1 h-6 bg-gray-700 rounded"></div>
-                <div
-                    className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'bottom' && isHighlighted
-                        ? 'bg-abacus-red ring-4 ring-aqua-blue scale-110'
-                        : position === 'bottom'
-                            ? 'bg-abacus-red'
-                            : 'bg-gray-300'
-                        }`}
-                ></div>
-            </div>
-        );
-    };
-
-    const currentPractice = practiceNumbers[currentQuestion];
-
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="min-h-screen bg-warm-neutral p-8"
+            className="min-h-screen bg-brand-cream p-8"
         >
             <div className="max-w-4xl mx-auto">
-                <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 mb-4 shadow-xl text-white">
+                <div className="bg-gradient-to-r from-brand-teal to-brand-success rounded-2xl p-4 mb-4 shadow-xl text-white">
                     <div className="flex justify-between items-center">
                         <p className="text-xl">
-                            ✨ Practice: Build the number <span className="text-3xl ml-2">{currentPractice}</span>
+                            ✨ Practice: Build the number <span className="text-3xl ml-2 font-bold">{currentPractice}</span>
                         </p>
                         <p className="text-sm">
                             {currentQuestion + 1} of {practiceNumbers.length}
@@ -122,28 +82,22 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-green-500">
-                    <div className="flex items-center gap-2 mb-6 bg-green-50 rounded-xl p-3">
+                <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-brand-teal">
+                    <div className="flex items-center gap-2 mb-6 bg-brand-teal/10 rounded-xl p-3">
                         <div className="text-2xl">🐝</div>
-                        <p className="text-deep-blue">
+                        <p className="text-brand-text">
                             {currentPractice === 1
-                                ? "Remember: One uses a lower bead. Which counter shows this?"
-                                : "Remember: Five uses the special top bead! Which one is it?"}
+                                ? "Remember: One uses a lower bead. Slide it up!"
+                                : "Remember: Five uses the special top bead! Slide it down!"}
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-4">
-                        {['top', 'middle-upper', 'middle-lower', 'bottom'].map((position) => (
-                            <motion.button
-                                key={position}
-                                onClick={() => handlePracticeAnswer(position)}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="bg-gray-50 rounded-xl p-4 border-3 border-gray-200 hover:border-green-500 transition-all shadow-md"
-                            >
-                                {renderAbacusPosition(position)}
-                            </motion.button>
-                        ))}
+                    <div className="flex justify-center mb-8">
+                        <InteractiveAbacus
+                            key={currentQuestion}
+                            rods={1}
+                            onChange={handleAbacusChange}
+                        />
                     </div>
 
                     <AnimatePresence>
@@ -176,3 +130,4 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
         </motion.div>
     );
 }
+
