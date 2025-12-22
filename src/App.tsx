@@ -13,8 +13,10 @@ import { Quest3Positioning } from './components/quests/Quest3Positioning';
 import { Quest4Freeze } from './components/quests/Quest4Freeze';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { SplashScreen } from './components/SplashScreen';
-import { QuestId } from './types/quest';
+import { QuestId, StudentProfile } from './types/quest';
+import { AuthScreen } from './components/auth/AuthScreen';
 import { AnimatePresence } from 'motion/react';
+
 
 
 
@@ -22,8 +24,11 @@ export type Screen = 'library' | 'settings' | 'dashboard';
 
 function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentScreen, setCurrentScreen] = useState<Screen>('library');
-  const { currentQuest, startQuest, exitQuest, completeQuest } = useQuestEngine();
+
+  const { currentQuest, startQuest, exitQuest, completeQuest, loadProfile } = useQuestEngine();
+
 
 
 
@@ -92,8 +97,18 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {!showSplash && (
+      {!showSplash && !isAuthenticated && (
+        <AuthScreen onAuthenticated={(student) => {
+          loadProfile(student);
+          // Also set the name explicitly if needed, though loadProfile handles it
+          setIsAuthenticated(true);
+        }} />
+      )}
+
+
+      {!showSplash && isAuthenticated && (
         <div className="relative w-full min-h-screen bg-warm-neutral overflow-hidden">
+
           {/* Tablet Frame - 1024x768 optimized */}
           <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden flex flex-col">
 

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { QuestId, QuestStep, QuestProgress, StudentProgress, QUESTS } from '../types/quest';
+import { QuestId, QuestStep, QuestProgress, StudentProgress, QUESTS, StudentProfile } from '../types/quest';
+
 
 interface QuestEngineContextType {
   studentProgress: StudentProgress;
@@ -9,7 +10,9 @@ interface QuestEngineContextType {
   completeStep: () => void;
   completeQuest: (preTestScore: number, postTestScore: number) => void;
   isQuestUnlocked: (questId: QuestId) => boolean;
+  loadProfile: (profile: StudentProfile) => void;
   setStudentName: (name: string) => void;
+
   setEmotionalState: (state: string) => void;
   addCoins: (amount: number) => void;
   resetProgress: () => void;
@@ -196,8 +199,10 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
         completeStep,
         completeQuest,
         isQuestUnlocked,
+        loadProfile: (profile: StudentProfile) => setStudentProgress(profile.progress),
         setStudentName,
         setEmotionalState,
+
         addCoins,
         resetProgress,
         goToStep,

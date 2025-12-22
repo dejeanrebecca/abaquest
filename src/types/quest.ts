@@ -2,7 +2,7 @@
 
 export type QuestId = 1 | 2 | 3 | 4;
 
-export type QuestStep = 
+export type QuestStep =
   | 'welcome'
   | 'pretest'
   | 'learn'
@@ -43,6 +43,16 @@ export interface StudentProgress {
   currentQuestId: QuestId | null;
   questProgress: Record<QuestId, QuestProgress>;
 }
+
+export interface StudentProfile {
+  id: string;
+  name: string;
+  avatar: string; // Emoji char
+  beadPassHash: string; // SHA-256 hash of the sequence
+  gradeLevel: 'K' | '1-2';
+  progress: StudentProgress;
+}
+
 
 // Quest definitions
 export const QUESTS: Record<QuestId, Quest> = {
