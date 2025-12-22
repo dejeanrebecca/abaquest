@@ -17,6 +17,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
   const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | 'skip' | null>(null);
   const [startTime, setStartTime] = useState(Date.now());
   const { logInteraction } = useDataLogger();
+  const [storyStep, setStoryStep] = useState(0);
 
   // Pre-test and Post-test questions (MUST BE IDENTICAL)
   const testQuestions = [
@@ -423,7 +424,8 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
 
   // STORY MODE - Focused interactions
   if (phase === 'story') {
-    const [storyStep, setStoryStep] = useState(0);
+
+
 
     const storyScenes = [
       {
