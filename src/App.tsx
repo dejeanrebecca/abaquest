@@ -13,7 +13,8 @@ import { Quest3Positioning } from './components/quests/Quest3Positioning';
 import { Quest4Freeze } from './components/quests/Quest4Freeze';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { SplashScreen } from './components/SplashScreen';
-import { QuestId, StudentProfile } from './types/quest';
+import { QuestId } from './types/quest';
+
 import { AuthScreen } from './components/auth/AuthScreen';
 import { AnimatePresence } from 'motion/react';
 
@@ -102,7 +103,12 @@ function AppContent() {
           loadProfile(student);
           // Also set the name explicitly if needed, though loadProfile handles it
           setIsAuthenticated(true);
+
+          if (student.role === 'teacher') {
+            setCurrentScreen('dashboard');
+          }
         }} />
+
       )}
 
 
@@ -124,10 +130,11 @@ function AppContent() {
               {renderContent()}
             </main>
 
-            {/* Bottom Navigation - Only show when NOT in a quest */}
-            {!currentQuest && (
+            {/* Bottom Navigation - Only show when NOT in a quest AND NOT a teacher */}
+            {!currentQuest && currentScreen !== 'dashboard' && (
               <Navigation currentScreen={currentScreen} onNavigate={setCurrentScreen} />
             )}
+
 
             {/* Floating Abby Avatar */}
             <AbbyAvatar />

@@ -50,8 +50,10 @@ export interface StudentProfile {
   avatar: string; // Emoji char
   beadPassHash: string; // SHA-256 hash of the sequence
   gradeLevel: 'K' | '1-2';
+  role?: 'student' | 'teacher'; // Default is 'student'
   progress: StudentProgress;
 }
+
 
 
 // Quest definitions

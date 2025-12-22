@@ -17,17 +17,46 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     useEffect(() => {
         // Initialize with dummy data if empty (simulate fetching from DB/LocalStorage)
         const loadStudents = async () => {
+            // Hash for pattern "5" (Ameer) -> SHA-256
+            const hash5 = await hashBeadPattern([5]);
+            // Hash for pattern "3" (Ameerah) -> SHA-256
+            const hash3 = await hashBeadPattern([3]);
+            // Hash for pattern "9" (Teacher) -> SHA-256
+            const hash9 = await hashBeadPattern([9]);
+
+            const teacherProfile: StudentProfile = {
+                id: 'teacher1',
+                name: 'Ms. Teacher',
+                avatar: '👩‍🏫',
+                beadPassHash: hash9,
+                gradeLevel: 'K',
+                role: 'teacher',
+                progress: {
+                    studentName: 'Ms. Teacher',
+                    emotionalState: '',
+                    totalCoins: 0,
+                    level: 99,
+                    xp: 0,
+                    completedQuests: [],
+                    currentQuestId: null,
+                    questProgress: {} as any,
+                }
+            };
+
             // Check LocalStorage first
             const saved = localStorage.getItem('abaquest_students');
             if (saved) {
-                setStudents(JSON.parse(saved));
+                let loadedStudents = JSON.parse(saved) as StudentProfile[];
+
+                // Ensure teacher exists (migration fix for existing users)
+                if (!loadedStudents.find(s => s.role === 'teacher')) {
+                    loadedStudents = [...loadedStudents, teacherProfile];
+                    localStorage.setItem('abaquest_students', JSON.stringify(loadedStudents));
+                }
+
+                setStudents(loadedStudents);
             } else {
                 // Create dummy students for demo
-                // Hash for pattern "5" (Ameer) -> SHA-256
-                const hash5 = await hashBeadPattern([5]);
-                // Hash for pattern "3" (Ameerah) -> SHA-256
-                const hash3 = await hashBeadPattern([3]);
-
                 const dummyStudents: StudentProfile[] = [
                     {
                         id: 's1',
@@ -63,13 +92,16 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                             questProgress: {} as any, // Placeholder
                         }
                     },
+                    teacherProfile
                 ];
+
                 setStudents(dummyStudents);
                 localStorage.setItem('abaquest_students', JSON.stringify(dummyStudents));
             }
         };
         loadStudents();
     }, []);
+
 
     const handleStudentSelect = (student: StudentProfile) => {
         setSelectedStudent(student);
