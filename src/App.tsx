@@ -27,6 +27,7 @@ function AppContent() {
 
   const handleQuestComplete = () => {
     // Return to library after quest completion
+    exitQuest();
     setCurrentScreen('library');
   };
 
