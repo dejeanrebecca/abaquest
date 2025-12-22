@@ -1,7 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
-import { Volume2, Snowflake } from 'lucide-react';
+import { Volume2, CheckCircle, ArrowRight } from 'lucide-react';
+import { useDataLogger } from '../DataLogger';
+import { InteractiveAbacus } from '../InteractiveAbacus';
+import { useAbacusSound } from '../../hooks/useAbacusSound';
+
+
 
 
 interface FreezeAdditionProps {
@@ -13,37 +18,70 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
   const [isFrozen, setIsFrozen] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const { logInteraction } = useDataLogger();
+  const { playSuccess } = useAbacusSound();
 
-  // Condensed to 3 quick lessons (≈2 minutes total)
+
+  // Condensed to 3 quick lessons
   const lessons = [
-    { problem: '5 + 0', answer: 5, concept: 'Freeze! Adding zero means nothing changes!' },
-    { problem: '0 + 3', answer: 3, concept: 'Starting from zero—let\'s build three!' },
-    { problem: '1 + 2', answer: 3, concept: 'Combine beads: one plus two equals three!' },
+    {
+      problem1: 5, problem2: 0, answer: 5,
+      concept: 'Freeze! Adding zero means nothing changes!',
+      prompt: "Set the abacus to 5. Adding zero changes nothing!"
+    },
+    {
+      problem1: 0, problem2: 3, answer: 3,
+      concept: 'Starting from zero—let\'s build three!',
+      prompt: "Start at 0. Add 3 beads. What do you get?"
+    },
+    {
+      problem1: 1, problem2: 2, answer: 3,
+      concept: 'Combine beads: one plus two equals three!',
+      prompt: "Start with 1. Add 2 more. What is the sum?"
+    },
   ];
 
-  const handleFreeze = () => {
+  const currentLessonData = lessons[currentLesson];
+
+  const handleAbacusChange = (value: number) => {
+    // Only check if not already frozen/correct
+    if (isFrozen) return;
+
+    if (value === currentLessonData.answer) {
+      // Debounce success
+      setTimeout(() => {
+        handleLessonSuccess(value);
+      }, 500);
+    }
+  };
+
+  const handleLessonSuccess = (value: number) => {
+    if (isFrozen) return;
+
     const startTime = Date.now();
     setIsFrozen(true);
+    playSuccess();
 
     // Log the interaction
     logInteraction({
       quest_id: 4,
       scene_id: `freeze_addition_lesson_${currentLesson + 1}`,
-      number: lessons[currentLesson].answer,
+      number: value,
       correct_flag: true,
       time_ms: Date.now() - startTime,
       interaction_type: 'practice',
+      student_response: value.toString()
     });
-
-    setTimeout(() => {
-      setIsFrozen(false);
-      if (currentLesson < lessons.length - 1) {
-        setCurrentLesson(currentLesson + 1);
-      } else {
-        setShowCelebration(true);
-      }
-    }, 2000);
   };
+
+  const handleNextLesson = () => {
+    setIsFrozen(false);
+    if (currentLesson < lessons.length - 1) {
+      setCurrentLesson(currentLesson + 1);
+    } else {
+      setShowCelebration(true);
+    }
+  };
+
 
   const coinsEarned = 50;
 
@@ -124,117 +162,90 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
 
       <div className="max-w-4xl mx-auto">
         {/* Instruction */}
-        <div className="bg-gradient-to-r from-aqua-blue to-deep-blue rounded-3xl p-6 mb-6 shadow-xl text-white">
+        <div className="bg-gradient-to-r from-brand-teal to-brand-purple rounded-3xl p-6 mb-6 shadow-xl text-white">
           <div className="flex items-center gap-4">
             <Volume2 className="w-8 h-8 animate-pulse" />
-            <p className="text-xl">{lessons[currentLesson].concept}</p>
+            <div>
+              <p className="text-xl font-bold">{currentLessonData.concept}</p>
+              <p className="text-white/80">{currentLessonData.prompt}</p>
+            </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
+        <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-brand-yellow">
           <div className="text-center mb-8">
-            <p className="text-deep-blue/60 mb-2">Lesson {currentLesson + 1} of {lessons.length}</p>
-            <h2 className="text-6xl text-deep-blue mb-4">{lessons[currentLesson].problem} = ?</h2>
+            <p className="text-brand-text-muted mb-2 font-bold">Lesson {currentLesson + 1} of {lessons.length}</p>
+            <h2 className="text-6xl text-brand-text mb-4 font-extrabold">
+              {currentLessonData.problem1} + {currentLessonData.problem2} = ?
+            </h2>
           </div>
 
           {/* Interactive Counter */}
-          <div className="flex justify-center mb-12 relative max-h-[320px]">
-            <motion.div
-              animate={{
-                rotate: isFrozen ? [0, -2, 2, -2, 2, 0] : 0,
-              }}
-              transition={{
-                duration: 0.5,
-                repeat: isFrozen ? 3 : 0,
-              }}
-              className="relative"
-            >
-              {/* Rod */}
-              <div className="w-6 h-64 bg-gradient-to-b from-gray-700 to-gray-900 rounded-full shadow-xl mx-auto">
-                {/* Upper Bead */}
-                <motion.div
-                  className="absolute left-1/2 -translate-x-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-abacus-red to-red-700 shadow-2xl"
-                  style={{ top: '10px' }}
-                  animate={{
-                    scale: isFrozen ? [1, 1.1, 1] : 1,
-                  }}
-                  transition={{
-                    duration: 0.3,
-                    repeat: isFrozen ? 5 : 0,
-                  }}
-                />
+          <div className="flex justify-center mb-12 relative min-h-[300px]">
+            <div className="scale-125 origin-top">
+              <InteractiveAbacus
+                interactive={!isFrozen}
+                onChange={handleAbacusChange}
+                rods={1}
+                key={currentLesson} // Reset on new lesson
+              />
+            </div>
 
-                {/* Lower Beads */}
-                <div className="absolute left-1/2 -translate-x-1/2 flex flex-col gap-2" style={{ top: '100px' }}>
-                  {[...Array(lessons[currentLesson].answer)].map((_, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.2 }}
-                      className="w-14 h-14 rounded-full bg-gradient-to-br from-aqua-blue to-blue-600 shadow-xl"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Freeze effect overlay */}
+            {/* Freeze effect overlay */}
+            <AnimatePresence>
               {isFrozen && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="absolute inset-0 bg-aqua-blue/20 rounded-3xl backdrop-blur-sm flex items-center justify-center"
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 bg-brand-teal/10 rounded-3xl backdrop-blur-[2px] flex items-center justify-center pointer-events-none"
                 >
                   <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 180, 360],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      delay: 0
-                    }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1, rotate: 360 }}
+                    transition={{ type: "spring" }}
+                    className="bg-white p-4 rounded-full shadow-2xl border-4 border-brand-teal"
                   >
-                    <Snowflake className="w-24 h-24 text-aqua-blue" />
+                    <CheckCircle className="w-16 h-16 text-brand-teal" />
                   </motion.div>
                 </motion.div>
               )}
-            </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Answer Display */}
-          {isFrozen && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="text-center mb-8"
-            >
-              <div className="inline-block bg-sunburst-yellow rounded-2xl px-8 py-4 border-4 border-deep-blue">
-                <p className="text-4xl text-deep-blue">= {lessons[currentLesson].answer}</p>
-              </div>
-            </motion.div>
-          )}
+          {/* Feedback & Navigation */}
+          <AnimatePresence>
+            {isFrozen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center"
+              >
+                <div className="inline-block bg-brand-yellow rounded-2xl px-8 py-4 border-4 border-brand-purple mb-6">
+                  <p className="text-4xl text-brand-purple font-bold">
+                    Correct! It's {currentLessonData.answer}!
+                  </p>
+                </div>
 
-          {/* Freeze Button */}
-          {!isFrozen && (
-            <Button
-              onClick={handleFreeze}
-              className="w-full bg-gradient-to-r from-aqua-blue to-blue-600 hover:from-aqua-blue/90 hover:to-blue-600/90 text-white py-6 rounded-2xl shadow-xl text-xl flex items-center justify-center gap-3"
-              size="lg"
-            >
-              <Snowflake className="w-6 h-6" />
-              {currentLesson === 0 ? 'Freeze!' : 'Show Answer'}
-            </Button>
-          )}
+                <Button
+                  onClick={handleNextLesson}
+                  className="w-full bg-brand-success hover:bg-brand-success/90 text-white py-6 rounded-2xl shadow-xl text-xl flex items-center justify-center gap-3"
+                  size="lg"
+                >
+                  {currentLesson < lessons.length - 1 ? "Next Challenge" : "Finish Quest!"}
+                  <ArrowRight className="w-6 h-6" />
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Progress dots */}
           <div className="flex justify-center gap-2 mt-6">
             {lessons.map((_, index) => (
               <div
                 key={index}
-                className={`w-3 h-3 rounded-full transition-all ${index <= currentLesson ? 'bg-aqua-blue scale-110' : 'bg-gray-300'
+                className={`w-3 h-3 rounded-full transition-all ${index <= currentLesson ? 'bg-brand-teal scale-110' : 'bg-gray-300'
                   }`}
               />
             ))}
@@ -242,5 +253,6 @@ export function FreezeAddition({ onNext }: FreezeAdditionProps) {
         </div>
       </div>
     </motion.div>
+
   );
 }
