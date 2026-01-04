@@ -49,29 +49,61 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
         alert(`Bead Pass for ${student.name} reset to: 1-2-3`);
     };
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return 'Never';
-        return new Date(dateString).toLocaleDateString() + ' ' + new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const calculateDuration = (start?: string, end?: string) => {
+        if (!start || !end) return '-';
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const diffMins = Math.round(diffMs / 60000);
+        return `${diffMins} min`;
     };
 
-    // Helper to get quest status
-    const getQuestStatus = (student: StudentProfile, questId: string) => {
-        const qId = parseInt(questId) as QuestId;
-        const progress = student.progress?.questProgress?.[qId];
+    const handleExportCSV = (student: StudentProfile) => {
+        // Headers
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Student Name,Quest ID,Status,Pre-Test Score,Post-Test Score,Learning Gain,Time Spent,Date Completed\n";
 
-        if (student.progress?.completedQuests?.includes(qId) || progress?.completed) {
-            return { status: 'Completed', color: 'text-green-600 bg-green-100', icon: '✅' };
-        }
-        if (progress) {
-            return { status: 'In Progress', color: 'text-blue-600 bg-blue-100', icon: '🚧' };
-        }
-        return { status: 'Not Started', color: 'text-slate-400 bg-slate-100', icon: '⚪' };
+        // Rows
+        [1, 2, 3, 4].forEach(qId => {
+            const progress = student.progress?.questProgress?.[qId as QuestId];
+            const statusInfo = getQuestStatus(student, qId.toString());
+
+            const pre = progress?.preTestScore ?? 0;
+            const post = progress?.postTestScore ?? 0;
+            const gain = (progress?.postTestScore !== undefined && progress?.preTestScore !== undefined)
+                ? post - pre
+                : 0;
+
+            const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
+            const date = progress?.completedAt ? new Date(progress.completedAt).toLocaleDateString() : '-';
+
+            const row = [
+                student.name,
+                `Quest ${qId}`,
+                statusInfo.status,
+                pre,
+                post,
+                gain > 0 ? `+${gain}` : gain,
+                duration,
+                date
+            ].join(",");
+            csvContent += row + "\n";
+        });
+
+        // Download
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${student.name}_progress_report.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
         <div className="fixed inset-0 z-50 bg-slate-50 overflow-y-auto">
             <header className="bg-deep-blue text-white p-6 shadow-md">
-                <div className="max-w-6xl mx-auto flex items-center justify-between">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         <Button variant="ghost" onClick={onBack} className="text-white hover:bg-white/10">
                             <ArrowLeft className="w-6 h-6 mr-2" />
@@ -82,7 +114,7 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                 </div>
             </header>
 
-            <main className="max-w-6xl mx-auto p-8">
+            <main className="max-w-7xl mx-auto p-8">
                 <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
                     <Star className="text-sunburst-yellow w-8 h-8 fill-current" />
                     Class Roster
@@ -119,8 +151,8 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                     <Coins className="w-4 h-4 text-amber-500" />
                                     {student.progress?.totalCoins || 0}
                                 </span>
-                                <span className="text-deep-blue">
-                                    Example Student...
+                                <span className="text-green-600">
+                                    View Report →
                                 </span>
                             </div>
                         </motion.div>
@@ -134,7 +166,7 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
                         <motion.div
                             layoutId={selectedStudent.id}
-                            className="bg-white w-full max-w-4xl h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+                            className="bg-white w-full max-w-6xl h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
                         >
                             {/* Modal Header */}
                             <div className="bg-deep-blue text-white p-8 flex justify-between items-start">
@@ -144,17 +176,17 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                     </div>
                                     <div>
                                         <h2 className="text-4xl font-bold mb-2">{selectedStudent.name}</h2>
-                                        <div className="flex gap-4 text-white/80">
+                                        <div className="flex gap-6 text-white/80 text-lg">
                                             <p className="flex items-center gap-2">
-                                                <Trophy className="w-5 h-5 text-sunburst-yellow" />
+                                                <Trophy className="w-6 h-6 text-sunburst-yellow" />
                                                 Level {selectedStudent.progress?.level || 1}
                                             </p>
                                             <p className="flex items-center gap-2">
-                                                <Coins className="w-5 h-5 text-amber-400" />
+                                                <Coins className="w-6 h-6 text-amber-400" />
                                                 {selectedStudent.progress?.totalCoins || 0} Coins
                                             </p>
                                             <p className="flex items-center gap-2">
-                                                <Calendar className="w-5 h-5" />
+                                                <Calendar className="w-6 h-6" />
                                                 Last: {formatDate(selectedStudent.lastLogin)}
                                             </p>
                                         </div>
@@ -174,15 +206,24 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                 <div className="flex justify-between items-center mb-6">
                                     <h3 className="text-2xl font-bold text-deep-blue flex items-center gap-2">
                                         <BarChart2 className="w-6 h-6" />
-                                        Quest Performance
+                                        Performance Analytics
                                     </h3>
-                                    <Button
-                                        onClick={() => setResettingStudent(selectedStudent)}
-                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold"
-                                    >
-                                        <RefreshCw className="w-4 h-4 mr-2" />
-                                        Reset Bead Pass
-                                    </Button>
+                                    <div className="flex gap-3">
+                                        <Button
+                                            onClick={() => handleExportCSV(selectedStudent)}
+                                            className="bg-green-600 hover:bg-green-700 text-white font-bold"
+                                        >
+                                            Download Report (.csv)
+                                        </Button>
+
+                                        <Button
+                                            onClick={() => setResettingStudent(selectedStudent)}
+                                            className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold"
+                                        >
+                                            <RefreshCw className="w-4 h-4 mr-2" />
+                                            Reset Password
+                                        </Button>
+                                    </div>
                                 </div>
 
                                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -192,7 +233,9 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                                 <th className="p-4">Quest</th>
                                                 <th className="p-4">Status</th>
                                                 <th className="p-4 text-center">Pre-Test</th>
-                                                <th className="p-4 text-center">Post-Test</th>
+                                                <th className="p-4 text-center">Highest Score</th>
+                                                <th className="p-4 text-center">Learning Gain</th>
+                                                <th className="p-4 text-center">Time Spent</th>
                                                 <th className="p-4 text-right">Completed</th>
                                             </tr>
                                         </thead>
@@ -201,19 +244,34 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                                 const { status, color, icon } = getQuestStatus(selectedStudent, qId.toString());
                                                 const progress = selectedStudent.progress?.questProgress?.[qId as QuestId];
 
+                                                const pre = progress?.preTestScore;
+                                                const post = progress?.postTestScore;
+                                                const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
+                                                const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
+
                                                 return (
-                                                    <tr key={qId} className="hover:bg-slate-50/50">
-                                                        <td className="p-4 font-bold text-deep-blue">Quest {qId}</td>
+                                                    <tr key={qId} className="hover:bg-slate-50/50 transition-colors">
+                                                        <td className="p-4 font-bold text-deep-blue text-lg">Quest {qId}</td>
                                                         <td className="p-4">
                                                             <span className={`px-3 py-1 rounded-full text-xs font-bold flex w-fit items-center gap-1 ${color}`}>
                                                                 {icon} {status}
                                                             </span>
                                                         </td>
                                                         <td className="p-4 text-center font-mono text-slate-600">
-                                                            {progress?.preTestScore !== undefined ? `${progress.preTestScore}%` : '-'}
+                                                            {pre !== undefined ? `${pre}%` : '-'}
                                                         </td>
-                                                        <td className="p-4 text-center font-mono font-bold text-deep-blue">
-                                                            {progress?.postTestScore !== undefined ? `${progress.postTestScore}%` : '-'}
+                                                        <td className="p-4 text-center font-mono font-bold text-deep-blue text-lg">
+                                                            {post !== undefined ? `${post}%` : '-'}
+                                                        </td>
+                                                        <td className="p-4 text-center">
+                                                            {gain !== null ? (
+                                                                <span className={`font-bold ${gain > 0 ? 'text-green-600' : 'text-slate-400'}`}>
+                                                                    {gain > 0 ? `+${gain}%` : `${gain}%`}
+                                                                </span>
+                                                            ) : '-'}
+                                                        </td>
+                                                        <td className="p-4 text-center text-slate-600">
+                                                            {duration}
                                                         </td>
                                                         <td className="p-4 text-right text-sm text-slate-500">
                                                             {progress?.completedAt ? new Date(progress.completedAt).toLocaleDateString() : '-'}
@@ -257,14 +315,9 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                     className="flex-1 bg-abacus-red hover:bg-red-600 text-white"
                                     onClick={() => {
                                         handleResetPass(resettingStudent);
-                                        // Update selected student if detail view is open
-                                        if (selectedStudent && selectedStudent.id === resettingStudent.id) {
-                                            // Close confirmation, keep details open. State update will flow down next render.
-                                            // The handleResetPass updates 'students', we rely on selectedStudent being refreshed if we re-select or we accept it's view-only for hash.
-                                        }
                                     }}
                                 >
-                                    Reset Pass
+                                    Reset Password
                                 </Button>
                             </div>
                         </motion.div>
