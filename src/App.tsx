@@ -106,6 +106,8 @@ function AppContent() {
 
           if (student.role === 'teacher') {
             setCurrentScreen('dashboard');
+            // Force exit any active quest for teacher to ensure they land on the dashboard
+            exitQuest();
           }
         }} />
 
@@ -127,7 +129,10 @@ function AppContent() {
 
             {/* Main Content Area */}
             <main className="pb-24 flex-1 bg-warm-neutral">
-              {renderContent()}
+              {currentScreen === 'dashboard'
+                ? <TeacherDashboard onBack={() => setCurrentScreen('library')} />
+                : renderContent()
+              }
             </main>
 
             {/* Bottom Navigation - Only show when NOT in a quest AND NOT a teacher */}
