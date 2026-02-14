@@ -3,7 +3,9 @@ import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { QuestClose } from '../quest-screens/QuestClose';
 import { Quest2Assessment } from './Quest2Assessment';
 import { Quest2Learn } from './Quest2Learn';
-import { Quest2Story } from './Quest2Story';
+// import { Quest2Story } from './Quest2Story';
+// import { TransitionScreen } from '../common/TransitionScreen';
+// import storyBookImage from '../../assets/story-book.png';
 import { useQuestEngine } from '../QuestEngine';
 
 interface Quest2PartsProps {
@@ -11,7 +13,7 @@ interface Quest2PartsProps {
 }
 
 
-type Step = 'welcome' | 'pretest' | 'learn' | 'story' | 'posttest' | 'close';
+type Step = 'welcome' | 'pretest' | 'learn' | 'story-transition' | 'story' | 'posttest' | 'close';
 
 export function Quest2Parts({ onComplete }: Quest2PartsProps) {
   const [step, setStep] = useState<Step>('welcome');
@@ -64,13 +66,31 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
 
   // STEP 3: MINI-LESSON
   if (step === 'learn') {
-    return <Quest2Learn key="learn" onComplete={() => setStep('story')} />;
+    // SKIP STORY MODE: Go directly to posttest
+    // return <Quest2Learn key="learn" onComplete={() => setStep('story-transition')} />;
+    return <Quest2Learn key="learn" onComplete={() => setStep('posttest')} />;
+  }
+
+  /* STORY MODE DISABLED PER FEEDBACK
+  // STEP 3.5: STORY TRANSITION
+  if (step === 'story-transition') {
+    return (
+      <TransitionScreen
+        title="Story Time!"
+        subtitle="Let's see how our abacus friends work together in a story."
+        imageSrc={storyBookImage}
+        onNext={() => setStep('story')}
+        variant="story"
+        buttonText="Start the Story"
+      />
+    );
   }
 
   // STEP 4: STORY MODE
   if (step === 'story') {
     return <Quest2Story key="story" onComplete={() => setStep('posttest')} />;
   }
+  */
 
   // STEP 5: POST-TEST
   if (step === 'posttest') {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Button } from '../ui/button';
+// import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
 import { JuniorCounter } from '../JuniorCounter';
 import { useDataLogger } from '../DataLogger';
@@ -106,29 +106,15 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
                     </div>
 
                     <div className="flex justify-center mb-6">
-                        <JuniorCounter interactive={false} size="large" />
+                        <JuniorCounter
+                            interactive={false}
+                            size="large"
+                            onPartClick={(part) => handleStoryAnswer(part)}
+                        />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                        <Button
-                            onClick={() => handleStoryAnswer('upper')}
-                            className="bg-abacus-red hover:bg-abacus-red/90 text-white py-8 rounded-2xl shadow-lg"
-                        >
-                            Upper Bead
-                        </Button>
-                        <Button
-                            onClick={() => handleStoryAnswer('lower')}
-                            className="bg-aqua-blue hover:bg-aqua-blue/90 text-white py-8 rounded-2xl shadow-lg"
-                        >
-                            Lower Beads
-                        </Button>
-                        <Button
-                            onClick={() => handleStoryAnswer('rod')}
-                            className="bg-gray-700 hover:bg-gray-800 text-white py-8 rounded-2xl shadow-lg"
-                        >
-                            Answer Rod
-                        </Button>
-                    </div>
+                    {/* Buttons removed */}
+                    <div className="mb-6 h-4" />
 
                     <AnimatePresence>
                         {showFeedback && (

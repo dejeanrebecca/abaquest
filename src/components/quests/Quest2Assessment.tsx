@@ -25,9 +25,9 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
     const { logInteraction } = useDataLogger();
 
     const testQuestions: Array<{ part: Part; question: string }> = [
-        { part: 'upper', question: 'Which part is the Upper Bead (Head)?' },
-        { part: 'lower', question: 'Which part are the Lower Beads (Legs)?' },
-        { part: 'rod', question: 'Which part is the Answer Rod (Body)?' },
+        { part: 'upper', question: 'Tap the Upper Bead (Head)' },
+        { part: 'lower', question: 'Tap the Lower Beads (Legs)' },
+        { part: 'rod', question: 'Tap the Answer Rod (Body)' },
     ];
 
     useEffect(() => {
@@ -89,7 +89,7 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
                             className="w-full mt-8 bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
                             size="lg"
                         >
-                            I'm Ready! 🚀
+                            I'm Ready to Go! 🚀
                         </Button>
                     </div>
                 </div>
@@ -115,31 +115,17 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
                     <AudioNarration text={isPostTest ? "Let's see what you've learned!" : currentQ.question} speaker="abby" compact />
 
                     <div className="my-8 flex justify-center">
-                        <JuniorCounter interactive={false} size="large" />
+                        <JuniorCounter
+                            interactive={false}
+                            size="large"
+                            onPartClick={(part) => handleAnswer(part)}
+                        />
                     </div>
 
                     <p className="text-center text-xl text-deep-blue mb-6">{currentQ.question}</p>
 
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                        <Button
-                            onClick={() => handleAnswer('upper')}
-                            className="bg-abacus-red hover:bg-abacus-red/90 text-white py-8 rounded-2xl shadow-lg"
-                        >
-                            Upper Bead
-                        </Button>
-                        <Button
-                            onClick={() => handleAnswer('lower')}
-                            className="bg-aqua-blue hover:bg-aqua-blue/90 text-white py-8 rounded-2xl shadow-lg"
-                        >
-                            Lower Beads
-                        </Button>
-                        <Button
-                            onClick={() => handleAnswer('rod')}
-                            className="bg-gray-700 hover:bg-gray-800 text-white py-8 rounded-2xl shadow-lg"
-                        >
-                            Answer Rod
-                        </Button>
-                    </div>
+                    {/* Buttons removed in favor of direct interaction */}
+                    <div className="mb-6 h-4" />
 
                     {!isPostTest && (
                         <Button

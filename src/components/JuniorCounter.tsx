@@ -22,6 +22,7 @@ export interface JuniorCounterProps {
   size?: 'small' | 'medium' | 'large';
   freezeAnimation?: boolean;
   onBeadMove?: () => void;
+  onPartClick?: (part: 'upper' | 'lower' | 'rod') => void;
 }
 
 export function JuniorCounter({
@@ -29,7 +30,7 @@ export function JuniorCounter({
   targetNumber,
   onStateChange,
   onCorrect,
-  onIncorrect,
+  // onIncorrect, // Unused for now
   highlightPart = null,
   showHints = false,
   disabled = false,
@@ -38,6 +39,7 @@ export function JuniorCounter({
   size = 'medium',
   freezeAnimation = false,
   onBeadMove,
+  onPartClick,
 }: JuniorCounterProps) {
   const [state, setState] = useState<JuniorCounterState>(initialState);
   const [isShaking, setIsShaking] = useState(false);
@@ -67,9 +69,16 @@ export function JuniorCounter({
     setState(initialState);
   };
 
-  // Toggle upper bead
   const toggleUpperBead = () => {
-    if (!interactive || disabled) return;
+    if (disabled) return;
+
+    if (onPartClick) {
+      onPartClick('upper');
+      if (!interactive) return; // If purely for selection, don't move
+    } else if (!interactive) {
+      return;
+    }
+
     setState(prev => ({
       ...prev,
       upperBeadEngaged: !prev.upperBeadEngaged,
@@ -84,7 +93,15 @@ export function JuniorCounter({
 
   // Increment lower beads
   const incrementLowerBeads = () => {
-    if (!interactive || disabled) return;
+    if (disabled) return;
+
+    if (onPartClick) {
+      onPartClick('lower');
+      if (!interactive) return;
+    } else if (!interactive) {
+      return;
+    }
+
     setState(prev => ({
       ...prev,
       lowerBeadsEngaged: Math.min(4, prev.lowerBeadsEngaged + 1),
@@ -94,7 +111,15 @@ export function JuniorCounter({
 
   // Decrement lower beads
   const decrementLowerBeads = () => {
-    if (!interactive || disabled) return;
+    if (disabled) return;
+
+    if (onPartClick) {
+      onPartClick('lower');
+      if (!interactive) return;
+    } else if (!interactive) {
+      return;
+    }
+
     setState(prev => ({
       ...prev,
       lowerBeadsEngaged: Math.max(0, prev.lowerBeadsEngaged - 1),
@@ -155,20 +180,19 @@ export function JuniorCounter({
         transition={{ duration: 0.5 }}
         className="relative flex flex-col items-center"
       >
-        {/* Upper Bead (Heaven Bead - represents 5) */}
         <div className="relative">
           <motion.button
             onClick={toggleUpperBead}
-            disabled={!interactive || disabled}
-            whileHover={interactive && !disabled ? { scale: 1.1 } : {}}
-            whileTap={interactive && !disabled ? { scale: 0.9 } : {}}
+            disabled={disabled}
+            whileHover={!disabled ? { scale: 1.1 } : {}}
+            whileTap={!disabled ? { scale: 0.9 } : {}}
             animate={{
               y: state.upperBeadEngaged ? 20 : 0,
             }}
             className={`${config.upperBead} rounded-full shadow-2xl transition-all duration-300 relative z-10 ${highlightPart === 'upper'
               ? 'bg-sunburst-yellow ring-4 ring-aqua-blue animate-pulse'
               : 'bg-gradient-to-br from-abacus-red to-red-700'
-              } ${interactive && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
+              } ${!disabled ? 'cursor-pointer' : 'cursor-default'}`}
           >
             {showHints && targetNumber !== undefined && targetNumber >= 5 && (
               <motion.div
@@ -180,11 +204,20 @@ export function JuniorCounter({
           </motion.button>
         </div>
 
-        <div className={`${config.separator} bg-gray-400 mt-2 mb-0 rounded-full shadow-lg z-10 relative flex items-center justify-center`} />
+        {/* Answer Rod (Horizontal Separator) */}
+        <motion.button
+          onClick={() => onPartClick?.('rod')}
+          disabled={disabled || !onPartClick}
+          whileHover={onPartClick && !disabled ? { scale: 1.05 } : {}}
+          whileTap={onPartClick && !disabled ? { scale: 0.95 } : {}}
+          className={`${config.separator} mt-2 mb-0 rounded-full shadow-lg z-10 relative flex items-center justify-center transition-all duration-300 ${highlightPart === 'rod'
+            ? 'bg-sunburst-yellow ring-4 ring-aqua-blue animate-pulse'
+            : 'bg-gray-400'
+            } ${onPartClick && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
+        />
 
         <div
-          className={`${config.rod} -mt-1 bg-gray-400 rounded-full shadow-xl relative z-0 ${highlightPart === 'rod' ? 'ring-4 ring-sunburst-yellow' : ''
-            }`}
+          className={`${config.rod} -mt-1 bg-gray-400 rounded-full shadow-xl relative z-0`}
         >
           {/* Lower Beads Container (Earth Beads - represent 1 each) */}
           <div className={`absolute top-4 left-1/2 -translate-x-1/2 flex flex-col ${config.gap}`}>
@@ -199,10 +232,17 @@ export function JuniorCounter({
               return (
                 <motion.button
                   key={index}
-                  onClick={isEngaged ? decrementLowerBeads : incrementLowerBeads}
-                  disabled={!interactive || disabled}
-                  whileHover={interactive && !disabled ? { scale: 1.1 } : {}}
-                  whileTap={interactive && !disabled ? { scale: 0.9 } : {}}
+                  onClick={() => {
+                    if (onPartClick) {
+                      onPartClick('lower');
+                      if (!interactive) return;
+                    }
+                    if (isEngaged) decrementLowerBeads();
+                    else incrementLowerBeads();
+                  }}
+                  disabled={disabled}
+                  whileHover={!disabled ? { scale: 1.1 } : {}}
+                  whileTap={!disabled ? { scale: 0.9 } : {}}
                   animate={{
                     x: isEngaged ? -5 : 0,
                     scale: isEngaged ? 1.05 : 1,
@@ -212,7 +252,7 @@ export function JuniorCounter({
                     : isEngaged
                       ? 'bg-gradient-to-br from-aqua-blue to-blue-600'
                       : 'bg-gradient-to-br from-gray-400 to-gray-500'
-                    } ${interactive && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
+                    } ${!disabled ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   {showHint && (
                     <motion.div
