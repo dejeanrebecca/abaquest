@@ -1,12 +1,12 @@
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { ArrowRight } from 'lucide-react';
-import BookIcon from '../../assets/book-icon.svg'; // Assuming we handle SVG imports or use an img tag
 
 interface TransitionScreenProps {
     title: string;
     subtitle?: string;
     icon?: string; // Emoji or image URL
+    imageSrc?: string; // Custom image URL (e.g., imported asset)
     onNext: () => void;
     buttonText?: string;
     variant?: 'story' | 'learning' | 'default';
@@ -17,6 +17,7 @@ export function TransitionScreen({
     title,
     subtitle,
     icon,
+    imageSrc,
     onNext,
     buttonText = "Continue",
     variant = 'default',
@@ -48,18 +49,22 @@ export function TransitionScreen({
         >
             <div className={`max-w-3xl w-full bg-white rounded-3xl shadow-2xl p-10 border-4 ${getBorderColor()} text-center`}>
 
-                {showBookIcon && (
+                {(showBookIcon || imageSrc) && (
                     <motion.div
                         initial={{ scale: 0, rotate: -10 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: "spring", bounce: 0.5 }}
-                        className="w-32 h-32 mx-auto mb-6 bg-abacus-red p-6 rounded-2xl shadow-lg transform rotate-3"
+                        className="w-48 h-48 mx-auto mb-6 bg-transparent p-2 rounded-2xl transform rotate-3 flex items-center justify-center"
                     >
-                        <img src="/src/assets/book-icon.svg" alt="Story Time" className="w-full h-full text-white" />
+                        <img
+                            src={imageSrc || "/src/assets/book-icon.svg"}
+                            alt="Story Time"
+                            className="w-full h-full object-contain drop-shadow-xl"
+                        />
                     </motion.div>
                 )}
 
-                {icon && !showBookIcon && (
+                {icon && !showBookIcon && !imageSrc && (
                     <div className="text-8xl mb-6">{icon}</div>
                 )}
 

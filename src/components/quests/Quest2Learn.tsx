@@ -72,6 +72,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                             interactive={false}
                             size="large"
                             highlightPart={currentPart}
+                            onPartClick={handlePartClick}
                         />
                     </div>
 
@@ -116,7 +117,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                                 className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
                                 size="lg"
                             >
-                                I Know the Parts! Let's Continue! ✨
+                                Got it! Let's Go! ✨
                             </Button>
                         </motion.div>
                     )}
