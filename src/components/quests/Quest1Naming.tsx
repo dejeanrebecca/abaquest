@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { QuestClose } from '../quest-screens/QuestClose';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Input } from '../ui/input';
 import { AudioNarration } from '../AudioNarration';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { useDataLogger } from '../DataLogger';
 import { useQuestEngine } from '../QuestEngine';
-import { HelpCircle, CheckCircle, XCircle, Ship, ArrowRight, Volume2 } from 'lucide-react';
+import { TransitionScreen } from '../common/TransitionScreen';
+import { PostTestCheckIn } from '../quest-screens/PostTestCheckIn';
+import { HelpCircle, CheckCircle, XCircle, Ship, ArrowRight } from 'lucide-react';
 
 
 interface Quest1NamingProps {
@@ -16,7 +18,7 @@ interface Quest1NamingProps {
 }
 
 
-type Step = 'welcome' | 'pretest' | 'learn' | 'story' | 'posttest' | 'close';
+type Step = 'welcome' | 'pretest' | 'learn' | 'transition' | 'story' | 'posttest' | 'close';
 
 export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [step, setStep] = useState<Step>('welcome');
@@ -24,7 +26,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | 'skip' | null>(null);
   const [startTime, setStartTime] = useState(Date.now());
   const [preTestAnswers, setPreTestAnswers] = useState<boolean[]>([]);
-  const [postTestAnswers, setPostTestAnswers] = useState<boolean[]>([]);
+  const [postTestAnswers] = useState<boolean[]>([]);
   const [counterName, setCounterName] = useState('');
   const [storyStep, setStoryStep] = useState(0);
   const [showPreTestIntro, setShowPreTestIntro] = useState(true);
@@ -36,7 +38,15 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   // Pre-test and Post-test questions (MUST BE IDENTICAL)
   const testQuestions = [
-    { question: 'Can you point to something that counts?', type: 'recognition' },
+    {
+      question: 'Tap the thing that helps you count!',
+      type: 'interaction',
+      options: [
+        { id: 'ball', label: '⚽', isCorrect: false },
+        { id: 'abacus', label: '🧮', isCorrect: true },
+        { id: 'book', label: '📚', isCorrect: false }
+      ]
+    },
     { question: 'Do you know what an abacus is?', type: 'knowledge' },
     { question: 'Can you name a tool that helps with math?', type: 'recall' },
   ];
@@ -58,7 +68,11 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
     return (
       <QuestWelcome
         questTitle="Quest 1: The Naming"
-        questIcon="✏️"
+        questIcon={
+          <div className="transform scale-75 origin-center">
+            <InteractiveAbacus interactive={false} />
+          </div>
+        }
         welcomeMessage="Welcome, young AbaQuester! I'm so happy you're here. Today, you're joining a very special place — Mistress Creola's School of Mental Math! It's a magical school where numbers come alive, and every student learns to use their Junior Counter to solve puzzles and explore new worlds."
         onNext={() => setStep('pretest')}
         onEmotionalCheckIn={setEmotionalState}
@@ -113,9 +127,15 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
     const currentQ = testQuestions[currentQuestion];
 
-    const handleAnswer = (answer: 'yes' | 'no' | 'skip') => {
+    const handleAnswer = (answer: any, isInteraction: boolean = false) => {
       const timeSpent = Date.now() - startTime;
-      const isCorrect = answer === 'yes'; // For this Quest, "yes" is generally correct
+      let isCorrect = false;
+
+      if (isInteraction) {
+        isCorrect = answer.isCorrect;
+      } else {
+        isCorrect = answer === 'yes'; // For this Quest, "yes" is generally correct
+      }
 
       logInteraction({
         quest_id: 1,
@@ -124,7 +144,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         correct_flag: answer === 'skip' ? null : isCorrect,
         time_ms: timeSpent,
         interaction_type: 'pre_test',
-        student_response: answer,
+        student_response: isInteraction ? answer.id : answer,
       });
 
       setPreTestAnswers(prev => [...prev, isCorrect]);
@@ -139,7 +159,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           setCurrentQuestion(0);
           setShowFeedback(null);
         }
-      }, 1500);
+      }, 1000); // Reduced delay
     };
 
     return (
@@ -164,31 +184,49 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
               <p className="text-2xl text-deep-blue">{currentQ.question}</p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <Button
-                onClick={() => handleAnswer('yes')}
-                className="bg-green-500 hover:bg-green-600 text-white py-8 rounded-2xl shadow-lg text-xl"
-                size="lg"
-              >
-                ✓ Yes
-              </Button>
-              <Button
-                onClick={() => handleAnswer('no')}
-                className="bg-orange-400 hover:bg-orange-500 text-white py-8 rounded-2xl shadow-lg text-xl"
-                size="lg"
-              >
-                ✗ No
-              </Button>
-            </div>
+            {currentQ.type === 'interaction' ? (
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {currentQ.options?.map((opt: any) => (
+                  <motion.button
+                    key={opt.id}
+                    onClick={() => handleAnswer(opt, true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="aspect-square bg-white border-4 border-gray-200 hover:border-aqua-blue rounded-2xl flex items-center justify-center text-6xl shadow-lg transition-all"
+                  >
+                    {opt.label}
+                  </motion.button>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <Button
+                  onClick={() => handleAnswer('yes')}
+                  className="bg-green-500 hover:bg-green-600 text-white py-8 rounded-2xl shadow-lg text-xl"
+                  size="lg"
+                >
+                  ✓ Yes
+                </Button>
+                <Button
+                  onClick={() => handleAnswer('no')}
+                  className="bg-orange-400 hover:bg-orange-500 text-white py-8 rounded-2xl shadow-lg text-xl"
+                  size="lg"
+                >
+                  ✗ No
+                </Button>
+              </div>
+            )}
 
-            <Button
-              onClick={() => handleAnswer('skip')}
-              variant="outline"
-              className="w-full border-2 border-deep-blue/30 text-deep-blue hover:bg-deep-blue/5 py-4 rounded-xl"
-            >
-              <HelpCircle className="w-5 h-5 mr-2" />
-              I don't know yet
-            </Button>
+            {currentQ.type !== 'interaction' && (
+              <Button
+                onClick={() => handleAnswer('skip')}
+                variant="outline"
+                className="w-full border-2 border-deep-blue/30 text-deep-blue hover:bg-deep-blue/5 py-4 rounded-xl"
+              >
+                <HelpCircle className="w-5 h-5 mr-2" />
+                I don't know yet
+              </Button>
+            )}
 
             <AnimatePresence>
               {showFeedback && (
@@ -253,11 +291,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
             />
 
             <div className="my-8 flex justify-center">
-              <JuniorCounter
-                interactive={false}
-                size="large"
-                showValue={false}
-              />
+              <InteractiveAbacus interactive={true} />
             </div>
 
             <div className="bg-gradient-to-r from-aqua-blue/10 to-deep-blue/10 rounded-2xl p-6 mb-6">
@@ -268,8 +302,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
             <Button
               onClick={() => {
-                setStep('story');
-                setStoryStep(5); // Skip directly to naming scene
+                setStep('transition');
               }}
               className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
               size="lg"
@@ -279,6 +312,23 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           </div>
         </div>
       </motion.div>
+    );
+  }
+
+  // STEP 3.5: TRANSITION TO STORY
+  if (step === 'transition') {
+    return (
+      <TransitionScreen
+        title="Story Time!"
+        subtitle="Let's join Ameer and Ameerah on their adventure."
+        onNext={() => {
+          setStep('story');
+          setStoryStep(5); // Skip story for now
+        }}
+        variant="story"
+        showBookIcon={true}
+        buttonText="Let's Read!"
+      />
     );
   }
 
@@ -442,6 +492,16 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         }
       };
 
+      const speakText = (text: string) => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.rate = 1.0;
+          utterance.pitch = 1.1; // Abby voice
+          window.speechSynthesis.speak(utterance);
+        }
+      };
+
       return (
         <motion.div
           initial={{ opacity: 0 }}
@@ -468,6 +528,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                       key={name}
                       onClick={() => {
                         setCounterName(name);
+                        speakText(`Great name! ${name} is ready for math quests!`);
                       }}
                       className={`p-4 rounded-xl border-4 transition-all ${counterName === name
                         ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
@@ -492,6 +553,11 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                     placeholder="Type a special name..."
                     className="text-center text-xl py-6 rounded-2xl border-4 border-gray-200 focus:border-aqua-blue"
                     maxLength={15}
+                    onBlur={() => {
+                      if (counterName) {
+                        speakText(`Great name! ${counterName} is ready for math quests!`);
+                      }
+                    }}
                   />
                 </div>
 
@@ -500,7 +566,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   disabled={!counterName}
                   className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl disabled:opacity-50"
                 >
-                  Confirm Name ✨
+                  Let's Go! 🚀
                 </Button>
 
                 {counterName && (
@@ -552,110 +618,25 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
     );
   }
 
-  // STEP 5: POST-TEST (Same questions as pre-test)
+  // STEP 5: POST-TEST (Emotional Check-in)
   if (step === 'posttest') {
-    const currentQ = testQuestions[currentQuestion];
-
-    const handleAnswer = (answer: 'yes' | 'no') => {
-      const timeSpent = Date.now() - startTime;
-      const isCorrect = answer === 'yes';
-
-      logInteraction({
-        quest_id: 1,
-        scene_id: `posttest_q${currentQuestion + 1}`,
-        number: null,
-        correct_flag: isCorrect,
-        time_ms: timeSpent,
-        interaction_type: 'post_test',
-        student_response: answer,
-      });
-
-      setPostTestAnswers(prev => [...prev, isCorrect]);
-      setShowFeedback(isCorrect ? 'correct' : 'wrong');
-
-      setTimeout(() => {
-        if (currentQuestion < testQuestions.length - 1) {
-          setCurrentQuestion(currentQuestion + 1);
-          setShowFeedback(null);
-        } else {
-          setStep('close');
-        }
-      }, 1500);
-    };
-
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen bg-warm-neutral p-8"
-      >
-        <div className="flex justify-center mb-4">
-          {/* Logo removed */}
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-4 mb-4 shadow-xl text-white">
-            <div className="flex justify-between items-center">
-              <p className="text-xl">✅ Post-Test Question {currentQuestion + 1} of {testQuestions.length}</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-green-500">
-            <AudioNarration
-              text="Let's see what you've learned! Answer these questions — I know you can do it!"
-              speaker="abby"
-              compact
-            />
-
-            <div className="my-8 text-center">
-              <p className="text-2xl text-deep-blue">{currentQ.question}</p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                onClick={() => handleAnswer('yes')}
-                className="bg-green-500 hover:bg-green-600 text-white py-8 rounded-2xl shadow-lg text-xl"
-                size="lg"
-              >
-                ✓ Yes
-              </Button>
-              <Button
-                onClick={() => handleAnswer('no')}
-                className="bg-orange-400 hover:bg-orange-500 text-white py-8 rounded-2xl shadow-lg text-xl"
-                size="lg"
-              >
-                ✗ No
-              </Button>
-            </div>
-
-            <AnimatePresence>
-              {showFeedback && (
-                <motion.div
-                  initial={{ scale: 0, y: 20 }}
-                  animate={{ scale: 1, y: 0 }}
-                  exit={{ scale: 0, y: 20 }}
-                  className={`mt-6 p-4 rounded-xl flex items-center justify-center gap-3 ${showFeedback === 'correct'
-                    ? 'bg-green-100 border-3 border-green-500'
-                    : 'bg-orange-100 border-3 border-orange-400'
-                    }`}
-                >
-                  {showFeedback === 'correct' ? (
-                    <>
-                      <CheckCircle className="w-8 h-8 text-green-600" />
-                      <span className="text-xl text-green-700">Perfect! 🌟</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="w-8 h-8 text-orange-600" />
-                      <span className="text-xl text-orange-700">Keep learning! 💪</span>
-                    </>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      </motion.div>
+      <PostTestCheckIn
+        onComplete={(emotion) => {
+          setEmotionalState(emotion);
+          // Log the emotional check-in
+          logInteraction({
+            quest_id: 1,
+            scene_id: 'posttest_checkin',
+            number: null,
+            correct_flag: true,
+            time_ms: 0,
+            interaction_type: 'emotional_checkin',
+            student_response: emotion,
+          });
+          setStep('close');
+        }}
+      />
     );
   }
 

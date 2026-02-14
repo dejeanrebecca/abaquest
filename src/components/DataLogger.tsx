@@ -8,7 +8,7 @@ export interface LearnerInteraction {
   correct_flag: boolean | null;
   time_ms: number;
   timestamp: string;
-  interaction_type: 'pre_test' | 'practice' | 'post_test' | 'story';
+  interaction_type: 'pre_test' | 'practice' | 'post_test' | 'story' | 'emotional_checkin';
   student_response?: string;
 }
 
@@ -36,7 +36,7 @@ export function DataLoggerProvider({ children }: { children: ReactNode }) {
       timestamp: new Date().toISOString(),
     };
     setInteractions(prev => [...prev, newInteraction]);
-    
+
     // Log to console for teacher/researcher review
     console.log('📊 Learning Data:', newInteraction);
   };
