@@ -87,12 +87,12 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
     const earthCount = value % 5;
 
     return (
-        <div className="flex flex-col items-center w-16 h-64 relative bg-transparent">
+        <div className="flex flex-col items-center w-16 h-[280px] -mt-[5px] relative bg-transparent">
             {/* The Rod Line */}
-            <div className="absolute inset-y-0 w-2 bg-gray-400 rounded-full z-0" />
+            <div className="absolute inset-y-0 w-4 bg-gray-400 rounded-full z-0" />
 
             {/* Heaven Deck (Top) */}
-            <div className="h-24 w-full flex flex-col justify-end items-center z-10 pb-2 border-b-4 border-brand-purple">
+            <div className="h-24 w-full flex flex-col justify-end items-center z-10 pb-2">
                 <Bead
                     isActive={isHeavenActive}
                     type="heaven"
@@ -100,6 +100,9 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
                     interactive={interactive}
                 />
             </div>
+
+            {/* Divider Bar - Matching Junior Counter Style */}
+            <div className="w-24 h-4 bg-gray-400 rounded-full shadow-md z-10 mt-2 mb-0" />
 
             {/* Earth Deck (Bottom) */}
             <div className="h-40 w-full flex flex-col justify-start items-center z-10 pt-2 gap-1">
@@ -119,17 +122,16 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
                             // Standard abacus: Sliding bead k UP means setting count to at least k+1.
                             onToggle={() => {
                                 if (isActive) {
-                                    // Clicking an active bead usually deactivates it and those below it?
-                                    // Actually, if we have 3 beads up, and click the top-most active one (pos 2), we might want to deactivate it.
-                                    // Let's simplify: Toggle logic for "Active count".
-                                    // If I click bead index 2 (3rd bead), I want exactly 3 beads active.
-                                    // If 3 beads are already active, maybe I want 2?
-                                    // Let's rely on standard: Click bead `i` -> make `i+1` beads active.
-                                    // If `i+1` are already active, make `i` beads active (toggle off the top one).
-                                    // Wait, direct manipulation implies state setting.
-                                    onUpdate((pos + 1) - earthCount);
+                                    // If bead is active (pushed up), clicking it should deactivate it and beads above it
+                                    // e.g. if 3 beads are active (0,1,2), clicking bead 2 makes count 2.
+                                    // if 1 bead is active (0), clicking bead 0 makes count 0.
+                                    // Target count = pos
+                                    // Delta = pos - earthCount
+                                    onUpdate(pos - earthCount);
                                 } else {
                                     // If inactive, activate up to this bead
+                                    // Target count = pos + 1
+                                    // Delta = (pos + 1) - earthCount
                                     onUpdate((pos + 1) - earthCount);
                                 }
                             }}

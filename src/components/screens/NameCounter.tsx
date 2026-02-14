@@ -549,7 +549,7 @@ export function NameCounter({ onNext }: NameCounterProps) {
               className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               size="lg"
             >
-              Confirm Name ✨
+              Start My Quest! 🚀
             </Button>
 
             {(selectedAvatar || customName) && (

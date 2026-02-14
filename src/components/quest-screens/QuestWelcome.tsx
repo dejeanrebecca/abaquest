@@ -6,7 +6,7 @@ import { Smile, Meh, Frown, Laugh } from 'lucide-react';
 
 interface QuestWelcomeProps {
   questTitle: string;
-  questIcon: string;
+  questIcon: React.ReactNode;
   welcomeMessage: string;
   onNext: () => void;
   onEmotionalCheckIn?: (emotion: string) => void;
@@ -83,8 +83,8 @@ export function QuestWelcome({
                   transition={{ delay: 0.6 + index * 0.1 }}
                   onClick={() => setSelectedEmotion(emotion.value)}
                   className={`p-6 rounded-2xl border-4 transition-all duration-300 ${selectedEmotion === emotion.value
-                      ? 'border-aqua-blue bg-aqua-blue/10 scale-105 shadow-lg'
-                      : 'border-gray-200 bg-white hover:border-sunburst-yellow hover:shadow-md'
+                    ? 'border-aqua-blue bg-aqua-blue/10 scale-105 shadow-lg'
+                    : 'border-gray-200 bg-white hover:border-sunburst-yellow hover:shadow-md'
                     }`}
                 >
                   <div className="text-6xl mb-2">{emotion.emoji}</div>

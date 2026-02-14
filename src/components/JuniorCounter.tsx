@@ -105,22 +105,25 @@ export function JuniorCounter({
   // Size configurations
   const sizeConfig = {
     small: {
-      rod: 'w-4 h-48',
+      rod: 'w-3 h-48',
       upperBead: 'w-12 h-12',
       lowerBead: 'w-10 h-10',
       gap: 'gap-1',
+      separator: 'h-3 w-32',
     },
     medium: {
-      rod: 'w-6 h-64',
+      rod: 'w-4 h-64',
       upperBead: 'w-16 h-16',
       lowerBead: 'w-14 h-14',
       gap: 'gap-2',
+      separator: 'h-4 w-40',
     },
     large: {
-      rod: 'w-8 h-80',
+      rod: 'w-6 h-80',
       upperBead: 'w-20 h-20',
       lowerBead: 'w-16 h-16',
       gap: 'gap-3',
+      separator: 'h-6 w-48',
     },
   };
 
@@ -144,9 +147,9 @@ export function JuniorCounter({
         animate={
           freezeAnimation && isShaking
             ? {
-                rotate: [0, -2, 2, -2, 2, 0],
-                scale: [1, 1.02, 1],
-              }
+              rotate: [0, -2, 2, -2, 2, 0],
+              scale: [1, 1.02, 1],
+            }
             : {}
         }
         transition={{ duration: 0.5 }}
@@ -162,11 +165,10 @@ export function JuniorCounter({
             animate={{
               y: state.upperBeadEngaged ? 20 : 0,
             }}
-            className={`${config.upperBead} rounded-full shadow-2xl transition-all duration-300 relative z-10 ${
-              highlightPart === 'upper'
-                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue animate-pulse'
-                : 'bg-gradient-to-br from-abacus-red to-red-700'
-            } ${interactive && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
+            className={`${config.upperBead} rounded-full shadow-2xl transition-all duration-300 relative z-10 ${highlightPart === 'upper'
+              ? 'bg-sunburst-yellow ring-4 ring-aqua-blue animate-pulse'
+              : 'bg-gradient-to-br from-abacus-red to-red-700'
+              } ${interactive && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
           >
             {showHints && targetNumber !== undefined && targetNumber >= 5 && (
               <motion.div
@@ -178,14 +180,11 @@ export function JuniorCounter({
           </motion.button>
         </div>
 
-        {/* Divider Bar */}
-        <div className="w-24 h-1 bg-gray-800 my-2 rounded-full shadow-lg" />
+        <div className={`${config.separator} bg-gray-400 mt-2 mb-0 rounded-full shadow-lg z-10 relative flex items-center justify-center`} />
 
-        {/* Answer Rod (Body) */}
         <div
-          className={`${config.rod} bg-gradient-to-b from-gray-700 to-gray-900 rounded-full shadow-xl relative ${
-            highlightPart === 'rod' ? 'ring-4 ring-sunburst-yellow' : ''
-          }`}
+          className={`${config.rod} -mt-1 bg-gray-400 rounded-full shadow-xl relative z-0 ${highlightPart === 'rod' ? 'ring-4 ring-sunburst-yellow' : ''
+            }`}
         >
           {/* Lower Beads Container (Earth Beads - represent 1 each) */}
           <div className={`absolute top-4 left-1/2 -translate-x-1/2 flex flex-col ${config.gap}`}>
@@ -208,13 +207,12 @@ export function JuniorCounter({
                     x: isEngaged ? -5 : 0,
                     scale: isEngaged ? 1.05 : 1,
                   }}
-                  className={`${config.lowerBead} rounded-full shadow-xl transition-all duration-200 relative ${
-                    highlightPart === 'lower' || showHint
-                      ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
-                      : isEngaged
+                  className={`${config.lowerBead} rounded-full shadow-xl transition-all duration-200 relative ${highlightPart === 'lower' || showHint
+                    ? 'bg-sunburst-yellow ring-4 ring-aqua-blue'
+                    : isEngaged
                       ? 'bg-gradient-to-br from-aqua-blue to-blue-600'
                       : 'bg-gradient-to-br from-gray-400 to-gray-500'
-                  } ${interactive && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
+                    } ${interactive && !disabled ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   {showHint && (
                     <motion.div
