@@ -107,9 +107,9 @@ export function Quest4Freeze({ onComplete }: Quest4FreezeProps) {
         {step === 'story-transition' && (
           <TransitionScreen
             key="story-transition"
-            title="Adventure Time!"
+            title="Story time!"
             subtitle="Journey to the Ice Valley with Ameer."
-            buttonText="Start Story"
+            buttonText="Story time!"
             // imageSrc="story-book.png" 
             onNext={() => setStep('story')}
             variant="story"
