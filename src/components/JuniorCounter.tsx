@@ -23,6 +23,7 @@ export interface JuniorCounterProps {
   freezeAnimation?: boolean;
   onBeadMove?: () => void;
   onPartClick?: (part: 'upper' | 'lower' | 'rod') => void;
+  value?: number; // External control for values
 }
 
 export function JuniorCounter({
@@ -40,9 +41,21 @@ export function JuniorCounter({
   freezeAnimation = false,
   onBeadMove,
   onPartClick,
+  value,
 }: JuniorCounterProps) {
   const [state, setState] = useState<JuniorCounterState>(initialState);
   const [isShaking, setIsShaking] = useState(false);
+
+  // Sync state with external value prop if provided
+  useEffect(() => {
+    if (value !== undefined) {
+      if (value < 0 || value > 9) return;
+      setState({
+        upperBeadEngaged: value >= 5,
+        lowerBeadsEngaged: value % 5,
+      });
+    }
+  }, [value]);
 
   // Calculate current number (0-9)
   const getCurrentNumber = (s: JuniorCounterState): number => {
@@ -57,12 +70,11 @@ export function JuniorCounter({
       onStateChange(state, currentNumber);
     }
 
-    if (targetNumber !== undefined && currentNumber === targetNumber) {
+    // Only check correctness if interactive (not auto-playing)
+    if (interactive && targetNumber !== undefined && currentNumber === targetNumber) {
       onCorrect?.();
-    } else if (targetNumber !== undefined && currentNumber !== targetNumber) {
-      // Don't fire onIncorrect immediately, wait for user to "submit"
     }
-  }, [state, currentNumber]);
+  }, [state, currentNumber, interactive, targetNumber, onCorrect, onStateChange]);
 
   // Reset to initial state
   const handleReset = () => {
