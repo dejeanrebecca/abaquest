@@ -1,134 +1,151 @@
-import { motion } from 'motion/react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/button';
-import { Sparkles, ArrowRight } from 'lucide-react';
-
+import { ArrowRight, RotateCcw, Play } from 'lucide-react';
+import { JuniorCounter } from '../JuniorCounter';
 
 interface Quest3LearnProps {
     onComplete: () => void;
 }
 
-export function Quest3Learn({ onComplete }: Quest3LearnProps) {
+const DEMO_STEPS = [
+    {
+        number: 0,
+        title: "The Number Zero",
+        description: "Zero means no beads are touching the white bar. It's empty!",
+        audioCheck: "Can you see zero?"
+    },
+    {
+        number: 1,
+        title: "The Number One",
+        description: "For one, we push ONE lower bead up to the bar.",
+        audioCheck: "Beep! That's one!"
+    },
+    {
+        number: 5,
+        title: "The Number Five",
+        description: "Five is special! We bring the huge upper bead DOWN to the bar.",
+        audioCheck: "Whoosh! High five!"
+    },
+    {
+        number: 9,
+        title: "The Number Nine",
+        description: "Nine is everything! Top bead down, all lower beads up. It's a party!",
+        audioCheck: "Full house!"
+    }
+];
 
-    const renderAbacusPosition = (position: string, isHighlighted: boolean = false) => {
-        return (
-            <div className="flex flex-col items-center gap-1">
-                <div
-                    className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'top' && isHighlighted
-                        ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                        : position === 'top'
-                            ? 'bg-sunburst-yellow'
-                            : 'bg-gray-300'
-                        }`}
-                ></div>
-                <div className="w-1 h-6 bg-gray-700 rounded"></div>
-                <div className="flex flex-col gap-1">
-                    {[0, 1].map((i) => (
-                        <div
-                            key={`upper-${i}`}
-                            className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-upper' && isHighlighted
-                                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                                : position === 'middle-upper'
-                                    ? 'bg-sunburst-yellow'
-                                    : 'bg-gray-400'
-                                }`}
-                        ></div>
-                    ))}
-                </div>
-                <div className="w-1 h-4 bg-gray-700 rounded"></div>
-                <div className="flex flex-col gap-1">
-                    {[0, 1].map((i) => (
-                        <div
-                            key={`lower-${i}`}
-                            className={`w-8 h-8 rounded-full transition-all shadow-lg ${position === 'middle-lower' && isHighlighted
-                                ? 'bg-sunburst-yellow ring-4 ring-aqua-blue scale-110'
-                                : position === 'middle-lower'
-                                    ? 'bg-sunburst-yellow'
-                                    : 'bg-gray-400'
-                                }`}
-                        ></div>
-                    ))}
-                </div>
-                <div className="w-1 h-6 bg-gray-700 rounded"></div>
-                <div
-                    className={`w-10 h-10 rounded-full transition-all shadow-lg ${position === 'bottom' && isHighlighted
-                        ? 'bg-abacus-red ring-4 ring-aqua-blue scale-110'
-                        : position === 'bottom'
-                            ? 'bg-abacus-red'
-                            : 'bg-gray-300'
-                        }`}
-                ></div>
-            </div>
-        );
+export function Quest3Learn({ onComplete }: Quest3LearnProps) {
+    const [stepIndex, setStepIndex] = useState(0);
+    const [currentValue, setCurrentValue] = useState(0);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    const currentStep = DEMO_STEPS[stepIndex];
+    const isLastStep = stepIndex === DEMO_STEPS.length - 1;
+
+    const playDemo = async () => {
+        setIsAnimating(true);
+        // Reset to 0 first for clear demonstration
+        setCurrentValue(0);
+
+        // Small delay before showing the target number to allow reset visibility
+        if (currentStep.number !== 0) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            setCurrentValue(currentStep.number);
+        }
+        setIsAnimating(false);
+    };
+
+    useEffect(() => {
+        playDemo();
+    }, [stepIndex]);
+
+    const handleNext = () => {
+        if (isLastStep) {
+            onComplete();
+        } else {
+            setStepIndex(prev => prev + 1);
+        }
+    };
+
+    const handleBack = () => {
+        if (stepIndex > 0) {
+            setStepIndex(prev => prev - 1);
+        }
     };
 
     return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="min-h-screen bg-warm-neutral p-8"
-        >
-            <div className="max-w-5xl mx-auto">
-                <div className="bg-gradient-to-r from-aqua-blue to-deep-blue rounded-2xl p-4 mb-6 shadow-xl text-white">
-                    <div className="flex items-center gap-3">
-                        <Sparkles className="w-6 h-6" />
-                        <p className="text-xl">Discovery Time: Where Do Numbers Live?</p>
+        <div className="min-h-screen bg-warm-neutral p-4 md:p-8 flex flex-col items-center">
+            {/* Header / Abby Area */}
+            <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-6 border-4 border-sunburst-yellow mb-8 flex items-center gap-6 relative overflow-hidden">
+                <div className="text-6xl animate-bounce-slight">🐝</div>
+                <div className="z-10">
+                    <h2 className="text-3xl font-bold text-deep-blue mb-2">{currentStep.title}</h2>
+                    <p className="text-xl text-charcoal-gray">{currentStep.description}</p>
+                </div>
+                {/* Decorative blob */}
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-sunburst-yellow/20 rounded-full blur-3xl"></div>
+            </div>
+
+            {/* Main Stage */}
+            <div className="flex flex-col md:flex-row gap-12 items-center justify-center w-full max-w-5xl flex-1">
+
+                {/* Large Counter Display */}
+                <div className="relative p-10 bg-white rounded-[3rem] shadow-2xl border-4 border-aqua-blue">
+                    <div className="scale-125 origin-center">
+                        <JuniorCounter
+                            value={currentValue}
+                            interactive={false}
+                            size="large"
+                            showValue={true}
+                        />
                     </div>
+
+                    {/* Replay Button overlay */}
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={playDemo}
+                        disabled={isAnimating}
+                        className="absolute bottom-4 right-4 bg-deep-blue/10 p-3 rounded-full text-deep-blue hover:bg-deep-blue/20 transition-colors"
+                        title="Replay Animation"
+                    >
+                        <RotateCcw className={`w-6 h-6 ${isAnimating ? 'animate-spin' : ''}`} />
+                    </motion.button>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-sunburst-yellow">
-                    <div className="flex items-start gap-4 mb-8 bg-sunburst-yellow/20 rounded-xl p-4">
-                        <div className="text-4xl">🐝</div>
-                        <div>
-                            <p className="text-deep-blue text-xl mb-2">
-                                <span className="font-semibold">Abby says:</span> "Each number has its own special home on our Junior Counter! Let's discover them together!"
-                            </p>
+                {/* Controls Area */}
+                <div className="flex flex-col gap-4 w-full max-w-xs">
+                    <div className="bg-white/80 backdrop-blur rounded-2xl p-6 shadow-lg text-center mb-4">
+                        <p className="text-deep-blue font-medium mb-2">Step {stepIndex + 1} of {DEMO_STEPS.length}</p>
+                        <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div
+                                className="bg-aqua-blue h-3 rounded-full transition-all duration-500"
+                                style={{ width: `${((stepIndex + 1) / DEMO_STEPS.length) * 100}%` }}
+                            ></div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-6 mb-8">
-                        {/* Lower Beads: 0-4 */}
-                        <div className="bg-aqua-blue/10 rounded-xl p-6 border-3 border-aqua-blue">
-                            <h3 className="text-deep-blue text-center mb-4">🔵 Lower Beads (0-4)</h3>
-                            <div className="flex justify-center mb-4">
-                                {renderAbacusPosition('middle-lower', true)}
-                            </div>
-                            <div className="space-y-2 text-deep-blue/80">
-                                <p>• <strong>Zero (0)</strong>: All beads away from the bar</p>
-                                <p>• <strong>One (1)</strong>: Move 1 lower bead up</p>
-                                <p>• <strong>Two-Four</strong>: Add more lower beads</p>
-                            </div>
-                        </div>
-
-                        {/* Upper Beads: 5-9 */}
-                        <div className="bg-sunburst-yellow/20 rounded-xl p-6 border-3 border-sunburst-yellow">
-                            <h3 className="text-deep-blue text-center mb-4">🟡 Upper Beads (5-9)</h3>
-                            <div className="flex justify-center mb-4">
-                                {renderAbacusPosition('middle-upper', true)}
-                            </div>
-                            <div className="space-y-2 text-deep-blue/80">
-                                <p>• <strong>Five (5)</strong>: Move the top bead down (equals 5!)</p>
-                                <p>• <strong>Six-Nine</strong>: Top bead + lower beads</p>
-                                <p>• <strong>Nine (9)</strong>: Top bead + all 4 lower beads</p>
-                            </div>
-                        </div>
+                    <div className="flex gap-4">
+                        {stepIndex > 0 && (
+                            <Button
+                                onClick={handleBack}
+                                variant="outline"
+                                className="flex-1 py-6 text-lg border-2 border-charcoal-gray text-charcoal-gray"
+                            >
+                                Back
+                            </Button>
+                        )}
+                        <Button
+                            onClick={handleNext}
+                            className={`flex-1 py-6 text-xl shadow-xl transform transition-all ${isLastStep ? 'bg-abacus-red hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
+                        >
+                            {isLastStep ? "Start Practice!" : "Next Number"}
+                            <ArrowRight className="ml-2 w-6 h-6" />
+                        </Button>
                     </div>
-
-                    <div className="bg-deep-blue/5 rounded-xl p-4 mb-6">
-                        <p className="text-deep-blue text-center">
-                            <strong>💡 Discovery Tip:</strong> The top bead is worth <em>five</em>! Lower beads are worth <em>one</em> each.
-                        </p>
-                    </div>
-
-                    <Button
-                        onClick={onComplete}
-                        className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-5 rounded-xl shadow-xl flex items-center justify-center gap-2"
-                        size="lg"
-                    >
-                        Let's Practice!
-                        <ArrowRight className="w-5 h-5" />
-                    </Button>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 }
