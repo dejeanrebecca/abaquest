@@ -159,7 +159,7 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                                 exit={{ opacity: 0 }}
                                 className={`text-2xl font-bold flex items-center gap-2 ${isCorrect ? 'text-green-600' : 'text-orange-500'}`}
                             >
-                                {isCorrect ? <><CheckCircle /> Great Job!</> : <><XCircle /> Try removing zero!</>}
+                                {isCorrect ? <><CheckCircle /> Great Job!</> : <><XCircle /> Incorrect!</>}
                             </motion.div>
                         )}
                     </AnimatePresence>

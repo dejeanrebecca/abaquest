@@ -5,9 +5,20 @@ import { AudioNarration } from '../AudioNarration';
 import { JuniorCounter } from '../JuniorCounter';
 import { useDataLogger } from '../DataLogger';
 import { CheckCircle, XCircle } from 'lucide-react';
+import storyImg from '../../assets/story-two-img1.png';
 
 
 type Part = 'upper' | 'lower' | 'rod';
+
+interface StoryScene {
+    narrator: string;
+    character: string;
+    characterName: string;
+    problem: string;
+    question: string;
+    correctAnswer: Part;
+    showImage: boolean;
+}
 
 interface Quest2StoryProps {
     onComplete: () => void;
@@ -26,22 +37,24 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
 
     const { logInteraction } = useDataLogger();
 
-    const storyScenes = [
+    const storyScenes: StoryScene[] = [
         {
-            narrator: "In Mistress Creola's class, students are learning about the parts of their Junior Counters...",
-            character: '👦',
-            characterName: 'Ameer',
-            problem: 'Ameer forgot which bead is worth five.',
-            question: 'Help Ameer: Which part is worth FIVE?',
+            narrator: "Look what Ameer and Ameerah found! It's a special diagram of the Junior Counter. It helps them see exactly where each part belongs. Can you help them identify the parts on your own counter?",
+            character: '🗺️',
+            characterName: 'The Map',
+            problem: 'Let\'s match the map to your counter!',
+            question: 'Find the Upper Bead.',
             correctAnswer: 'upper' as Part,
+            showImage: true
         },
         {
-            narrator: "Ameerah is trying to remember the names of all the parts...",
+            narrator: "Ameerah is studying the map closely. She says, 'The answer rod is like the counter's backbone!'",
             character: '👧',
             characterName: 'Ameerah',
-            problem: "Ameerah can't remember what holds all the beads together.",
-            question: 'Help Ameerah: Which part holds everything together?',
+            problem: "Ameerah wants to find the backbone.",
+            question: 'Which part holds everything together like a backbone?',
             correctAnswer: 'rod' as Part,
+            showImage: false
         },
     ];
 
@@ -88,7 +101,23 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
                     <h2 className="text-deep-blue text-center mb-6">📖 Story Time with Mistress Creola</h2>
 
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6">
+                        {currentStory.showImage && (
+                            <div className="mb-6 flex justify-center">
+                                <img
+                                    src={storyImg}
+                                    alt="Diagram of Junior Counter Parts"
+                                    className="rounded-xl shadow-lg max-h-64 object-cover border-4 border-white"
+                                />
+                            </div>
+                        )}
+
                         <p className="text-deep-blue/80 text-lg mb-4">{currentStory.narrator}</p>
+                        <AudioNarration
+                            text={currentStory.narrator}
+                            speaker="narrator"
+                            autoPlay={true}
+                            compact
+                        />
 
                         <div className="flex items-center gap-4 mb-4 bg-white rounded-lg p-4 shadow">
                             <div className="text-5xl">{currentStory.character}</div>

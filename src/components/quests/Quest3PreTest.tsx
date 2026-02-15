@@ -141,35 +141,43 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
                         </Button>
                     )}
 
-                    {/* Feedback Overlay */}
-                    <AnimatePresence>
+                    {/* Feedback Section - Inline */}
+                    <AnimatePresence mode="wait">
                         {showFeedback && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.8 }}
-                                className={`absolute inset-0 m-4 rounded-[1.5rem] flex items-center justify-center backdrop-blur-sm z-10 ${showFeedback === 'correct' ? 'bg-green-100/95 border-4 border-green-500' :
-                                        showFeedback === 'skip' ? 'bg-blue-100/95 border-4 border-blue-400' :
-                                            'bg-orange-100/95 border-4 border-orange-400'
+                                initial={{ opacity: 0, height: 0, y: 20 }}
+                                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                exit={{ opacity: 0, height: 0, y: 20 }}
+                                className={`mt-8 rounded-2xl border-4 overflow-hidden ${showFeedback === 'correct' ? 'bg-green-100 border-green-500' :
+                                    showFeedback === 'skip' ? 'bg-blue-100 border-blue-400' :
+                                        'bg-orange-100 border-orange-400'
                                     }`}
                             >
-                                <div className="text-center p-6">
-                                    {showFeedback === 'correct' ? (
-                                        <>
-                                            <CheckCircle className="w-20 h-20 text-green-600 mx-auto mb-4 animate-bounce" />
-                                            <h3 className="text-3xl font-bold text-green-700">Correct!</h3>
-                                        </>
-                                    ) : showFeedback === 'skip' ? (
-                                        <>
-                                            <HelpCircle className="w-20 h-20 text-blue-600 mx-auto mb-4" />
-                                            <h3 className="text-2xl font-bold text-blue-700">Not sure? That's okay!</h3>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <XCircle className="w-20 h-20 text-orange-600 mx-auto mb-4" />
-                                            <h3 className="text-2xl font-bold text-orange-700">Let's keep practicing!</h3>
-                                        </>
-                                    )}
+                                <div className="p-6 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                                    <div className="flex-shrink-0">
+                                        {showFeedback === 'correct' ? (
+                                            <CheckCircle className="w-16 h-16 text-green-600 animate-bounce" />
+                                        ) : showFeedback === 'skip' ? (
+                                            <HelpCircle className="w-16 h-16 text-blue-600" />
+                                        ) : (
+                                            <XCircle className="w-16 h-16 text-orange-600" />
+                                        )}
+                                    </div>
+                                    <div>
+                                        <h3 className={`text-2xl font-bold mb-1 ${showFeedback === 'correct' ? 'text-green-700' :
+                                            showFeedback === 'skip' ? 'text-blue-700' :
+                                                'text-orange-700'
+                                            }`}>
+                                            {showFeedback === 'correct' ? 'Correct!' :
+                                                showFeedback === 'skip' ? "Not sure? That's okay!" :
+                                                    "Let's keep practicing!"}
+                                        </h3>
+                                        <p className="text-lg opacity-80 font-medium">
+                                            {showFeedback === 'correct' ? "Great job finding the number!" :
+                                                showFeedback === 'skip' ? "We'll keep learning this together." :
+                                                    "Try again or keep going to learn more."}
+                                        </p>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
