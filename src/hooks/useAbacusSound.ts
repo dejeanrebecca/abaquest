@@ -65,5 +65,31 @@ export function useAbacusSound() {
         oscillator.stop(ctx.currentTime + 0.5);
     }, []);
 
-    return { playClick, playSuccess };
+    const playError = useCallback(() => {
+        if (!audioContextRef.current) return;
+
+        const ctx = audioContextRef.current;
+        if (ctx.state === 'suspended') {
+            ctx.resume();
+        }
+
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        // Error buzz (sawtooth, low pitch)
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(150, ctx.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(100, ctx.currentTime + 0.3);
+
+        gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + 0.3);
+    }, []);
+
+    return { playClick, playSuccess, playError };
 }

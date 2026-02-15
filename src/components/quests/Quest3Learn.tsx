@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
-import { ArrowRight, RotateCcw, Play } from 'lucide-react';
+import { ArrowRight, RotateCcw } from 'lucide-react';
 import { JuniorCounter } from '../JuniorCounter';
 
 interface Quest3LearnProps {

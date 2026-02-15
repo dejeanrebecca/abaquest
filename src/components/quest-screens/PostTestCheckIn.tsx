@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
 import { Smile, Meh, Frown, Laugh } from 'lucide-react';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface PostTestCheckInProps {
     onComplete: (emotion: string) => void;

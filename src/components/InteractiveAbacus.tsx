@@ -88,11 +88,11 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
 
     return (
         <div className="flex flex-col items-center w-16 h-[280px] -mt-[5px] relative bg-transparent">
-            {/* The Rod Line */}
+            {/* The Rod Line - Lower Z to sit behind everything */}
             <div className="absolute inset-y-0 w-4 bg-gray-400 rounded-full z-0" />
 
-            {/* Heaven Deck (Top) */}
-            <div className="h-24 w-full flex flex-col justify-end items-center z-10 pb-2">
+            {/* Heaven Deck (Top) - High Z for interaction */}
+            <div className="h-24 w-full flex flex-col justify-end items-center relative z-20 pb-2">
                 <Bead
                     isActive={isHeavenActive}
                     type="heaven"
@@ -101,11 +101,11 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
                 />
             </div>
 
-            {/* Divider Bar - Matching Junior Counter Style */}
-            <div className="w-24 h-4 bg-gray-400 rounded-full shadow-md z-10 mt-2 mb-0" />
+            {/* Divider Bar - Middle Z, ensure relative positioning so it stacks correctly below beads */}
+            <div className="w-24 h-4 bg-gray-400 rounded-full shadow-md relative z-10 mt-2 mb-0" />
 
-            {/* Earth Deck (Bottom) */}
-            <div className="h-40 w-full flex flex-col justify-start items-center z-10 pt-2 gap-1">
+            {/* Earth Deck (Bottom) - High Z for interaction */}
+            <div className="h-40 w-full flex flex-col justify-start items-center relative z-20 pt-2 gap-1">
                 {[0, 1, 2, 3].map((pos) => {
                     // Logic: If earthCount is 3, beads 0, 1, 2 are active (pushed up)
                     // In abacus, earth beads push UP to be active.
@@ -168,7 +168,7 @@ function Bead({ isActive, type, onToggle, interactive }: BeadProps) {
             }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
             className={`
-        relative w-14 h-10 rounded-full z-20 cursor-pointer
+        relative w-14 h-10 rounded-full z-30 cursor-pointer
         ${beadColor}
         flex items-center justify-center
         ${!interactive && 'cursor-default'}

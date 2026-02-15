@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle, XCircle, ArrowRight, BookOpen } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CheckCircle, ArrowRight, BookOpen } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
 import { JuniorCounter, JuniorCounterState } from '../JuniorCounter';
 import { useAbacusSound } from '../../hooks/useAbacusSound';
@@ -13,7 +14,7 @@ interface Quest3StoryProps {
 
 export function Quest3Story({ onComplete }: Quest3StoryProps) {
     const [storyStep, setStoryStep] = useState(0);
-    const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | null>(null);
+    const [showFeedback, setShowFeedback] = useState<'correct' | null>(null); // Removed 'wrong' from type
     const [startTime, setStartTime] = useState(Date.now());
     const { logInteraction } = useDataLogger();
     const { playSuccess } = useAbacusSound();
@@ -63,7 +64,7 @@ export function Quest3Story({ onComplete }: Quest3StoryProps) {
 
     const currentStory = storyScenes[storyStep];
 
-    const handleStateChange = (state: JuniorCounterState, value: number) => {
+    const handleStateChange = (_state: JuniorCounterState, value: number) => {
         if (showFeedback === 'correct') return;
 
         if (value === currentStory.number) {
