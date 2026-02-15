@@ -72,12 +72,34 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
                 }
             }, 2000);
         } else {
-            setFeedback("Not quite! Remember, adding zero changes nothing!");
+            setFeedback("Not quite!");
         }
     };
 
     return (
         <div className="min-h-screen bg-sky-100 p-6 flex flex-col items-center">
+            {/* Quest Header - Matching Quest 2/3 style */}
+            <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg p-6 mb-6 border-l-8 border-sky-500 flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-4 w-full md:w-auto">
+                    <div className="bg-sky-100 p-3 rounded-xl text-sky-600">
+                        <Volume2 className="w-8 h-8" />
+                    </div>
+                    <div>
+                        <h2 className="text-xl md:text-2xl font-bold text-sky-900 leading-tight break-words">Story time!</h2>
+                        <p className="text-sky-600 font-medium">Quest 4: Frozen Addition</p>
+                    </div>
+                </div>
+                <div className="w-full md:w-auto flex-1 min-w-0 flex justify-center md:justify-end">
+                    <AudioNarration
+                        text={currentChapter.text}
+                        speaker="narrator"
+                        autoPlay
+                        key={currentChapter.id}
+                        onComplete={() => setShowInteraction(true)}
+                    />
+                </div>
+            </div>
+
             <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-sky-300">
                 {/* Header Image Area */}
                 <div className="h-64 bg-sky-200 relative flex items-center justify-center">
@@ -96,13 +118,6 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
                         </div>
                         <div className="text-xl text-gray-700 leading-relaxed font-medium">
                             {currentChapter.text}
-                            <AudioNarration
-                                text={currentChapter.text}
-                                speaker="narrator"
-                                autoPlay
-                                key={currentChapter.id}
-                                onComplete={() => setShowInteraction(true)}
-                            />
                         </div>
                     </div>
 

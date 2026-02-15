@@ -61,9 +61,9 @@ export function Quest4Learn({ onComplete }: Quest4LearnProps) {
     const getAudioText = () => {
         switch (step) {
             case 0: return "Hi! I'm Abby. Let's learn to FREEZE add!";
-            case 1: return "First, I show the number 5. High five! (Top bead)";
-            case 2: return "Now, I add ZERO beads. Watch closely...";
-            case 3: return "See? The beads didn't move! 5 + 0 is still 5. It's FROZEN!";
+            case 1: return "First, I show the number five. High five! That is the top bead.";
+            case 2: return "Now, I add zero beads. Watch closely...";
+            case 3: return "See? The beads didn't move! Five plus zero is still five. It's frozen!";
             default: return "";
         }
     };

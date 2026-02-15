@@ -32,7 +32,7 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
         },
         {
             id: 3,
-            problem: "4 + 0",
+            problem: "0 + 4",
             answer: 4,
             distractors: [0, 5]
         },
