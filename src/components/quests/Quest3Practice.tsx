@@ -6,6 +6,10 @@ import { useDataLogger } from '../DataLogger';
 import { JuniorCounter, JuniorCounterState } from '../JuniorCounter';
 import { useAbacusSound } from '../../hooks/useAbacusSound';
 import { Button } from '../ui/button';
+import practiceImg0 from '../../assets/quest-3-img0.png';
+import practiceImg1 from '../../assets/quest-3-img1.png';
+import practiceImg5 from '../../assets/quest-3-img5.png';
+import practiceImg9 from '../../assets/quest-3-img9.png';
 
 interface Quest3PracticeProps {
     onComplete: () => void;
@@ -22,6 +26,16 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
     const practiceNumbers = [0, 1, 5, 9];
     const currentPractice = practiceNumbers[currentQuestion];
 
+    const getPracticeImage = (index: number) => {
+        if (practiceNumbers[index] === 0) return practiceImg0;
+        if (practiceNumbers[index] === 1) return practiceImg1;
+        if (practiceNumbers[index] === 5) return practiceImg5;
+        if (practiceNumbers[index] === 9) return practiceImg9;
+        return null;
+    };
+
+    const currentImage = getPracticeImage(currentQuestion);
+
     useEffect(() => {
         setStartTime(Date.now());
     }, [currentQuestion]);
@@ -30,10 +44,12 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
         if (showFeedback === 'correct') return; // Prevent multiple triggers
 
         if (value === currentPractice) {
-            // Debounce success slightly
+            // Debounce success slightly, but longer delay for initial 0 (Q0)
+            const delay = currentQuestion === 0 ? 5000 : 500;
+
             setTimeout(() => {
                 handlePracticeSuccess(value);
-            }, 500);
+            }, delay);
         }
     };
 
@@ -61,6 +77,15 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
             onComplete();
         }
     };
+
+    const getQuestionText = (index: number) => {
+        if (practiceNumbers[index] === 5) {
+            return "In Mistress Creola's class, students are learning number positions. Ameer tried to show the number 5 but...";
+        }
+        return `Move the beads to show the number ${practiceNumbers[index]}!`;
+    };
+
+    const currentText = getQuestionText(currentQuestion);
 
     return (
         <motion.div
@@ -90,20 +115,37 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
                         <h2 className="text-3xl md:text-4xl font-bold text-deep-blue mb-2">
                             Position to <span className="text-abacus-red text-5xl">{currentPractice}</span>
                         </h2>
-                        <p className="text-charcoal-gray text-lg">
-                            Move the beads to show the number {currentPractice}!
+                        <p className="text-charcoal-gray text-lg max-w-2xl mx-auto">
+                            {currentText}
                         </p>
                     </div>
 
-                    {/* Counter */}
-                    <div className="flex justify-center mb-8 scale-110 origin-center">
-                        <JuniorCounter
-                            key={currentQuestion} // Reset check on question change
-                            targetNumber={currentPractice} // For hints if enabled
-                            onStateChange={handleStateChange}
-                            size="large"
-                            showHints={true} // Enable hints for practice
-                        />
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 mb-8">
+                        {currentImage && (
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                key={currentQuestion} // Re-animate on change
+                                className="flex-shrink-0"
+                            >
+                                <img
+                                    src={currentImage}
+                                    alt={`Practice Hint for ${currentPractice}`}
+                                    className="rounded-xl shadow-md h-48 md:h-64 object-contain border-2 border-brand-teal/20"
+                                />
+                            </motion.div>
+                        )}
+
+                        {/* Counter */}
+                        <div className="scale-110 origin-center">
+                            <JuniorCounter
+                                key={currentQuestion} // Reset check on question change
+                                targetNumber={currentPractice} // For hints if enabled
+                                onStateChange={handleStateChange}
+                                size="large"
+                                showHints={false} // Disable hints for practice
+                            />
+                        </div>
                     </div>
 
                     {/* Feedback Overlay */}

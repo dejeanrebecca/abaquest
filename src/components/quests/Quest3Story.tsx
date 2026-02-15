@@ -107,18 +107,18 @@ export function Quest3Story({ onComplete }: Quest3StoryProps) {
         >
             <div className="w-full max-w-5xl">
                 {/* Header */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border-l-8 border-brand-purple flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-brand-purple/10 p-3 rounded-full">
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border-l-8 border-brand-purple flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        <div className="bg-brand-purple/10 p-3 rounded-full flex-shrink-0">
                             <BookOpen className="w-8 h-8 text-brand-purple" />
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold text-brand-purple">Story Time with Mistress Creola</h2>
-                            <p className="text-brand-text-muted">Chapter {storyStep + 1}: {currentStory.characterName}'s Challenge</p>
+                        <div className="min-w-0">
+                            <h2 className="text-xl md:text-2xl font-bold text-brand-purple leading-tight break-words">Story Time with Mistress Creola</h2>
+                            <p className="text-sm md:text-base text-brand-text-muted break-words">Chapter {storyStep + 1}: {currentStory.characterName}'s Challenge</p>
                         </div>
                     </div>
                     {/* Narration Control */}
-                    <div className="flex-shrink-0">
+                    <div className="w-full md:w-auto flex-1 min-w-0 flex justify-center md:justify-end">
                         <AudioNarration
                             key={storyStep} // Re-mount to auto-play new text
                             text={currentStory.voiceText}
@@ -182,7 +182,7 @@ export function Quest3Story({ onComplete }: Quest3StoryProps) {
                                 key={storyStep} // Reset state on step change
                                 targetNumber={currentStory.number}
                                 onStateChange={handleStateChange}
-                                showHints={true}
+                                showHints={false}
                             />
                         </div>
                     </div>
