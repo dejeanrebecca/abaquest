@@ -6,7 +6,7 @@ import path from 'path';
 
 
 export default defineConfig({
-  base: '/abaquest/',
+  base: '/',
   plugins: [react(), tailwindcss()],
   resolve: {
 

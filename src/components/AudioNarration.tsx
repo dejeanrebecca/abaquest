@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Volume2, VolumeX, RotateCcw } from 'lucide-react';
-import { Button } from './ui/button';
+// import { Button } from './ui/button';
 
 export interface AudioNarrationProps {
   text: string;
-  audioId?: string; // For future audio file integration
+  // audioId?: string; // For future audio file integration
   speaker?: 'abby' | 'ameer' | 'ameerah' | 'mistress-creola' | 'narrator';
   autoPlay?: boolean;
   onComplete?: () => void;
@@ -15,7 +15,7 @@ export interface AudioNarrationProps {
 
 export function AudioNarration({
   text,
-  audioId,
+  // audioId,
   speaker = 'abby',
   autoPlay = false,
   onComplete,

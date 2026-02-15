@@ -10,7 +10,8 @@ import { useDataLogger } from '../DataLogger';
 import { useQuestEngine } from '../QuestEngine';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { PostTestCheckIn } from '../quest-screens/PostTestCheckIn';
-import { HelpCircle, CheckCircle, XCircle, Ship, ArrowRight } from 'lucide-react';
+import { HelpCircle, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { Quest1StoryAnimation } from './Quest1StoryAnimation';
 
 
 interface Quest1NamingProps {
@@ -18,7 +19,7 @@ interface Quest1NamingProps {
 }
 
 
-type Step = 'welcome' | 'pretest' | 'learn' | 'transition' | 'story' | 'posttest' | 'close';
+type Step = 'welcome' | 'pretest' | 'learn' | 'transition' | 'story' | 'naming' | 'posttest' | 'close';
 
 export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [step, setStep] = useState<Step>('welcome');
@@ -30,7 +31,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [counterName, setCounterName] = useState('');
   const [storyStep, setStoryStep] = useState(0);
   const [showPreTestIntro, setShowPreTestIntro] = useState(true);
-  const [navComplete, setNavComplete] = useState(false);
+  const [narrationComplete, setNarrationComplete] = useState(false);
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
@@ -155,7 +156,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           setCurrentQuestion(currentQuestion + 1);
           setShowFeedback(null);
         } else {
-          setStep('learn');
+          setStep('transition');
           setCurrentQuestion(0);
           setShowFeedback(null);
         }
@@ -302,7 +303,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
             <Button
               onClick={() => {
-                setStep('transition');
+                setStep('naming');
               }}
               className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
               size="lg"
@@ -323,7 +324,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         subtitle="Let's join Ameer and Ameerah on their adventure."
         onNext={() => {
           setStep('story');
-          setStoryStep(5); // Skip story for now
+          setStoryStep(0); // Start story from beginning
         }}
         variant="story"
         showBookIcon={true}
@@ -332,260 +333,16 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
     );
   }
 
-  // STEP 4: STORY MODE (The existing NameCounter story)
+  // STEP 4: STORY MODE
   if (step === 'story') {
-    // Condensed story version for Quest 1
     const storyScenes = [
       {
         type: 'narration',
-        content: "It was the twins' first day at the School of Mental Math. Ameerah was curious about who her new friends would be. Ameer hoped the math wouldn't be too hard, he was nervous.",
-      },
-      {
-        type: 'navigation',
-        content: "Help Ameer and Ameerah navigate their boat to school!",
-      },
-      {
-        type: 'arrival',
-        content: "You did it! They navigated to Academia!",
-      },
-      {
-        type: 'mistress-creola',
-        content: "Mistress Creola asks: 'Do you have everything you need for math? Brains? ✓ Positive attitude? ✓ Your Junior Counter? ✓'",
-      },
-      {
-        type: 'classmates',
-        content: "Meet your classmates! They've already named their Junior Counters.",
-      },
-      {
-        type: 'naming',
-        content: "Now it's YOUR turn to name your Junior Counter!",
+        content: `It was the twins' first day at the School of Mental Math. Ameerah was curious about who her new friends would be. Ameer hoped the math wouldn't be too hard; he was nervous. They were both quiet as they walked to their boat. Ameer's heart beat fast. Ameerah smiled and said, "I'll steer today!" She was nervous too, but ready to be brave.`,
       },
     ];
 
     const currentScene = storyScenes[storyStep];
-
-    // Navigation scene
-    if (currentScene.type === 'navigation') {
-      return (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="min-h-screen bg-gradient-to-b from-sky-200 to-warm-neutral p-8"
-        >
-          <div className="flex justify-center mb-4">
-            {/* Logo removed */}
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
-              <div className="flex items-center gap-4 mb-6 bg-gradient-to-r from-aqua-blue to-deep-blue rounded-2xl p-4">
-                <Ship className="w-8 h-8 text-white" />
-                <h3 className="text-white">Navigate the Map!</h3>
-              </div>
-
-              <AudioNarration
-                text="Ameer and Ameerah must travel east toward Smart Tech Town, then south to their school, Academia. Help them steer the right way!"
-                speaker="narrator"
-                compact
-              />
-
-              <div className="my-6">
-                <p className="text-deep-blue text-center mb-4">Which way should they go first?</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <Button
-                    onClick={() => {
-                      setNavComplete(true);
-                      setTimeout(() => setStoryStep(storyStep + 1), 1500);
-                    }}
-                    className="bg-green-500 hover:bg-green-600 text-white py-8 rounded-2xl shadow-lg"
-                    disabled={navComplete}
-                  >
-                    <ArrowRight className="w-6 h-6 mr-2" /> Steer East ✓
-                  </Button>
-                  <Button
-                    className="bg-gray-400 text-white py-8 rounded-2xl shadow-lg cursor-not-allowed"
-                    disabled
-                  >
-                    Steer West
-                  </Button>
-                </div>
-
-                {navComplete && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="mt-4 bg-green-100 border-4 border-green-500 rounded-2xl p-4 text-center"
-                  >
-                    <p className="text-green-800 text-xl">🎉 Perfect! That's the right way!</p>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      );
-    }
-
-    // Classmates scene
-    if (currentScene.type === 'classmates') {
-      const classmates = [
-        { name: 'Coco', color: 'bg-orange-400', intro: "Hi! I'm Coco. I love counting!" },
-        { name: 'Nova', color: 'bg-purple-400', intro: "Hey! I'm Nova. Math is fun!" },
-        { name: 'Bolt', color: 'bg-yellow-400', intro: "Yo! I'm Bolt. I'm super fast!" },
-        { name: 'Zippy', color: 'bg-green-400', intro: "Hi! I'm Zippy!" },
-      ];
-
-      return (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="min-h-screen bg-warm-neutral p-8"
-        >
-          <div className="flex justify-center mb-4">
-            {/* Logo removed */}
-          </div>
-
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
-              <AudioNarration
-                text="Your classmates have already named their junior counters. Tap on each friend to hear what they named theirs!"
-                speaker="abby"
-                compact
-              />
-
-              <div className="grid grid-cols-4 gap-4 my-8">
-                {classmates.map((friend, index) => (
-                  <motion.div
-                    key={friend.name}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="p-4 rounded-2xl border-4 border-gray-200 hover:border-sunburst-yellow transition-all cursor-pointer text-center"
-                  >
-                    <div className={`w-16 h-16 ${friend.color} rounded-full mx-auto mb-2`}></div>
-                    <p className="text-deep-blue">{friend.name}</p>
-                  </motion.div>
-                ))}
-              </div>
-
-              <Button
-                onClick={() => setStoryStep(storyStep + 1)}
-                className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
-              >
-                Now It's My Turn! ✨
-              </Button>
-            </div>
-          </div>
-        </motion.div>
-      );
-    }
-
-    // Naming scene
-    if (currentScene.type === 'naming') {
-      const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
-
-      const handleConfirm = () => {
-        const finalName = counterName;
-        if (finalName) {
-          setStudentName(finalName);
-          setStep('posttest');
-        }
-      };
-
-      const speakText = (text: string) => {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.rate = 1.0;
-          utterance.pitch = 1.1; // Abby voice
-          window.speechSynthesis.speak(utterance);
-        }
-      };
-
-      return (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="min-h-screen bg-warm-neutral p-8"
-        >
-          <div className="flex justify-center mb-4">
-            {/* Logo removed */}
-          </div>
-
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
-              <AudioNarration
-                text="You heard what your friends named their junior counters. Now it's your turn! Choose a name you like or create your own special name."
-                speaker="abby"
-                compact
-              />
-
-              <div className="my-8">
-                <p className="text-center text-deep-blue mb-4">Choose a name:</p>
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                  {suggestedNames.map(name => (
-                    <button
-                      key={name}
-                      onClick={() => {
-                        setCounterName(name);
-                        speakText(`Great name! ${name} is ready for math quests!`);
-                      }}
-                      className={`p-4 rounded-xl border-4 transition-all ${counterName === name
-                        ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
-                        : 'border-gray-200 hover:border-sunburst-yellow'
-                        }`}
-                    >
-                      <p className="text-deep-blue">{name}</p>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-deep-blue mb-3 text-center">
-                    Or create your own name:
-                  </label>
-                  <Input
-                    type="text"
-                    value={counterName}
-                    onChange={(e) => {
-                      setCounterName(e.target.value);
-                    }}
-                    placeholder="Type a special name..."
-                    className="text-center text-xl py-6 rounded-2xl border-4 border-gray-200 focus:border-aqua-blue"
-                    maxLength={15}
-                    onBlur={() => {
-                      if (counterName) {
-                        speakText(`Great name! ${counterName} is ready for math quests!`);
-                      }
-                    }}
-                  />
-                </div>
-
-                <Button
-                  onClick={handleConfirm}
-                  disabled={!counterName}
-                  className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl disabled:opacity-50"
-                >
-                  Let's Go! 🚀
-                </Button>
-
-                {counterName && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="mt-6 bg-green-100 border-4 border-green-400 rounded-2xl p-6 text-center"
-                  >
-                    <p className="text-green-800 text-xl">
-                      Great name! <span className="text-abacus-red font-bold">{counterName}</span> is ready for math quests!
-                    </p>
-                  </motion.div>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      );
-    }
 
     // Default story narration
     return (
@@ -602,11 +359,26 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue">
             <h2 className="text-deep-blue text-center mb-6">📖 Story Time</h2>
 
-            <AudioNarration text={currentScene.content} speaker="narrator" autoPlay />
+            <div className="mb-6 flex justify-center">
+              <Quest1StoryAnimation startAnimation={narrationComplete} />
+            </div>
+
+            <AudioNarration
+              text={currentScene.content}
+              speaker="narrator"
+              autoPlay
+              onComplete={() => setNarrationComplete(true)}
+            />
 
             <div className="mt-8">
               <Button
-                onClick={() => setStoryStep(storyStep + 1)}
+                onClick={() => {
+                  if (storyStep < storyScenes.length - 1) {
+                    setStoryStep(storyStep + 1);
+                  } else {
+                    setStep('learn');
+                  }
+                }}
                 className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
               >
                 Continue <ArrowRight className="w-5 h-5 ml-2" />
@@ -616,6 +388,114 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         </div>
       </motion.div>
     );
+  }
+
+  // STEP 4.5: NAMING
+  if (step === 'naming') {
+    const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
+
+    const handleConfirm = () => {
+      const finalName = counterName;
+      if (finalName) {
+        setStudentName(finalName);
+        setStep('posttest');
+      }
+    };
+
+    const speakText = (text: string) => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1.0;
+        utterance.pitch = 1.1; // Abby voice
+        window.speechSynthesis.speak(utterance);
+      }
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-warm-neutral p-8"
+      >
+        <div className="flex justify-center mb-4">
+          {/* Logo removed */}
+        </div>
+
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
+            <AudioNarration
+              text="You heard what your friends named their junior counters. Now it's your turn! Choose a name you like or create your own special name."
+              speaker="abby"
+              compact
+            />
+
+            <div className="my-8">
+              <p className="text-center text-deep-blue mb-4">Choose a name:</p>
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                {suggestedNames.map(name => (
+                  <button
+                    key={name}
+                    onClick={() => {
+                      setCounterName(name);
+                      speakText(`Great name! ${name} is ready for math quests!`);
+                    }}
+                    className={`p-4 rounded-xl border-4 transition-all ${counterName === name
+                      ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
+                      : 'border-gray-200 hover:border-sunburst-yellow'
+                      }`}
+                  >
+                    <p className="text-deep-blue">{name}</p>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-deep-blue mb-3 text-center">
+                  Or create your own name:
+                </label>
+                <Input
+                  type="text"
+                  value={counterName}
+                  onChange={(e) => {
+                    setCounterName(e.target.value);
+                  }}
+                  placeholder="Type a special name..."
+                  className="text-center text-xl py-6 rounded-2xl border-4 border-gray-200 focus:border-aqua-blue"
+                  maxLength={15}
+                  onBlur={() => {
+                    if (counterName) {
+                      speakText(`Great name! ${counterName} is ready for math quests!`);
+                    }
+                  }}
+                />
+              </div>
+
+              <Button
+                onClick={handleConfirm}
+                disabled={!counterName}
+                className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl disabled:opacity-50"
+              >
+                Let's Go! 🚀
+              </Button>
+
+              {counterName && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="mt-6 bg-green-100 border-4 border-green-400 rounded-2xl p-6 text-center"
+                >
+                  <p className="text-green-800 text-xl">
+                    Great name! <span className="text-abacus-red font-bold">{counterName}</span> is ready for math quests!
+                  </p>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    );
+
   }
 
   // STEP 5: POST-TEST (Emotional Check-in)
