@@ -143,7 +143,7 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
                                                 <Button
                                                     key={opt}
                                                     onClick={() => handleAnswer(opt)}
-                                                    variant={userAnswer === opt ? (feedback?.includes("Correct") ? "default" : "destructive") : "outline"}
+                                                    variant={userAnswer === opt ? (feedback?.includes("Correct") || feedback?.includes("Ice-Tastic") ? "default" : "destructive") : "outline"}
                                                     className="text-2xl py-8 rounded-xl border-2 border-sky-200 hover:bg-sky-100"
                                                 >
                                                     {opt}
@@ -155,7 +155,7 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
                                             <motion.div
                                                 initial={{ scale: 0.8 }}
                                                 animate={{ scale: 1 }}
-                                                className={`mt-4 text-xl font-bold text-center ${feedback.includes("Correct") ? "text-green-600" : "text-orange-500"}`}
+                                                className={`mt-4 text-xl font-bold text-center ${feedback.includes("Correct") || feedback.includes("Ice-Tastic") ? "text-green-600" : "text-orange-500"}`}
                                             >
                                                 {feedback}
                                             </motion.div>
