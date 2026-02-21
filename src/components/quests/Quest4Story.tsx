@@ -60,7 +60,7 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
         const target = currentChapter.id === 'chapter3' ? currentChapter.correctAnswerNum : currentChapter.correctAnswer;
 
         if (answer === target) {
-            setFeedback("Correct! The Ice Magic holds true!");
+            setFeedback("Ice-Tastic!");
             setTimeout(() => {
                 if (chapter < storyChapters.length - 1) {
                     setChapter(c => c + 1);
