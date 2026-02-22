@@ -12,10 +12,10 @@ export function PostTestCheckIn({ onComplete }: PostTestCheckInProps) {
     const [selectedEmotion, setSelectedEmotion] = useState('');
 
     const emotions = [
-        { emoji: '🤩', label: 'Super Confident!', value: 'confident', color: 'bg-green-100', icon: Laugh },
+        { emoji: '😊', label: 'Super Confident!', value: 'confident', color: 'bg-green-100', icon: Laugh },
         { emoji: '🙂', label: 'I get it!', value: 'good', color: 'bg-blue-100', icon: Smile },
-        { emoji: '🤔', label: 'I need practice', value: 'practice', color: 'bg-yellow-100', icon: Meh },
-        { emoji: '🤯', label: 'I need help', value: 'help', color: 'bg-orange-100', icon: Frown },
+        { emoji: '😐', label: 'I need practice', value: 'practice', color: 'bg-yellow-100', icon: Meh },
+        { emoji: '😟', label: 'I need help', value: 'help', color: 'bg-orange-100', icon: Frown },
     ];
 
     return (

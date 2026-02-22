@@ -59,7 +59,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   // Complete quest logic moved to close step interaction
 
   const calculateScore = (answers: boolean[]): number => {
-    if (answers.length === 0) return 0;
+    if (answers.length === 0) return 100;
     const correct = answers.filter(a => a).length;
     return Math.round((correct / answers.length) * 100);
   };
@@ -75,7 +75,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           </div>
         }
         welcomeMessage="Welcome, young AbaQuester! I'm so happy you're here. Today, you're joining a very special place — Mistress Creola's School of Mental Math! It's a magical school where numbers come alive, and every student learns to use their Junior Counter to solve puzzles and explore new worlds."
-        onNext={() => setStep('pretest')}
+        onNext={() => setStep('transition')}
         onEmotionalCheckIn={setEmotionalState}
         showEmotionalCheckIn={true}
       />

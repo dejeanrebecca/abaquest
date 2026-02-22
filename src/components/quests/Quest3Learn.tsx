@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { ArrowRight, RotateCcw } from 'lucide-react';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 
 interface Quest3LearnProps {
     onComplete: () => void;
@@ -77,7 +77,7 @@ export function Quest3Learn({ onComplete }: Quest3LearnProps) {
     return (
         <div className="min-h-screen bg-warm-neutral p-4 md:p-8 flex flex-col items-center">
             {/* Header / Abby Area */}
-            <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-6 border-4 border-sunburst-yellow mb-8 flex items-center gap-6 relative overflow-hidden">
+            <div className="w-full max-w-4xl bg-white rounded-3xl shadow-xl p-6 border-4 border-deep-blue mb-8 flex items-center gap-6 relative overflow-hidden">
                 <div className="text-6xl animate-bounce-slight">🐝</div>
                 <div className="z-10">
                     <h2 className="text-3xl font-bold text-deep-blue mb-2">{currentStep.title}</h2>
@@ -91,13 +91,12 @@ export function Quest3Learn({ onComplete }: Quest3LearnProps) {
             <div className="flex flex-col md:flex-row gap-12 items-center justify-center w-full max-w-5xl flex-1">
 
                 {/* Large Counter Display */}
-                <div className="relative p-10 bg-white rounded-[3rem] shadow-2xl border-4 border-aqua-blue">
+                <div className="relative p-10 bg-white rounded-[3rem] shadow-2xl border-4 border-deep-blue">
                     <div className="scale-125 origin-center">
-                        <JuniorCounter
-                            value={currentValue}
+                        <InteractiveAbacus
+                            initialValue={currentValue}
                             interactive={false}
-                            size="large"
-                            showValue={true}
+                            key={currentValue}
                         />
                     </div>
 

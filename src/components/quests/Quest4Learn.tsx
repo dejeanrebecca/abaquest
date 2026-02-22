@@ -100,7 +100,7 @@ export function Quest4Learn({ onComplete }: Quest4LearnProps) {
 
             {/* Learning Area */}
             <div className="flex-1 w-full max-w-4xl flex flex-col items-center justify-center bg-white/50 rounded-3xl p-8 shadow-inner">
-                <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-brand-yellow mb-8 scale-110">
+                <div className="bg-white p-10 rounded-[3rem] shadow-xl border-4 border-deep-blue mb-8 scale-110">
                     <InteractiveAbacus
                         rods={1}
                         initialValue={abacusValue}

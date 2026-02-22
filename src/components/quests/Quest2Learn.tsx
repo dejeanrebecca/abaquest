@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { Sparkles } from 'lucide-react';
 
 
@@ -60,7 +60,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
+                <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue">
                     <AudioNarration
                         text="Your Junior Counter has three main parts, and each one has a special name and job. Tap on each part to learn about it!"
                         speaker="abby"
@@ -68,9 +68,8 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                     />
 
                     <div className="my-8 flex justify-center">
-                        <JuniorCounter
+                        <InteractiveAbacus
                             interactive={false}
-                            size="large"
                             highlightPart={currentPart}
                             onPartClick={handlePartClick}
                         />

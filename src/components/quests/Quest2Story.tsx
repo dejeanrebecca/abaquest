@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 // import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { useDataLogger } from '../DataLogger';
 import { CheckCircle, XCircle } from 'lucide-react';
 import storyImg from '../../assets/story-two-img1.png';
@@ -97,7 +97,7 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
             </div>
 
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-deep-blue">
+                <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue">
                     <h2 className="text-deep-blue text-center mb-6">📖 Story Time with Mistress Creola</h2>
 
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6">
@@ -135,9 +135,8 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
                     </div>
 
                     <div className="flex justify-center mb-6">
-                        <JuniorCounter
+                        <InteractiveAbacus
                             interactive={false}
-                            size="large"
                             onPartClick={(part) => handleStoryAnswer(part)}
                         />
                     </div>
