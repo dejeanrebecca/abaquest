@@ -27,6 +27,7 @@ interface Quest2StoryProps {
 export function Quest2Story({ onComplete }: Quest2StoryProps) {
     const [storyStep, setStoryStep] = useState(0);
     const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | null>(null);
+    const [selectedPart, setSelectedPart] = useState<Part | null>(null);
 
 
     // Actually, we should track response time per question
@@ -64,6 +65,8 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
         const isCorrect = answer === currentStory.correctAnswer;
         const timeSpent = 1000; // Placeholder or calculate properly if needed.
 
+        setSelectedPart(answer);
+
         logInteraction({
             quest_id: 2,
             scene_id: `story_scene_${storyStep + 1}`,
@@ -80,6 +83,7 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
             if (storyStep < storyScenes.length - 1) {
                 setStoryStep(storyStep + 1);
                 setShowFeedback(null);
+                setSelectedPart(null);
             } else {
                 onComplete();
             }
@@ -137,6 +141,7 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
                     <div className="flex justify-center mb-6">
                         <InteractiveAbacus
                             interactive={false}
+                            highlightPart={selectedPart}
                             onPartClick={(part) => handleStoryAnswer(part)}
                         />
                     </div>

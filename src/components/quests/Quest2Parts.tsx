@@ -97,7 +97,7 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
         postTestScore={postTestScore}
         coinsEarned={25}
         learningGain={learningGain}
-        summary="You've mastered the three parts of your Junior Counter: the Upper Bead (Head), Lower Beads (Legs), and Answer Rod (Body)! Now you're ready to learn how numbers live on your counter!"
+        summary="You've mastered the three parts of your Junior Counter: the Upper Bead (Head), Lower Beads (Legs), and Answer Rod! Now you're ready to learn how numbers live on your counter!"
         onNext={() => {
           onComplete({ pre: preTestScore, post: postTestScore });
         }}

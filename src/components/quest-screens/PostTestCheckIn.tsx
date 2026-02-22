@@ -1,7 +1,6 @@
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
-import { Smile, Meh, Frown, Laugh } from 'lucide-react';
 import { useState } from 'react';
 
 interface PostTestCheckInProps {
@@ -12,10 +11,10 @@ export function PostTestCheckIn({ onComplete }: PostTestCheckInProps) {
     const [selectedEmotion, setSelectedEmotion] = useState('');
 
     const emotions = [
-        { emoji: '😊', label: 'Super Confident!', value: 'confident', color: 'bg-green-100', icon: Laugh },
-        { emoji: '🙂', label: 'I get it!', value: 'good', color: 'bg-blue-100', icon: Smile },
-        { emoji: '😐', label: 'I need practice', value: 'practice', color: 'bg-yellow-100', icon: Meh },
-        { emoji: '😟', label: 'I need help', value: 'help', color: 'bg-orange-100', icon: Frown },
+        { emoji: '😊', label: 'Excited!', value: 'excited', color: 'bg-green-100' },
+        { emoji: '🙂', label: 'Good', value: 'good', color: 'bg-blue-100' },
+        { emoji: '😐', label: 'Okay', value: 'okay', color: 'bg-yellow-100' },
+        { emoji: '😟', label: 'Nervous', value: 'nervous', color: 'bg-orange-100' },
     ];
 
     return (

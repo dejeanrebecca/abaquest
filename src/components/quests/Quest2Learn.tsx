@@ -31,7 +31,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
         },
         {
             part: 'rod',
-            name: 'Answer Rod (Body)',
+            name: 'Answer Rod',
             description: 'This rod holds everything together — like the body connects the head and legs!',
             color: 'from-gray-700 to-gray-900',
         },

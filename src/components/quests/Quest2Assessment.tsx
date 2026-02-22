@@ -28,7 +28,7 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
     const testQuestions: Array<{ part: Part; question: string }> = [
         { part: 'upper', question: 'Tap the Upper Bead (Head)' },
         { part: 'lower', question: 'Tap the Lower Beads (Legs)' },
-        { part: 'rod', question: 'Tap the Answer Rod (Body)' },
+        { part: 'rod', question: 'Tap the Answer Rod' },
     ];
 
     useEffect(() => {

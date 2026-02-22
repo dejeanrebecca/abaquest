@@ -26,15 +26,15 @@ export function Quest4Learn({ onComplete }: Quest4LearnProps) {
         setAbacusValue(0);
 
         // Initial state
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 4000));
         setStep(1); // "Set to 5"
         setAbacusValue(5);
 
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 6000));
         setStep(2); // "Add Zero"
         // No change in value
 
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 6000));
         setStep(3); // Result
         setIsAutoPlaying(false);
     };
