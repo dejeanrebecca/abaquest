@@ -26,10 +26,10 @@ export function Quest4Practice({ onComplete }: Quest4PracticeProps) {
         },
         {
             id: 2,
-            start: 1,
+            start: 0,
             add: 2,
-            target: 3,
-            prompt: "Start at 1. Add 2 more beads.",
+            target: 2,
+            prompt: "Start at 0. Add 2 more beads.",
             hint: "Push up 2 more lower beads!"
         },
         {
