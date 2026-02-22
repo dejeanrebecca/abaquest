@@ -9,13 +9,17 @@ interface InteractiveAbacusProps {
     rods?: number;
     onChange?: (value: number) => void;
     interactive?: boolean;
+    highlightPart?: 'upper' | 'lower' | 'rod' | null;
+    onPartClick?: (part: 'upper' | 'lower' | 'rod') => void;
 }
 
 export function InteractiveAbacus({
     initialValue = 0,
     rods = 1, // Default to single rod for simple number concepts first
     onChange,
-    interactive = true
+    interactive = true,
+    highlightPart = null,
+    onPartClick
 }: InteractiveAbacusProps) {
     // State to track values per column (e.g. [hundreds, tens, ones])
     // For now, simpler implementation: just tracking a single value if rods=1
@@ -63,6 +67,8 @@ export function InteractiveAbacus({
                             value={getDigit(currentValue, i)}
                             onUpdate={(delta) => updateValue(i, delta)}
                             interactive={interactive}
+                            highlightPart={highlightPart}
+                            onPartClick={onPartClick}
                         />
                     ))}
                 </div>
@@ -75,9 +81,11 @@ interface RodProps {
     value: number;
     onUpdate: (delta: number) => void;
     interactive: boolean;
+    highlightPart: 'upper' | 'lower' | 'rod' | null;
+    onPartClick?: (part: 'upper' | 'lower' | 'rod') => void;
 }
 
-function AbacusRod({ value, onUpdate, interactive }: RodProps) {
+function AbacusRod({ value, onUpdate, interactive, highlightPart, onPartClick }: RodProps) {
 
     // Value decomposition
     // 5-bead (Heaven) active if value >= 5
@@ -96,13 +104,23 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
                 <Bead
                     isActive={isHeavenActive}
                     type="heaven"
-                    onToggle={() => onUpdate(isHeavenActive ? -5 : 5)}
+                    onToggle={() => {
+                        if (onPartClick) onPartClick('upper');
+                        if (interactive) onUpdate(isHeavenActive ? -5 : 5);
+                    }}
                     interactive={interactive}
+                    isHighlighted={highlightPart === 'upper'}
                 />
             </div>
 
             {/* Divider Bar - Middle Z, ensure relative positioning so it stacks correctly below beads */}
-            <div className="w-24 h-4 bg-gray-400 rounded-full shadow-md relative z-10 mt-2 mb-0" />
+            <div
+                onClick={() => onPartClick?.('rod')}
+                className={`w-24 h-4 rounded-full shadow-md relative z-10 mt-2 mb-0 transition-all duration-300 ${highlightPart === 'rod'
+                    ? 'bg-sunburst-yellow ring-4 ring-aqua-blue animate-pulse'
+                    : 'bg-gray-400'
+                    } ${onPartClick ? 'cursor-pointer' : ''}`}
+            />
 
             {/* Earth Deck (Bottom) - High Z for interaction */}
             <div className="h-40 w-full flex flex-col justify-start items-center relative z-20 pt-2 gap-1">
@@ -121,6 +139,9 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
                             // Simplified toggle: If I click bead at pos 2, and currently 2 are active, it adds 1? 
                             // Standard abacus: Sliding bead k UP means setting count to at least k+1.
                             onToggle={() => {
+                                if (onPartClick) onPartClick('lower');
+                                if (!interactive) return;
+
                                 if (isActive) {
                                     // If bead is active (pushed up), clicking it should deactivate it and beads above it
                                     // e.g. if 3 beads are active (0,1,2), clicking bead 2 makes count 2.
@@ -136,6 +157,7 @@ function AbacusRod({ value, onUpdate, interactive }: RodProps) {
                                 }
                             }}
                             interactive={interactive}
+                            isHighlighted={highlightPart === 'lower'}
                         />
                     );
                 })}
@@ -149,18 +171,23 @@ interface BeadProps {
     type: 'heaven' | 'earth';
     onToggle: () => void;
     interactive: boolean;
+    isHighlighted?: boolean;
 }
 
-function Bead({ isActive, type, onToggle, interactive }: BeadProps) {
+function Bead({ isActive, type, onToggle, interactive, isHighlighted }: BeadProps) {
     // Brand Colors
-    const beadColor = isActive ? "bg-brand-teal ring-2 ring-brand-teal shadow-[0_0_15px_rgba(47,193,164,0.6)]" : "bg-brand-yellow shadow-md hover:bg-brand-yellow/80";
+    const beadColor = isHighlighted
+        ? "bg-sunburst-yellow ring-4 ring-aqua-blue animate-pulse shadow-[0_0_15px_rgba(253,224,71,0.6)]"
+        : isActive
+            ? "bg-brand-teal ring-2 ring-brand-teal shadow-[0_0_15px_rgba(47,193,164,0.6)]"
+            : "bg-brand-yellow shadow-md hover:bg-brand-yellow/80";
 
     return (
         <motion.button
             layout
-            onClick={interactive ? onToggle : undefined}
-            whileHover={interactive ? { scale: 1.1 } : {}}
-            whileTap={interactive ? { scale: 0.95 } : {}}
+            onClick={onToggle}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             animate={{
                 y: type === 'heaven'
                     ? (isActive ? 15 : -15) // Move Heaven bead closer to/away from divider
@@ -171,7 +198,7 @@ function Bead({ isActive, type, onToggle, interactive }: BeadProps) {
         relative w-14 h-10 rounded-full z-30 cursor-pointer
         ${beadColor}
         flex items-center justify-center
-        ${!interactive && 'cursor-default'}
+        ${(!interactive && !isHighlighted) && 'opacity-90'}
       `}
         >
             <div className="w-10 h-2 bg-white/30 rounded-full" />

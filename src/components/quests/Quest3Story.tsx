@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, ArrowRight, BookOpen } from 'lucide-react';
+import { CheckCircle, ArrowRight, BookOpen, Volume2 } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
-import { JuniorCounter, JuniorCounterState } from '../JuniorCounter';
 import { useAbacusSound } from '../../hooks/useAbacusSound';
 import { Button } from '../ui/button';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { AudioNarration } from '../AudioNarration';
 
 interface Quest3StoryProps {
@@ -64,12 +63,12 @@ export function Quest3Story({ onComplete }: Quest3StoryProps) {
 
     const currentStory = storyScenes[storyStep];
 
-    const handleStateChange = (_state: JuniorCounterState, value: number) => {
+    const handleAbacusChange = (newValue: number) => {
         if (showFeedback === 'correct') return;
 
-        if (value === currentStory.number) {
+        if (newValue === currentStory.number) {
             setTimeout(() => {
-                handleStorySuccess(value);
+                handleStorySuccess(newValue);
             }, 500);
         }
     };
@@ -171,19 +170,17 @@ export function Quest3Story({ onComplete }: Quest3StoryProps) {
                                 <div className="text-3xl">🐝</div>
                                 <p className="font-bold text-brand-teal text-lg">Abby needs you!</p>
                             </div>
-                            <p className="text-xl text-deep-blue font-medium leading-relaxed">
+                            <p className="text-xl text-deep-blue font-medium leading-relaxed mb-4">
                                 {currentStory.question}
                             </p>
-                        </div>
-
-                        {/* Abacus */}
-                        <div className="bg-white rounded-[2rem] shadow-xl p-8 border-4 border-brand-teal flex justify-center scale-100 md:scale-105 origin-top">
-                            <JuniorCounter
-                                key={storyStep} // Reset state on step change
-                                targetNumber={currentStory.number}
-                                onStateChange={handleStateChange}
-                                showHints={false}
-                            />
+                            {/* Abacus */}
+                            <div className="bg-white rounded-[2rem] shadow-xl p-8 border-4 border-brand-teal flex justify-center scale-100 md:scale-105 origin-top">
+                                <InteractiveAbacus
+                                    key={storyStep} // Reset state on step change
+                                    initialValue={0} // Start at 0 for user to build
+                                    onChange={handleAbacusChange}
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

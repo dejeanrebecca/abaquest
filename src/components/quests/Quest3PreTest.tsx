@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 
 interface Quest3PreTestProps {
     onComplete: () => void;
@@ -119,11 +119,9 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
                                 className="bg-gray-50 rounded-2xl p-4 border-4 border-gray-100 hover:shadow-lg transition-all flex flex-col items-center gap-4 group"
                             >
                                 <div className="pointer-events-none transform group-hover:scale-110 transition-transform duration-300">
-                                    <JuniorCounter
-                                        value={num}
+                                    <InteractiveAbacus
+                                        initialValue={num}
                                         interactive={false}
-                                        size="small"
-                                        showValue={false}
                                     />
                                 </div>
                             </motion.button>

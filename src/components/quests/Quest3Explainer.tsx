@@ -1,5 +1,5 @@
 
-import { JuniorCounter, numberToCounterState } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 
 interface Quest3ExplainerProps {
     onComplete: () => void;
@@ -30,14 +30,14 @@ export function Quest3Explainer({ onComplete }: Quest3ExplainerProps) {
                     <div className="flex flex-col items-center gap-2">
                         <span className="text-2xl font-bold text-primary-blue">1</span>
                         <div className="scale-75 origin-top">
-                            <JuniorCounter initialState={numberToCounterState(1)} interactive={false} />
+                            <InteractiveAbacus initialValue={1} interactive={false} />
                         </div>
                     </div>
 
                     <div className="flex flex-col items-center gap-2">
                         <span className="text-2xl font-bold text-primary-blue">5</span>
                         <div className="scale-75 origin-top">
-                            <JuniorCounter initialState={numberToCounterState(5)} interactive={false} />
+                            <InteractiveAbacus initialValue={5} interactive={false} />
                         </div>
                     </div>
                 </div>

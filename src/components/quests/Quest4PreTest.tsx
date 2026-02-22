@@ -26,9 +26,9 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
         },
         {
             id: 2,
-            problem: "1 + 2",
-            answer: 3,
-            distractors: [1, 2]
+            problem: "0 + 2",
+            answer: 2,
+            distractors: [0, 4]
         },
         {
             id: 3,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { Volume2 } from 'lucide-react';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { AudioNarration } from '../AudioNarration';
 
 interface Quest4StoryProps {
@@ -100,7 +100,7 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
                 </div>
             </div>
 
-            <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-sky-300">
+            <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-deep-blue">
                 {/* Header Image Area */}
                 <div className="h-64 bg-sky-200 relative flex items-center justify-center">
                     {/* Placeholder for story images */}
@@ -130,7 +130,7 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
                             >
                                 <div className="flex flex-col md:flex-row items-center gap-8">
                                     <div className="scale-75">
-                                        <JuniorCounter value={currentChapter.visualValue} interactive={false} />
+                                        <InteractiveAbacus initialValue={currentChapter.visualValue} interactive={false} />
                                     </div>
 
                                     <div className="flex-1">

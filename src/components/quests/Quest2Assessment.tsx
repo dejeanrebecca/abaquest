@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { AudioNarration } from '../AudioNarration';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { useDataLogger } from '../DataLogger'; // Ensure import
 
 import { HelpCircle, CheckCircle, XCircle } from 'lucide-react';
@@ -21,13 +21,14 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
     const [startTime, setStartTime] = useState(Date.now());
     const [answers, setAnswers] = useState<boolean[]>([]);
     const [showIntro, setShowIntro] = useState(true);
+    const [selectedPart, setSelectedPart] = useState<Part | null>(null);
 
     const { logInteraction } = useDataLogger();
 
     const testQuestions: Array<{ part: Part; question: string }> = [
         { part: 'upper', question: 'Tap the Upper Bead (Head)' },
         { part: 'lower', question: 'Tap the Lower Beads (Legs)' },
-        { part: 'rod', question: 'Tap the Answer Rod (Body)' },
+        { part: 'rod', question: 'Tap the Answer Rod' },
     ];
 
     useEffect(() => {
@@ -51,12 +52,14 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
 
         const newAnswers = [...answers, isCorrect];
         setAnswers(newAnswers);
+        if (answer !== 'skip') setSelectedPart(answer);
         setShowFeedback(answer === 'skip' ? 'skip' : isCorrect ? 'correct' : 'wrong');
 
         setTimeout(() => {
             if (currentQuestion < testQuestions.length - 1) {
                 setCurrentQuestion(currentQuestion + 1);
                 setShowFeedback(null);
+                setSelectedPart(null);
             } else {
                 onComplete(newAnswers);
             }
@@ -111,13 +114,13 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
                     <p className="text-xl">{isPostTest ? '✅ Post-Test' : '📋 Pre-Test'}: Question {currentQuestion + 1} of {testQuestions.length}</p>
                 </div>
 
-                <div className={`bg-white rounded-2xl shadow-2xl p-8 border-4 ${isPostTest ? 'border-green-500' : 'border-aqua-blue'}`}>
+                <div className={`bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue`}>
                     <AudioNarration text={isPostTest ? "Let's see what you've learned!" : currentQ.question} speaker="abby" compact />
 
                     <div className="my-8 flex justify-center">
-                        <JuniorCounter
+                        <InteractiveAbacus
                             interactive={false}
-                            size="large"
+                            highlightPart={selectedPart}
                             onPartClick={(part) => handleAnswer(part)}
                         />
                     </div>

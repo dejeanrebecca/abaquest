@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
-import { JuniorCounter, JuniorCounterState } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { useAbacusSound } from '../../hooks/useAbacusSound';
 import { Button } from '../ui/button';
 import practiceImg0 from '../../assets/quest-3-img0.png';
@@ -40,7 +39,7 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
         setStartTime(Date.now());
     }, [currentQuestion]);
 
-    const handleStateChange = (_state: JuniorCounterState, value: number) => {
+    const handleAbacusChange = (value: number) => {
         if (showFeedback === 'correct') return; // Prevent multiple triggers
 
         if (value === currentPractice) {
@@ -57,7 +56,7 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
         const timeSpent = Date.now() - startTime;
         logInteraction({
             quest_id: 3,
-            scene_id: `practice_${currentPractice} `,
+            scene_id: `practice_${currentPractice}`,
             number: currentPractice,
             correct_flag: true,
             time_ms: timeSpent,
@@ -103,13 +102,13 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
                         {practiceNumbers.map((_num, idx) => (
                             <div
                                 key={idx}
-                                className={`w-3 h-3 rounded-full ${idx === currentQuestion ? 'bg-white scale-125' : idx < currentQuestion ? 'bg-white/50' : 'bg-white/20'}`}
+                                className={`w - 3 h - 3 rounded - full ${idx === currentQuestion ? 'bg-white scale-125' : idx < currentQuestion ? 'bg-white/50' : 'bg-white/20'} `}
                             />
                         ))}
                     </div>
                 </div>
 
-                <div className="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 border-4 border-brand-teal relative overflow-hidden">
+                <div className="bg-white rounded-[3rem] shadow-2xl p-8 md:p-12 border-4 border-deep-blue relative overflow-hidden">
                     {/* Prompt */}
                     <div className="text-center mb-10">
                         <h2 className="text-3xl md:text-4xl font-bold text-deep-blue mb-2">
@@ -138,12 +137,10 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
 
                         {/* Counter */}
                         <div className="scale-110 origin-center">
-                            <JuniorCounter
-                                key={currentQuestion} // Reset check on question change
-                                targetNumber={currentPractice} // For hints if enabled
-                                onStateChange={handleStateChange}
-                                size="large"
-                                showHints={false} // Disable hints for practice
+                            <InteractiveAbacus
+                                key={currentQuestion} // Reset on question change
+                                initialValue={0}
+                                onChange={handleAbacusChange}
                             />
                         </div>
                     </div>
