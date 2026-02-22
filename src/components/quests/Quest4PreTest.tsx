@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 import { useAbacusSound } from '../../hooks/useAbacusSound';
 
 interface Quest4PreTestProps {
@@ -143,7 +143,7 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
               */}
                             <div className="pointer-events-none scale-75 -my-4">
                                 {/* Non-interactive display */}
-                                <JuniorCounter value={opt} interactive={false} />
+                                <InteractiveAbacus initialValue={opt} interactive={false} />
                             </div>
                             <span className="text-3xl font-bold text-gray-800">{opt}</span>
                         </motion.button>
