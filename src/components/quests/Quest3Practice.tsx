@@ -44,7 +44,7 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
 
         if (value === currentPractice) {
             // Debounce success slightly, but longer delay for initial 0 (Q0)
-            const delay = currentQuestion === 0 ? 5000 : 500;
+            const delay = currentQuestion === 0 ? 3000 : 500;
 
             setTimeout(() => {
                 handlePracticeSuccess(value);
