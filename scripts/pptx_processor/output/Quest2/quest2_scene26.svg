@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="13.333333in" height="7.5in" class="slides-canvas" viewBox="0 0 960 540">
+  <g text-rendering="geometricPrecision" transform="scale(1, 1)">
+    <rect x="0" y="0" width="960" height="540" fill="#FFFFFF" />
+    <g shape-rendering="crispEdges">
+      <g transform="matrix(1, 0, 0, 1, 66, 80.12921)">
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 0L0 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 28.8L0 100.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 100.8L0 151.2" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 151.2L0 180" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 180L0 230.4" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 230.4L0 280.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 280.8L0 331.21" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 0L414 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 28.8L414 100.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 100.8L414 151.2" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 151.2L414 180" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 180L414 230.4" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 230.4L414 280.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 280.8L414 331.21" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 0L828 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 28.8L828 100.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 100.8L828 151.2" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 151.2L828 180" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 180L828 230.4" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 230.4L828 280.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 280.8L828 331.21" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 0L414 0" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 0L828 0" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 28.8L414 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 28.8L828 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 100.8L414 100.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 100.8L828 100.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 151.2L414 151.2" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 151.2L828 151.2" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 180L414 180" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 180L828 180" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 230.4L414 230.4" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 230.4L828 230.4" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 280.8L414 280.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 280.8L828 280.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 331.21L414 331.21" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M414 331.21L828 331.21" />
+      </g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 83.7296)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="17.502798"><tspan x="0" y="17.502798">Best Practice</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 83.7296)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="17.502798"><tspan x="0" y="17.502798">How We Apply It</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 112.53039)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="39.1028"><tspan x="0" y="39.1028" font-weight="bold">Repetition with variation</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 112.53039)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="60.702797"><tspan x="0" y="17.502798">Use same 3 parts but change color, orientation, or</tspan><tspan xml:space="preserve" x="398.00684" y="17.502798"> </tspan><tspan x="0" y="39.1028">context so children must</tspan><tspan xml:space="preserve" x="194" y="39.1028"> </tspan><tspan x="199" y="39.1028" textLength="183" font-style="italic">recognize conceptually</tspan><tspan x="382" y="39.1028" textLength="5">,</tspan><tspan xml:space="preserve" x="387" y="39.1028" textLength="5"> </tspan><tspan x="0" y="60.702797">not memorize the picture.</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 184.53117)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="28.3028"><tspan x="0" y="28.3028" font-weight="bold">Concrete → representational</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 184.53117)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="39.1028"><tspan x="0" y="17.502798">Start with real image, end with simple cartoon to</tspan><tspan xml:space="preserve" x="383" y="17.502798"> </tspan><tspan x="0" y="39.1028">check transfer.</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 234.93196)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="17.502798"><tspan x="0" y="17.502798" font-weight="bold">Limited load</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 234.93196)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="17.502798"><tspan x="0" y="17.502798">4 questions total (≈ 90 seconds).</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 263.73276)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="28.3028"><tspan x="0" y="28.3028" font-weight="bold">Positive tone / no grades</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 263.73276)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="39.1028"><tspan x="0" y="17.502798">Abby gives gentle, encouraging feedback (“Good</tspan><tspan xml:space="preserve" x="390" y="17.502798"> </tspan><tspan x="0" y="39.1028">thinking!”).</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 314.13354)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="28.3028"><tspan x="0" y="28.3028" font-weight="bold">Multiple response modes</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 314.13354)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="39.1028"><tspan x="0" y="17.502798">Tap or drag; optional “I don’t know yet” to reduce</tspan><tspan xml:space="preserve" x="386.00488" y="17.502798"> </tspan><tspan x="0" y="39.1028">anxiety.</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 73.20078, 364.53433)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="28.3028"><tspan x="0" y="28.3028" font-weight="bold">Gamified mastery meter</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 487.20078, 364.53433)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="39.1028"><tspan x="0" y="17.502798">After each item, a small “bead light” fills up—</tspan><tspan x="0" y="39.1028">visible progress keeps motivation high.</tspan></text></g>
+    </g></g>
+</svg>

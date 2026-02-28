@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { InteractiveAbacus } from '../InteractiveAbacus';
@@ -9,6 +9,33 @@ interface Quest4PreTestProps {
     isPreTest?: boolean;
 }
 
+const questions = [
+    {
+        id: 1,
+        problem: "3 + 0",
+        answer: 3,
+        distractors: [0, 30]
+    },
+    {
+        id: 2,
+        problem: "0 + 2",
+        answer: 2,
+        distractors: [0, 4]
+    },
+    {
+        id: 3,
+        problem: "0 + 4",
+        answer: 4,
+        distractors: [0, 5]
+    },
+    {
+        id: 4,
+        problem: "0 + 5",
+        answer: 5,
+        distractors: [0, 50]
+    }
+];
+
 export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestProps) {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
@@ -16,33 +43,6 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
     const [isCorrect, setIsCorrect] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const { playSuccess, playError } = useAbacusSound();
-
-    const questions = [
-        {
-            id: 1,
-            problem: "3 + 0",
-            answer: 3,
-            distractors: [0, 30]
-        },
-        {
-            id: 2,
-            problem: "0 + 2",
-            answer: 2,
-            distractors: [0, 4]
-        },
-        {
-            id: 3,
-            problem: "0 + 4",
-            answer: 4,
-            distractors: [0, 5]
-        },
-        {
-            id: 4,
-            problem: "0 + 5",
-            answer: 5,
-            distractors: [0, 50]
-        }
-    ];
 
     const handleAnswer = (selected: number) => {
         if (showFeedback) return;
@@ -57,7 +57,6 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
         }
         setShowFeedback(true);
 
-        // Auto advancing or showing complete
         setTimeout(() => {
             if (currentQuestion < questions.length - 1) {
                 setCurrentQuestion(q => q + 1);
@@ -68,6 +67,14 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
             }
         }, 1500);
     };
+
+    const question = questions[currentQuestion];
+    // Shuffle options: Answer + Distractors, stable across re-renders for the same question
+    const options = useMemo(() => {
+        const question = questions[currentQuestion];
+        const rawOptions = [question.answer, ...question.distractors];
+        return rawOptions.sort(() => Math.random() - 0.5);
+    }, [currentQuestion]);
 
     if (isCompleted) {
         return (
@@ -95,12 +102,6 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
             </div>
         );
     }
-
-    const question = questions[currentQuestion];
-    // Shuffle options: Answer + Distractors
-    // For consistency in rendering, we'll just sort them or use a fixed order if shuffling causes hydration issues.
-    // Simple sort for now.
-    const options = [question.answer, ...question.distractors].sort((a, b) => a - b);
 
     return (
         <div className="min-h-screen bg-warm-neutral p-4 flex flex-col items-center justify-center">

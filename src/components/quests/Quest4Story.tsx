@@ -1,172 +1,48 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Button } from '../ui/button';
-import { Volume2 } from 'lucide-react';
-import { InteractiveAbacus } from '../InteractiveAbacus';
-import { AudioNarration } from '../AudioNarration';
+import { StorySceneViewer, StorySceneData } from '../common/StorySceneViewer';
+import quest4Scene1 from '@/docs/Quest-4_Image1.png';
+import quest4Scene2 from '@/docs/Quest-4_Image2.png';
+import quest4Scene3 from '@/docs/Quest-4_Image3.png';
+import quest4Scene4 from '@/docs/Quest-4_Image4.png';
+import quest4Scene5 from '@/docs/Quest-4_Image5.png';
 
 interface Quest4StoryProps {
     onComplete: () => void;
 }
 
 export function Quest4Story({ onComplete }: Quest4StoryProps) {
-    const [chapter, setChapter] = useState(0);
-    const [showInteraction, setShowInteraction] = useState(false);
-    const [userAnswer, setUserAnswer] = useState<number | null>(null);
-    const [feedback, setFeedback] = useState<string | null>(null);
-
-    const storyChapters = [
+    const storyScenes: StorySceneData[] = [
         {
-            id: 'chapter1',
-            title: "The Ice Valley",
-            text: "Ameer traveled to the magical Ice Valley. It was very cold! He found 3 shiny ice crystals on the ground.",
-            visualValue: 3,
-            question: "How many crystals did Ameer find?",
-            correctAnswer: 3,
-            options: [1, 3, 5],
-            image: "story_scene_1.webp" // Placeholder
+            imageSrc: quest4Scene1,
+            speaker: 'narrator',
+            narrationText: "It's Funday Friday! Ameerah hops around excitedly, but Ameer is moving as slow as a turtle because he wants to do math, not play.",
         },
         {
-            id: 'chapter2',
-            title: "The Magic Chill",
-            text: "Suddenly, a cold wind blew. It was the Magic Chill! The wind added ZERO crystals to Ameer's pile. It just froze everything!",
-            visualValue: 3,
-            question: "3 crystals plus 0 crystals is...?",
-            correctAnswer: 3,
-            options: [0, 3, 30],
-            image: "story_scene_2.webp"
+            imageSrc: quest4Scene2,
+            speaker: 'ameerah',
+            narrationText: "On the boat ride to school, Ameerah said Its Friday! Friday! steers the boat too hard. SPLASH! A giant wave soaks them completely. 'Oops! My bad!' Ameerah says.",
         },
         {
-            id: 'chapter3',
-            title: "The Frozen Bridge",
-            text: "Ameer came to a bridge. The guard said, 'You need 5 crystals to cross. You have 3. If I give you ZERO more, can you cross?'",
-            visualValue: 3,
-            question: "Ameer has 3. He gets 0 more. Does he have 5?",
-            correctAnswer: 0, // 0 for No (logic handled in selection) - let's stick to number selection for simplicity or Yes/No
-            // Let's rephrase to addition: "He needs 2 more. But the guard gives 0. 3 + 0 = ?"
-            rephrasedQuestion: "Ameer has 3. The guard adds 0. How many does he have now?",
-            correctAnswerNum: 3,
-            options: [3, 5, 0],
-            image: "story_scene_3.webp"
+            imageSrc: quest4Scene3,
+            speaker: 'ameer',
+            narrationText: "They arrive at class dripping wet. But Ameer doesn't care. Mistress Creola announces they are learning addition, and Ameer cheers!",
+        },
+        {
+            imageSrc: quest4Scene4,
+            speaker: 'mistress-creola',
+            narrationText: "Mistress Creola gives them a challenge: 'Go outside and pick zero flowers for me!' The class is very confused. How do you pick zero flowers?",
+        },
+        {
+            imageSrc: quest4Scene5,
+            speaker: 'ameerah',
+            narrationText: "Ameerah leaves to change into dry clothes, but Ameer stays perfectly still. He refuses to miss a single second of his math lesson!",
         }
     ];
 
-    const currentChapter = storyChapters[chapter];
-
-    const handleAnswer = (answer: number) => {
-        setUserAnswer(answer);
-
-        // For chapter 3, logic is "3", so he can't cross.
-        const target = currentChapter.id === 'chapter3' ? currentChapter.correctAnswerNum : currentChapter.correctAnswer;
-
-        if (answer === target) {
-            setFeedback("Ice-Tastic!");
-            setTimeout(() => {
-                if (chapter < storyChapters.length - 1) {
-                    setChapter(c => c + 1);
-                    setShowInteraction(false);
-                    setUserAnswer(null);
-                    setFeedback(null);
-                } else {
-                    onComplete();
-                }
-            }, 2000);
-        } else {
-            setFeedback("Not quite!");
-        }
-    };
-
     return (
-        <div className="min-h-screen bg-sky-100 p-6 flex flex-col items-center">
-            {/* Quest Header - Matching Quest 2/3 style */}
-            <div className="max-w-4xl w-full bg-white rounded-2xl shadow-lg p-6 mb-6 border-l-8 border-sky-500 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-4 w-full md:w-auto">
-                    <div className="bg-sky-100 p-3 rounded-xl text-sky-600">
-                        <Volume2 className="w-8 h-8" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl md:text-2xl font-bold text-sky-900 leading-tight break-words">Story time!</h2>
-                        <p className="text-sky-600 font-medium">Quest 4: Frozen Addition</p>
-                    </div>
-                </div>
-                <div className="w-full md:w-auto flex-1 min-w-0 flex justify-center md:justify-end">
-                    <AudioNarration
-                        text={currentChapter.text}
-                        speaker="narrator"
-                        autoPlay
-                        key={currentChapter.id}
-                        onComplete={() => setShowInteraction(true)}
-                    />
-                </div>
-            </div>
-
-            <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-deep-blue">
-                {/* Header Image Area */}
-                <div className="h-64 bg-sky-200 relative flex items-center justify-center">
-                    {/* Placeholder for story images */}
-                    <div className="text-sky-800/20 text-9xl font-bold">❄️</div>
-                    <div className="absolute bottom-4 left-4 bg-black/30 text-white px-4 py-2 rounded-xl backdrop-blur-md">
-                        {currentChapter.title}
-                    </div>
-                </div>
-
-                <div className="p-8">
-                    {/* Story Text */}
-                    <div className="mb-8 flex gap-4 items-start">
-                        <div className="bg-sky-500 rounded-full p-3 text-white">
-                            <Volume2 />
-                        </div>
-                        <div className="text-xl text-gray-700 leading-relaxed font-medium">
-                            {currentChapter.text}
-                        </div>
-                    </div>
-
-                    <AnimatePresence mode='wait'>
-                        {showInteraction && (
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-sky-50 p-6 rounded-2xl border-2 border-sky-100"
-                            >
-                                <div className="flex flex-col md:flex-row items-center gap-8">
-                                    <div className="scale-75">
-                                        <InteractiveAbacus initialValue={currentChapter.visualValue} interactive={false} />
-                                    </div>
-
-                                    <div className="flex-1">
-                                        <h3 className="text-2xl font-bold text-sky-900 mb-6">
-                                            {currentChapter.id === 'chapter3' ? currentChapter.rephrasedQuestion : currentChapter.question}
-                                        </h3>
-
-                                        <div className="grid grid-cols-3 gap-4">
-                                            {currentChapter.options.map((opt) => (
-                                                <Button
-                                                    key={opt}
-                                                    onClick={() => handleAnswer(opt)}
-                                                    variant={userAnswer === opt ? (feedback?.includes("Correct") || feedback?.includes("Ice-Tastic") ? "default" : "destructive") : "outline"}
-                                                    className="text-2xl py-8 rounded-xl border-2 border-sky-200 hover:bg-sky-100"
-                                                >
-                                                    {opt}
-                                                </Button>
-                                            ))}
-                                        </div>
-
-                                        {feedback && (
-                                            <motion.div
-                                                initial={{ scale: 0.8 }}
-                                                animate={{ scale: 1 }}
-                                                className={`mt-4 text-xl font-bold text-center ${feedback.includes("Correct") || feedback.includes("Ice-Tastic") ? "text-green-600" : "text-orange-500"}`}
-                                            >
-                                                {feedback}
-                                            </motion.div>
-                                        )}
-                                    </div>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            </div>
-        </div>
+        <StorySceneViewer
+            scenes={storyScenes}
+            onComplete={onComplete}
+            title="📖 The Big Splash"
+        />
     );
 }

@@ -4,6 +4,7 @@ import { Button } from '../ui/button';
 import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
 import { InteractiveAbacus } from '../InteractiveAbacus';
+import { AudioNarration } from '../AudioNarration';
 
 interface Quest3PreTestProps {
     onComplete: () => void;
@@ -14,6 +15,7 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | 'skip' | null>(null);
     const [startTime, setStartTime] = useState(Date.now());
+    const [showIntro, setShowIntro] = useState(!isPostTest); // Add showIntro state
     // Store current options to keep them stable during re-renders until question changes
     const [currentOptions, setCurrentOptions] = useState<number[]>([]);
 
@@ -75,6 +77,40 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
     };
 
     const currentQ = testQuestions[currentQuestion];
+
+    // Intro Screen (Only for Pre-Test)
+    if (!isPostTest && showIntro) {
+        return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-warm-neutral p-8">
+                <div className="flex justify-center mb-4">
+                    {/* Logo removed */}
+                </div>
+
+                <div className="max-w-3xl mx-auto">
+                    <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-aqua-blue">
+                        <div className="text-center mb-8">
+                            <div className="text-6xl mb-4">📋</div>
+                            <h2 className="text-deep-blue mb-4">Pre-Test</h2>
+                        </div>
+
+                        <AudioNarration
+                            text="Before we learn where the numbers live, let's see what you already know. Remember: You can always say 'I don't know yet' — that's how we learn!"
+                            speaker="abby"
+                            autoPlay
+                        />
+
+                        <Button
+                            onClick={() => setShowIntro(false)}
+                            className="w-full mt-8 bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl text-xl"
+                            size="lg"
+                        >
+                            I'm Ready to Go! 🚀
+                        </Button>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
 
     return (
         <motion.div

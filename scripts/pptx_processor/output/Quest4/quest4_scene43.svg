@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="13.333333in" height="7.5in" class="slides-canvas" viewBox="0 0 960 540">
+  <g text-rendering="geometricPrecision" transform="scale(1, 1)">
+    <rect x="0" y="0" width="960" height="540" fill="#FFFFFF" />
+    <g transform="matrix(1, 0, 0, 1, 73.19882, 32.348423)"><text font-family="Calibri" font-style="normal" font-weight="normal" font-stretch="normal" font-size="33pt" fill="#000000" x="0" y="61.31389"><tspan x="0" y="61.31389">Post-test Intro</tspan></text></g>
+    <g transform="matrix(1, 0, 0, 1, 130.09544, 193.52954)"><text font-family="Calibri" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="81.647995"><tspan x="0" y="16.848">“Let’s see how much you remember,AbaQuesters!</tspan><tspan x="0" y="38.447998">Use your junior counter to solve each problem. Move</tspan><tspan xml:space="preserve" x="389.5078" y="38.447998"> </tspan><tspan x="0" y="60.047997">your beads, freeze when you’re ready, and tap the</tspan><tspan xml:space="preserve" x="366.7627" y="60.047997"> </tspan><tspan x="0" y="81.647995">right answer. Take your time — you’ve got this!”</tspan></text></g></g>
+</svg>

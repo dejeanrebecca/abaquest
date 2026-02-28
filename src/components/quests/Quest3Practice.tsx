@@ -37,7 +37,16 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
 
     useEffect(() => {
         setStartTime(Date.now());
-    }, [currentQuestion]);
+
+        // Auto-succeed if the target is 0 since the abacus starts at 0
+        if (currentPractice === 0 && showFeedback === null) {
+            const timeoutId = setTimeout(() => {
+                handlePracticeSuccess(0);
+            }, 3000);
+
+            return () => clearTimeout(timeoutId);
+        }
+    }, [currentQuestion, currentPractice, showFeedback]);
 
     const handleAbacusChange = (value: number) => {
         if (showFeedback === 'correct') return; // Prevent multiple triggers

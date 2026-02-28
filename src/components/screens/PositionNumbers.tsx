@@ -5,6 +5,7 @@ import { Quest3Learn } from '../quests/Quest3Learn';
 import { Quest3Practice } from '../quests/Quest3Practice';
 import { Quest3Story } from '../quests/Quest3Story';
 import { TransitionScreen } from '../common/TransitionScreen';
+import { QuestWelcome } from '../quest-screens/QuestWelcome';
 
 interface PositionNumbersProps {
   onNext: (results?: { pre: number; post: number }) => void;
@@ -36,12 +37,13 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
   switch (phase) {
     case 'welcome':
       return (
-        <TransitionScreen
-          variant="learning"
-          title="Quest 3: Position Numbers"
-          subtitle="Let's learn where numbers live on the abacus!"
+        <QuestWelcome
+          key="welcome"
+          questTitle="Quest 3: Position Numbers"
+          questIcon="123"
+          welcomeMessage="Great work so far, AbaQuester! Now that you know the parts of your Junior Counter, it's time to find out where the numbers 0 to 9 live. Every number has its own special place!"
           onNext={() => handleNextPhase()}
-          icon="123" // Using 123 as icon representation for numbers quest
+          showEmotionalCheckIn={false}
         />
       );
     case 'pretest':
