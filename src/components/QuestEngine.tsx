@@ -152,6 +152,9 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
   };
 
   const isQuestUnlocked = (questId: QuestId): boolean => {
+    // DEV MODE OVERRIDE: Unlock all quests for local testing
+    if ((import.meta as any).env?.DEV) return true;
+
     // Quest 1 is always unlocked
     if (questId === 1) return true;
 

@@ -10,10 +10,15 @@ import { useDataLogger } from '../DataLogger';
 import { useQuestEngine } from '../QuestEngine';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { PostTestCheckIn } from '../quest-screens/PostTestCheckIn';
-import { HelpCircle, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
-import { Quest1StoryAnimation } from './Quest1StoryAnimation';
-
-
+import { HelpCircle, CheckCircle, XCircle } from 'lucide-react';
+import { StorySceneViewer, StorySceneData } from '../common/StorySceneViewer';
+import abbyImage from '@/docs/Abby.png';
+import ameerImg from '@/docs/Ameer.png';
+import ameerahImg from '@/docs/Ameerah.png';
+import schoolBoatImg from '@/docs/School_Boat.png';
+import reachedSchoolImg from '@/docs/Reached_School.png';
+import teacherImg from '@/docs/Teacher.png';
+import namingImg from '@/docs/Naming.png';
 interface Quest1NamingProps {
   onComplete: (results?: { pre: number; post: number }) => void;
 }
@@ -29,9 +34,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [preTestAnswers, setPreTestAnswers] = useState<boolean[]>([]);
   const [postTestAnswers] = useState<boolean[]>([]);
   const [counterName, setCounterName] = useState('');
-  const [storyStep, setStoryStep] = useState(0);
   const [showPreTestIntro, setShowPreTestIntro] = useState(true);
-  const [narrationComplete, setNarrationComplete] = useState(false);
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
@@ -324,7 +327,6 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         subtitle="Let's join Ameer and Ameerah on their adventure."
         onNext={() => {
           setStep('story');
-          setStoryStep(0); // Start story from beginning
         }}
         variant="story"
         showBookIcon={true}
@@ -335,58 +337,46 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   // STEP 4: STORY MODE
   if (step === 'story') {
-    const storyScenes = [
+    const storyScenes: StorySceneData[] = [
       {
-        type: 'narration',
-        content: `It was the twins' first day at the School of Mental Math. Ameerah was curious about who her new friends would be. Ameer hoped the math wouldn't be too hard; he was nervous. They were both quiet as they walked to their boat. Ameer's heart beat fast. Ameerah smiled and said, "I'll steer today!" She was nervous too, but ready to be brave.`,
+        imageSrc: abbyImage,
+        speaker: 'abby',
+        narrationText: "Welcome, young AbaQuester! I'm Abby, your personal AI-bot! Today, you're joining a very special place — Mistress Creola's School of Mental Math!",
       },
+      {
+        imageSrc: ameerImg,
+        secondaryImageSrc: ameerahImg,
+        speaker: 'narrator',
+        narrationText: "Here's Ameer and Ameerah! Ameerah is smart, creative, and super brave. Ameer loves counting, reading maps, and finding new ways to solve problems.",
+      },
+      {
+        imageSrc: schoolBoatImg,
+        speaker: 'narrator',
+        narrationText: "It was the twins' first day at school. Ameerah was curious about who her friends would be, Ameer hoped the math wouldn't be to hard, he was nervous. Both were quiet, Ameerah smiled and said I will steer Today!!",
+      },
+      {
+        imageSrc: reachedSchoolImg,
+        speaker: 'narrator',
+        narrationText: "Ameer and Ameerah reached the school, Ameer is still worried the math would be hard, Ameerah still feels little brave!!",
+      },
+      {
+        imageSrc: teacherImg,
+        speaker: 'mistress-creola',
+        narrationText: "Math is not about being perfect. It's about trying, thinking, and believing in yourself!",
+      },
+      {
+        imageSrc: namingImg,
+        speaker: 'abby',
+        narrationText: "Todays hard work will be choosing a name for your junior counters. Ameer felt when he heard this. Naming his junior counter would be a fun and easy assignment",
+      }
     ];
 
-    const currentScene = storyScenes[storyStep];
-
-    // Default story narration
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen bg-gradient-to-b from-purple-100 to-warm-neutral p-8"
-      >
-        <div className="flex justify-center mb-4">
-          {/* Logo removed */}
-        </div>
-
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue">
-            <h2 className="text-deep-blue text-center mb-6">📖 Story Time</h2>
-
-            <div className="mb-6 flex justify-center">
-              <Quest1StoryAnimation startAnimation={narrationComplete} />
-            </div>
-
-            <AudioNarration
-              text={currentScene.content}
-              speaker="narrator"
-              autoPlay
-              onComplete={() => setNarrationComplete(true)}
-            />
-
-            <div className="mt-8">
-              <Button
-                onClick={() => {
-                  if (storyStep < storyScenes.length - 1) {
-                    setStoryStep(storyStep + 1);
-                  } else {
-                    setStep('learn');
-                  }
-                }}
-                className="w-full bg-abacus-red hover:bg-abacus-red/90 text-white py-6 rounded-2xl shadow-xl"
-              >
-                Continue <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+      <StorySceneViewer
+        scenes={storyScenes}
+        onComplete={() => setStep('learn')}
+        title="📖 Abacus Math Quest"
+      />
     );
   }
 

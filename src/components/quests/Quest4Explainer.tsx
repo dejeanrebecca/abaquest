@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
 import { ArrowRight, Snowflake } from 'lucide-react';
-import { JuniorCounter } from '../JuniorCounter';
+import { InteractiveAbacus } from '../InteractiveAbacus';
 
 interface Quest4ExplainerProps {
     onNext: () => void;
@@ -38,7 +38,7 @@ export function Quest4Explainer({ onNext }: Quest4ExplainerProps) {
                     <div className="flex justify-center relative">
                         {/* Visual representation: A counter showing 5, with snowflakes around it indicating "frozen" */}
                         <div className="scale-75 origin-center relative">
-                            <JuniorCounter value={5} interactive={false} />
+                            <InteractiveAbacus initialValue={5} interactive={false} />
                             <motion.div
                                 animate={{ rotate: 360 }}
                                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}

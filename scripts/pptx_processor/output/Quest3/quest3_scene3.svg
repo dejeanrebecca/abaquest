@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="13.333333in" height="7.5in" class="slides-canvas" viewBox="0 0 960 540">
+  <g text-rendering="geometricPrecision" transform="scale(1, 1)">
+    <rect x="0" y="0" width="960" height="540" fill="#FFFFFF" />
+    <g transform="matrix(1, 0, 0, 1, 73.19882, 94.39103)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="33pt" fill="#000000" x="0" y="53.71877"><tspan x="0" y="53.71877" font-weight="bold">STEP 1 —&amp; Character Intro</tspan></text></g>
+    <g shape-rendering="crispEdges">
+      <g transform="matrix(1, 0, 0, 1, 256.72345, 191.74341)">
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 0L0 72" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M52.9 0L52.9 72" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M466.9 0L466.9 72" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 0L52.9 0" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M52.9 0L466.9 0" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 72L52.9 72" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M52.9 72L466.9 72" />
+      </g>
+      <g transform="matrix(1, 0, 0, 1, 263.92422, 195.3438)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="49.9028"><tspan x="0" y="28.3028" font-weight="bold">Goa</tspan><tspan x="0" y="49.9028" font-weight="bold">l</tspan></text></g>
+      <g transform="matrix(1, 0, 0, 1, 316.82382, 195.3438)"><text font-family="Arial" font-style="normal" font-weight="normal" font-stretch="normal" font-size="13.5pt" fill="#000000" x="0" y="60.702797"><tspan x="0" y="17.502798">Warmly reintroduce Abby, Ameer, and Ameerah.</tspan><tspan xml:space="preserve" x="382.02344" y="17.502798"> </tspan><tspan x="0" y="39.1028">Set up that today’s adventure is about “making</tspan><tspan xml:space="preserve" x="370.6748" y="39.1028"> </tspan><tspan x="0" y="60.702797">numbers come to life.”</tspan></text></g>
+    </g>
+    <g shape-rendering="crispEdges">
+      <g transform="matrix(1, 0, 0, 1, 66, 300.6625)">
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 0L0 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M828 0L828 28.8" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 0L828 0" />
+        <path stroke-width="0.75" stroke="#000000" stroke-opacity="0" fill="none" d="M0 28.8L828 28.8" />
+      </g>
+    </g></g>
+</svg>

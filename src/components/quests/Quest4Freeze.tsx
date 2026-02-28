@@ -72,7 +72,7 @@ export function Quest4Freeze({ onComplete }: Quest4FreezeProps) {
             key="welcome"
             questTitle="Quest 4: Freeze Addition"
             questIcon={<span className="text-6xl">❄️</span>}
-            welcomeMessage="Join the adventure to the Ice Valley! Learn the power of Zero!"
+            welcomeMessage="Great job Abaquester! You have learned so much already. Today we will learn to add using our Junior counter and practise the Freeze Rule!"
             onNext={() => setStep('pretest-transition')}
           />
         )}
