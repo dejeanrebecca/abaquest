@@ -5,3 +5,4 @@ build
 key.json
 *.log
 .env
+.env.local
