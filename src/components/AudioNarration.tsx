@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Volume2, VolumeX, RotateCcw } from 'lucide-react';
+import { useElevenLabs } from '../hooks/useElevenLabs';
 // import { Button } from './ui/button';
 
 export interface AudioNarrationProps {
@@ -22,56 +23,31 @@ export function AudioNarration({
   showReplay = true,
   compact = false,
 }: AudioNarrationProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showCaptions, setShowCaptions] = useState(true);
   const [hasPlayed, setHasPlayed] = useState(false);
 
-  // TODO: Replace with actual audio implementation
-  // For now, simulate audio playback
-  const playAudio = () => {
-    setIsPlaying(true);
+  const { playAudio, stopAudio, isPlaying } = useElevenLabs();
+
+  const handlePlayAudio = () => {
     setHasPlayed(true);
 
-    // Simulate audio duration based on text length (rough estimate: 150 words per minute)
-    const words = text.split(' ').length;
-    const durationMs = (words / 150) * 60 * 1000;
+    // Voice mapping could be added here later if needed
+    // const customVoiceId = speaker === 'abby' ? 'voice1' : 'voice2';
 
-    // TODO: Replace with actual Web Speech API or audio file playback
-    // Example using Web Speech API (for prototype):
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9; // Slightly slower for K-2 learners
-      utterance.pitch = speaker === 'abby' ? 1.1 : 1.0;
-      utterance.onend = () => {
-        setIsPlaying(false);
-        onComplete?.();
-      };
-      window.speechSynthesis.speak(utterance);
-    } else {
-      // Fallback: just wait and complete
-      setTimeout(() => {
-        setIsPlaying(false);
-        onComplete?.();
-      }, Math.max(2000, durationMs));
-    }
-  };
-
-  const stopAudio = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-    setIsPlaying(false);
+    playAudio(text, () => {
+      onComplete?.();
+    });
   };
 
   const replayAudio = () => {
     stopAudio();
-    setTimeout(() => playAudio(), 100);
+    setTimeout(() => handlePlayAudio(), 100);
   };
 
   // Auto-play on mount if enabled
   useEffect(() => {
     if (autoPlay && !hasPlayed) {
-      playAudio();
+      handlePlayAudio();
     }
     return () => stopAudio();
   }, [autoPlay]);
@@ -126,7 +102,7 @@ export function AudioNarration({
     return (
       <div className="flex items-center gap-3 bg-aqua-blue/10 rounded-xl p-3">
         <button
-          onClick={isPlaying ? stopAudio : playAudio}
+          onClick={isPlaying ? stopAudio : handlePlayAudio}
           className="bg-deep-blue hover:bg-deep-blue/90 text-white rounded-full p-3 transition-all shadow-lg"
         >
           {isPlaying ? (
@@ -177,7 +153,7 @@ export function AudioNarration({
         {/* Audio Controls */}
         <div className="flex items-center gap-2">
           <button
-            onClick={isPlaying ? stopAudio : playAudio}
+            onClick={isPlaying ? stopAudio : handlePlayAudio}
             className="bg-white/20 hover:bg-white/30 text-white rounded-full p-3 transition-all"
             aria-label={isPlaying ? 'Stop audio' : 'Play audio'}
           >

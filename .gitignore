@@ -6,3 +6,4 @@ key.json
 *.log
 .env
 .env.local
+.env.*

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { QuestClose } from '../quest-screens/QuestClose';
+import { useElevenLabs } from '../../hooks/useElevenLabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '../ui/input';
 import { AudioNarration } from '../AudioNarration';
@@ -38,6 +39,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
+  const { playAudio } = useElevenLabs();
 
 
   // Pre-test and Post-test questions (MUST BE IDENTICAL)
@@ -393,13 +395,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
     };
 
     const speakText = (text: string) => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.0;
-        utterance.pitch = 1.1; // Abby voice
-        window.speechSynthesis.speak(utterance);
-      }
+      playAudio(text);
     };
 
     return (
