@@ -1,0 +1,11 @@
+# Ignore standard build and git folders
+.git
+.github
+node_modules
+build
+dist
+coverage
+.DS_Store
+
+# Explicitly DO NOT ignore .env.local so Cloud Build has access to the API keys
+!.env.local
