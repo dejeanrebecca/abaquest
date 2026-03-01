@@ -2,8 +2,8 @@
 import { useState, useRef, useCallback } from 'react';
 
 // In-memory cache to prevent re-fetching the same audio
-// Maps string (text + voiceId) to a Blob URL
-const audioCache = new Map<string, string>();
+// Maps string (text + voiceId) to a Promise of a Blob URL
+const audioCache = new Map<string, Promise<string>>();
 
 interface UseElevenLabsOptions {
     voiceId?: string;
@@ -36,9 +36,9 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
         const cacheKey = `${voiceId}_${text}`;
 
         try {
-            let audioUrl = audioCache.get(cacheKey);
+            let audioUrlPromise = audioCache.get(cacheKey);
 
-            if (!audioUrl) {
+            if (!audioUrlPromise) {
                 // If no API key is set, fallback to Web Speech API or just simulate
                 if (!apiKey || apiKey === 'your_api_key_here') {
                     console.warn("ElevenLabs API Key is missing. Falling back to Web Speech API.");
@@ -60,8 +60,7 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
                     }
                 }
 
-                // Fetch from ElevenLabs
-                const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+                audioUrlPromise = fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
                     method: 'POST',
                     headers: {
                         'Accept': 'audio/mpeg',
@@ -76,16 +75,21 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
                             similarity_boost: 0.5
                         }
                     }),
+                }).then(async (response) => {
+                    if (!response.ok) {
+                        throw new Error(`ElevenLabs API error: ${response.statusText}`);
+                    }
+                    const blob = await response.blob();
+                    return URL.createObjectURL(blob);
+                }).catch((error) => {
+                    audioCache.delete(cacheKey);
+                    throw error;
                 });
 
-                if (!response.ok) {
-                    throw new Error(`ElevenLabs API error: ${response.statusText}`);
-                }
-
-                const blob = await response.blob();
-                audioUrl = URL.createObjectURL(blob);
-                audioCache.set(cacheKey, audioUrl);
+                audioCache.set(cacheKey, audioUrlPromise);
             }
+
+            const audioUrl = await audioUrlPromise;
 
             // Play the audio URL
             const audio = new Audio(audioUrl);
@@ -122,5 +126,51 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
         setIsPlaying(false);
     }, []);
 
-    return { playAudio, stopAudio, isPlaying };
+    const prefetchAudio = useCallback(async (text: string, customVoiceId?: string) => {
+        const voiceId = customVoiceId || defaultVoiceId;
+
+        if (!text || !text.trim()) return;
+
+        const cacheKey = `${voiceId}_${text}`;
+
+        if (audioCache.has(cacheKey)) return;
+
+        try {
+            if (!apiKey || apiKey === 'your_api_key_here') return;
+
+            const promise = fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'audio/mpeg',
+                    'xi-api-key': apiKey,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    model_id: 'eleven_monolingual_v1',
+                    voice_settings: {
+                        stability: 0.5,
+                        similarity_boost: 0.5
+                    }
+                }),
+            }).then(async (response) => {
+                if (!response.ok) {
+                    throw new Error(`ElevenLabs API prefetch error: ${response.statusText}`);
+                }
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+            }).catch((error) => {
+                audioCache.delete(cacheKey);
+                throw error;
+            });
+
+            audioCache.set(cacheKey, promise);
+            await promise;
+
+        } catch (error) {
+            console.error("Failed to prefetch audio:", error);
+        }
+    }, [apiKey, defaultVoiceId]);
+
+    return { playAudio, stopAudio, prefetchAudio, isPlaying };
 }

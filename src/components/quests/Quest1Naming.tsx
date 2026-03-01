@@ -39,7 +39,17 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
-  const { playAudio } = useElevenLabs();
+  const { playAudio, prefetchAudio } = useElevenLabs();
+
+  useEffect(() => {
+    if (step === 'naming' && counterName && counterName.trim().length >= 2) {
+      const timeoutId = setTimeout(() => {
+        console.log("Prefetching name:", counterName.trim());
+        prefetchAudio(`Great name! ${counterName.trim()} is ready for math quests!`);
+      }, 300); // reduced timeout to prefetch faster
+      return () => clearTimeout(timeoutId);
+    }
+  }, [step, counterName, prefetchAudio]);
 
 
   // Pre-test and Post-test questions (MUST BE IDENTICAL)
@@ -387,15 +397,17 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
     const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
 
     const handleConfirm = () => {
-      const finalName = counterName;
+      const finalName = counterName ? counterName.trim() : '';
       if (finalName) {
         setStudentName(finalName);
-        setStep('posttest');
+        speakText(`Great name! ${finalName} is ready for math quests!`, () => {
+          setStep('posttest');
+        });
       }
     };
 
-    const speakText = (text: string) => {
-      playAudio(text);
+    const speakText = (text: string, onComplete?: () => void) => {
+      playAudio(text, onComplete);
     };
 
     return (
@@ -450,8 +462,14 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   className="text-center text-xl py-6 rounded-2xl border-4 border-gray-200 focus:border-aqua-blue"
                   maxLength={15}
                   onBlur={() => {
-                    if (counterName) {
-                      speakText(`Great name! ${counterName} is ready for math quests!`);
+                    if (counterName && counterName.trim().length >= 2) {
+                      speakText(`Great name! ${counterName.trim()} is ready for math quests!`);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleConfirm();
                     }
                   }}
                 />
