@@ -11,7 +11,7 @@ interface PositionNumbersProps {
   onNext: (results?: { pre: number; post: number }) => void;
 }
 
-type Phase = 'welcome' | 'pretest' | 'explainer' | 'learn' | 'practice' | 'story' | 'posttest' | 'close';
+type Phase = 'welcome' | 'pretest' | 'explainer' | 'learn' | 'practice' | 'transition' | 'story' | 'posttest' | 'close';
 
 export function PositionNumbers({ onNext }: PositionNumbersProps) {
   const [phase, setPhase] = useState<Phase>('welcome');
@@ -26,7 +26,8 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
         case 'pretest': setPhase('explainer'); break;
         case 'explainer': setPhase('learn'); break;
         case 'learn': setPhase('practice'); break;
-        case 'practice': setPhase('story'); break;
+        case 'practice': setPhase('transition'); break;
+        case 'transition': setPhase('story'); break;
         case 'story': setPhase('posttest'); break;
         case 'posttest': setPhase('close'); break;
         case 'close': onNext({ pre: 100, post: 100 }); break; // TODO: Pass actual results
@@ -42,6 +43,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
           questTitle="Quest 3: Position Numbers"
           questIcon="123"
           welcomeMessage="Great work so far, AbaQuester! Now that you know the parts of your Junior Counter, it's time to find out where the numbers 0 to 9 live. Every number has its own special place!"
+          audioWelcomeMessage="Great work so far, AbaQuester! Now that you know the parts of your Junior Counter, it's time to find out where the numbers 0 to 9 liv. Every number has its own special place!"
           onNext={() => handleNextPhase()}
           showEmotionalCheckIn={false}
         />
@@ -54,6 +56,18 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
       return <Quest3Learn key="learn" onComplete={() => handleNextPhase()} />;
     case 'practice':
       return <Quest3Practice key="practice" onComplete={() => handleNextPhase()} />;
+    case 'transition':
+      return (
+        <TransitionScreen
+          key="transition"
+          title="Story Time!"
+          subtitle="Let's join Ameer and Ameerah on their adventure."
+          onNext={() => handleNextPhase()}
+          variant="story"
+          showBookIcon={true}
+          buttonText="Let's Read!"
+        />
+      );
     case 'story':
       return <Quest3Story key="story" onComplete={() => handleNextPhase()} />;
     case 'posttest':

@@ -4,9 +4,8 @@ import { QuestClose } from '../quest-screens/QuestClose';
 import { Quest2Assessment } from './Quest2Assessment';
 import { Quest2Learn } from './Quest2Learn';
 import { Quest2Story } from './Quest2Story';
-// import { TransitionScreen } from '../common/TransitionScreen';
+import { TransitionScreen } from '../common/TransitionScreen';
 // import storyBookImage from '../../assets/story-book.png';
-import { useQuestEngine } from '../QuestEngine';
 
 interface Quest2PartsProps {
   onComplete: (results?: { pre: number; post: number }) => void;
@@ -65,7 +64,22 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
   }
 
   if (step === 'learn') {
-    return <Quest2Learn key="learn" onComplete={() => setStep('story')} />;
+    return <Quest2Learn key="learn" onComplete={() => setStep('story-transition')} />;
+  }
+
+  // STEP 3.5: STORY TRANSITION
+  if (step === 'story-transition') {
+    return (
+      <TransitionScreen
+        key="story-transition"
+        title="Story Time!"
+        subtitle="Let's find out about First-Day Feelings!"
+        onNext={() => setStep('story')}
+        variant="story"
+        showBookIcon={true}
+        buttonText="Let's Read!"
+      />
+    );
   }
 
   // STEP 4: STORY MODE

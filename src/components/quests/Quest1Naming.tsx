@@ -354,7 +354,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
       {
         imageSrc: schoolBoatImg,
         speaker: 'narrator',
-        narrationText: "It was the twins' first day at school. Ameerah was curious about who her friends would be, Ameer hoped the math wouldn't be to hard, he was nervous. Both were quiet, Ameerah smiled and said I will steer Today!!",
+        narrationText: "It was the twins' first day at school. Ameerah was curious about who her friends would be, Ameer hoped the math wouldn't be too hard, he was nervous. Both were quiet, Ameerah smiled and said I will steer Today!!",
       },
       {
         imageSrc: reachedSchoolImg,
