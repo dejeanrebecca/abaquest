@@ -115,7 +115,13 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
                 </div>
 
                 <div className={`bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue`}>
-                    <AudioNarration text={isPostTest ? "Let's see what you've learned!" : currentQ.question} speaker="abby" compact />
+                    <AudioNarration
+                        key={`q2-assessment-${type}-${currentQuestion}`}
+                        text={isPostTest ? `Let's see what you've learned! ${currentQ.question}` : currentQ.question}
+                        speaker="abby"
+                        compact
+                        autoPlay
+                    />
 
                     <div className="my-8 flex justify-center">
                         <InteractiveAbacus

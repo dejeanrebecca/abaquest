@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { Button } from '../ui/button';
+import { AudioNarration } from '../AudioNarration';
 import { ArrowRight, Snowflake } from 'lucide-react';
 import { InteractiveAbacus } from '../InteractiveAbacus';
 
@@ -22,13 +23,13 @@ export function Quest4Explainer({ onNext }: Quest4ExplainerProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
                     <div className="space-y-6">
-                        <p className="text-2xl text-gray-700 leading-relaxed">
-                            When you add <span className="font-bold text-sky-600">Zero (0)</span> to a number, the number stays exactly the same.
-                        </p>
-                        <p className="text-2xl text-gray-700 leading-relaxed">
-                            It's like a <span className="font-bold text-sky-600">Freeze Ray!</span> ❄️
-                        </p>
-                        <div className="bg-sky-100 p-6 rounded-xl border border-sky-200">
+                        <AudioNarration
+                            text="When you add Zero to a number, the number stays exactly the same. It's like a Freeze Ray!"
+                            speaker="abby"
+                            compact
+                            autoPlay
+                        />
+                        <div className="bg-sky-100 p-6 rounded-xl border border-sky-200 mt-6">
                             <p className="text-3xl font-mono text-center text-sky-900">
                                 5 + 0 = 5
                             </p>

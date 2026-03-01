@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { AudioNarration } from '../AudioNarration';
+import { CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import { Button } from '../ui/button';
 import { InteractiveAbacus } from '../InteractiveAbacus';
 import { useAbacusSound } from '../../hooks/useAbacusSound';
 
@@ -12,7 +14,7 @@ interface Quest4PreTestProps {
 const questions = [
     {
         id: 1,
-        problem: "3 + 0",
+        problem: "0 + 3",
         answer: 3,
         distractors: [0, 30]
     },
@@ -39,28 +41,34 @@ const questions = [
 export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestProps) {
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [score, setScore] = useState(0);
-    const [showFeedback, setShowFeedback] = useState(false);
+    const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | 'skip' | null>(null);
     const [isCorrect, setIsCorrect] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
     const { playSuccess, playError } = useAbacusSound();
 
-    const handleAnswer = (selected: number) => {
-        if (showFeedback) return;
+    const handleAnswer = (selected: number | null) => {
+        if (showFeedback !== null) return;
 
-        const correct = selected === questions[currentQuestion].answer;
-        setIsCorrect(correct);
-        if (correct) {
-            setScore(s => s + 1);
-            playSuccess();
+        if (selected === null) {
+            // Skipped / I don't know yet
+            setIsCorrect(false);
+            setShowFeedback('skip');
         } else {
-            playError();
+            const correct = selected === questions[currentQuestion].answer;
+            setIsCorrect(correct);
+            if (correct) {
+                setScore(s => s + 1);
+                playSuccess();
+            } else {
+                playError();
+            }
+            setShowFeedback(correct ? 'correct' : 'wrong');
         }
-        setShowFeedback(true);
 
         setTimeout(() => {
             if (currentQuestion < questions.length - 1) {
                 setCurrentQuestion(q => q + 1);
-                setShowFeedback(false);
+                setShowFeedback(null);
             } else {
                 // Pre-test finished, show transition screen instead of auto-completing
                 setIsCompleted(true);
@@ -116,8 +124,17 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-12 items-center justify-center mb-12">
-                    <div className="text-6xl font-bold text-brand-blue font-mono bg-blue-50 px-8 py-4 rounded-2xl border-2 border-blue-200">
-                        {question.problem} = ?
+                    <div className="text-6xl font-bold text-brand-blue font-mono bg-blue-50 px-8 py-4 rounded-2xl border-2 border-blue-200 flex flex-col items-center">
+                        <div>{question.problem} = ?</div>
+                        <div className="mt-4 text-xl font-sans font-normal">
+                            <AudioNarration
+                                key={`q4-quickcheck-${currentQuestion}`}
+                                text={`What is ${question.problem.replace('+', 'plus')}?`}
+                                speaker="abby"
+                                compact
+                                autoPlay
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -128,13 +145,13 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleAnswer(opt)}
-                            disabled={showFeedback}
+                            disabled={showFeedback !== null}
                             className={`
                 p-6 rounded-2xl border-4 transition-all
                 flex flex-col items-center gap-4
-                ${showFeedback && opt === question.answer ? 'bg-green-100 border-green-500' : ''}
-                ${showFeedback && opt !== question.answer && !isCorrect ? 'opacity-50' : ''}
-                ${!showFeedback ? 'bg-white border-gray-200 hover:border-brand-blue hover:shadow-lg' : ''}
+                ${showFeedback !== null && opt === question.answer ? 'bg-green-100 border-green-500' : ''}
+                ${showFeedback !== null && opt !== question.answer && !isCorrect ? 'opacity-50' : ''}
+                ${showFeedback === null ? 'bg-white border-gray-200 hover:border-brand-blue hover:shadow-lg' : ''}
               `}
                         >
                             {/* Using JuniorCounter as a visual for the option could be cool, but maybe too busy? 
@@ -151,6 +168,19 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                     ))}
                 </div>
 
+                {isPreTest && (
+                    <div className="mt-8 flex justify-center">
+                        <Button
+                            onClick={() => handleAnswer(null)}
+                            variant="outline"
+                            className="w-full max-w-md border-2 border-brand-blue/30 text-brand-blue hover:bg-brand-blue/5 py-6 rounded-2xl text-lg font-medium transition-colors"
+                        >
+                            <HelpCircle className="w-6 h-6 mr-2" />
+                            I don't know yet
+                        </Button>
+                    </div>
+                )}
+
                 <div className="h-16 mt-8 flex justify-center items-center">
                     <AnimatePresence>
                         {showFeedback && (
@@ -158,9 +188,9 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0 }}
-                                className={`text-2xl font-bold flex items-center gap-2 ${isCorrect ? 'text-green-600' : 'text-orange-500'}`}
+                                className={`text-2xl font-bold flex items-center gap-2 ${showFeedback === 'correct' ? 'text-green-600' : showFeedback === 'skip' ? 'text-blue-500' : 'text-orange-500'}`}
                             >
-                                {isCorrect ? <><CheckCircle /> Great Job!</> : <><XCircle /> Incorrect!</>}
+                                {showFeedback === 'correct' ? <><CheckCircle /> Great Job!</> : showFeedback === 'skip' ? <><HelpCircle /> That's okay, let's learn together!</> : <><XCircle /> Incorrect!</>}
                             </motion.div>
                         )}
                     </AnimatePresence>

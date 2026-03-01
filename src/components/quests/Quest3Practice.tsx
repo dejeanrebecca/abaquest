@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { AudioNarration } from '../AudioNarration';
 import { CheckCircle, ArrowRight } from 'lucide-react';
 import { useDataLogger } from '../DataLogger';
 import { InteractiveAbacus } from '../InteractiveAbacus';
@@ -87,9 +88,6 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
     };
 
     const getQuestionText = (index: number) => {
-        if (practiceNumbers[index] === 5) {
-            return "In Mistress Creola's class, students are learning number positions. Ameer tried to show the number 5 but...";
-        }
         return `Move the beads to show the number ${practiceNumbers[index]}!`;
     };
 
@@ -123,9 +121,15 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
                         <h2 className="text-3xl md:text-4xl font-bold text-deep-blue mb-2">
                             Position to <span className="text-abacus-red text-5xl">{currentPractice}</span>
                         </h2>
-                        <p className="text-charcoal-gray text-lg max-w-2xl mx-auto">
-                            {currentText}
-                        </p>
+                        <div className="max-w-2xl mx-auto flex justify-center">
+                            <AudioNarration
+                                key={`practice-audio-${currentPractice}`}
+                                text={currentText}
+                                speaker="abby"
+                                compact
+                                autoPlay
+                            />
+                        </div>
                     </div>
 
                     <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 mb-8">

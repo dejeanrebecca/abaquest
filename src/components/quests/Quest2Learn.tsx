@@ -31,7 +31,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
         },
         {
             part: 'rod',
-            name: 'Middle rod',
+            name: 'Answer rod',
             description: 'This rod holds everything together — like the body connects the head and legs!',
             color: 'from-gray-700 to-gray-900',
         },
@@ -100,12 +100,13 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-gradient-to-r from-aqua-blue/10 to-deep-blue/10 rounded-2xl p-6 mb-6"
                         >
-                            <h3 className="text-deep-blue mb-2">
-                                {parts.find(p => p.part === currentPart)?.name}
-                            </h3>
-                            <p className="text-deep-blue/80">
-                                {parts.find(p => p.part === currentPart)?.description}
-                            </p>
+                            <AudioNarration
+                                key={`audio-${currentPart}`}
+                                text={`${parts.find(p => p.part === currentPart)?.name}. ${parts.find(p => p.part === currentPart)?.description}`}
+                                speaker="abby"
+                                compact
+                                autoPlay
+                            />
                         </motion.div>
                     )}
 

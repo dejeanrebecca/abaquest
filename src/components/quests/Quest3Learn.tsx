@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
+import { AudioNarration } from '../AudioNarration';
 import { Button } from '../ui/button';
 import { ArrowRight, RotateCcw } from 'lucide-react';
 import { InteractiveAbacus } from '../InteractiveAbacus';
@@ -81,7 +82,13 @@ export function Quest3Learn({ onComplete }: Quest3LearnProps) {
                 <div className="text-6xl animate-bounce-slight">🐝</div>
                 <div className="z-10">
                     <h2 className="text-3xl font-bold text-deep-blue mb-2">{currentStep.title}</h2>
-                    <p className="text-xl text-charcoal-gray">{currentStep.description}</p>
+                    <AudioNarration
+                        key={`learn-audio-${currentStep.number}`}
+                        text={currentStep.description}
+                        speaker="abby"
+                        compact
+                        autoPlay
+                    />
                 </div>
                 {/* Decorative blob */}
                 <div className="absolute -right-10 -top-10 w-40 h-40 bg-sunburst-yellow/20 rounded-full blur-3xl"></div>
