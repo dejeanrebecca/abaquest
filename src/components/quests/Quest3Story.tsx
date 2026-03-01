@@ -2,6 +2,8 @@ import { StorySceneViewer, StorySceneData } from '../common/StorySceneViewer';
 import quest3Scene0 from '@/docs/Quest-3_Image1.png';
 import quest3Scene1 from '@/docs/Quest-3_Image2.png';
 import quest3Scene2 from '@/docs/zero.png';
+import quest3Scene2b from '@/docs/One.png';
+import quest3Scene2c from '@/docs/five.png';
 import quest3Scene3 from '@/docs/Nine.png';
 import quest3Scene4 from '@/docs/AfterClass.png';
 import quest3Scene5 from '@/docs/Quest-3Bye.png';
@@ -26,6 +28,16 @@ export function Quest3Story({ onComplete }: Quest3StoryProps) {
             imageSrc: quest3Scene2,
             speaker: 'mistress-creola',
             narrationText: "While the twins are in the nurse's office, Mistress Creola teaches the class. 'Zero means no beads are touching the Answer Rod!' she says.",
+        },
+        {
+            imageSrc: quest3Scene2b,
+            speaker: 'mistress-creola',
+            narrationText: "Then she shows the next number. 'One means ONE lower bead is touching the Answer Rod!' she adds.",
+        },
+        {
+            imageSrc: quest3Scene2c,
+            speaker: 'mistress-creola',
+            narrationText: "She continues teaching. 'Five is special! It means ONE upper bead is touching the Answer Rod!' she explains.",
         },
         {
             imageSrc: quest3Scene3,

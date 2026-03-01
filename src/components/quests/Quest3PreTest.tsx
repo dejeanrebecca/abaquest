@@ -95,6 +95,7 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
 
                         <AudioNarration
                             text="Before we learn where the numbers live, let's see what you already know. Remember: You can always say 'I don't know yet' — that's how we learn!"
+                            audioText="Before we learn where the numbers liv, let's see what you already know. Remember: You can always say 'I don't know yet' — that's how we learn!"
                             speaker="abby"
                             autoPlay
                         />
@@ -135,13 +136,17 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
                 </div>
 
                 <div className="bg-white rounded-[2rem] shadow-2xl p-8 border-4 border-aqua-blue max-w-4xl mx-auto">
-                    <div className="flex items-center gap-4 mb-8 bg-aqua-blue/10 rounded-2xl p-4 border border-aqua-blue/20">
-                        <div className="text-4xl">🐝</div>
-                        <p className="text-deep-blue text-lg font-medium">
-                            {isPostTest
-                                ? "Click the abacus that matches the number!"
-                                : "Give it a try! Can you find the matching number?"}
-                        </p>
+                    <div className="mb-8">
+                        <AudioNarration
+                            key={`q3-assessment-${isPostTest ? 'post' : 'pre'}-${currentQuestion}`}
+                            text={`${isPostTest
+                                ? "Click the abacus that matches the number"
+                                : "Give it a try! Can you find the matching number"
+                                } ${currentQ.display}`}
+                            speaker="abby"
+                            compact
+                            autoPlay
+                        />
                     </div>
 
                     {/* Options Grid - Now only displaying 3 options */}
