@@ -94,7 +94,7 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                     <div className="text-8xl mb-8">❄️</div>
                     <p className="text-xl text-gray-600 mb-8">
                         {isPreTest
-                            ? "Now you've seen the questions... are you ready to master the Ice Valley secrets?"
+                            ? "Now you've seen the questions... are you ready to master these new secrets?"
                             : `You got ${score} out of ${questions.length} correct!`}
                     </p>
 

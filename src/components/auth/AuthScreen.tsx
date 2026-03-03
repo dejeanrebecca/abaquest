@@ -45,162 +45,61 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
             // Check LocalStorage first
             const saved = localStorage.getItem('abaquest_students');
+            const dummyStudents: StudentProfile[] = [
+                {
+                    id: 's1',
+                    name: 'Ameer',
+                    avatar: '👦',
+                    beadPassHash: hash5,
+                    gradeLevel: 'K',
+                    progress: {
+                        studentName: 'Ameer',
+                        emotionalState: 'happy',
+                        totalCoins: 20,
+                        level: 2,
+                        xp: 100,
+                        completedQuests: [1],
+                        currentQuestId: 2,
+                        questProgress: {
+                            1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 60, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86000000).toISOString() }
+                        } as any,
+                    }
+                },
+                {
+                    id: 's2',
+                    name: 'Ameerah',
+                    avatar: '👧',
+                    beadPassHash: hash3,
+                    gradeLevel: 'K',
+                    progress: {
+                        studentName: 'Ameerah',
+                        emotionalState: 'excited',
+                        totalCoins: 0,
+                        level: 1,
+                        xp: 0,
+                        completedQuests: [],
+                        currentQuestId: 1,
+                        questProgress: {} as any,
+                    }
+                },
+                teacherProfile
+            ];
+
             if (saved) {
                 let loadedStudents = JSON.parse(saved) as StudentProfile[];
 
-                // Ensure teacher exists (migration fix for existing users)
-                if (!loadedStudents.find(s => s.role === 'teacher')) {
-                    loadedStudents = [...loadedStudents, teacherProfile];
-                    localStorage.setItem('abaquest_students', JSON.stringify(loadedStudents));
+                // Migration: If we have more than our expected profiles, or the teacher is missing, reset to defaults.
+                // This ensures existing users see the 3-profile list.
+                const hasExtraProfiles = loadedStudents.length > 3;
+                const missingTeacher = !loadedStudents.find(s => s.role === 'teacher');
+
+                if (hasExtraProfiles || missingTeacher) {
+                    loadedStudents = dummyStudents;
+                    localStorage.setItem('abaquest_students', JSON.stringify(dummyStudents));
                 }
 
                 setStudents(loadedStudents);
             } else {
-                // Create dummy students for demo
-                // Hash pattern generation
-                const hash1 = await hashBeadPattern([1]);
-                const hash2 = await hashBeadPattern([2]);
-                const hash4 = await hashBeadPattern([4]);
-                const hash6 = await hashBeadPattern([6]);
-                const hash8 = await hashBeadPattern([8]);
-
-                const dummyStudents: StudentProfile[] = [
-                    {
-                        id: 's1',
-                        name: 'Ameer',
-                        avatar: '👦',
-                        beadPassHash: hash5,
-                        gradeLevel: 'K',
-                        progress: {
-                            studentName: 'Ameer',
-                            emotionalState: 'happy',
-                            totalCoins: 20,
-                            level: 2,
-                            xp: 100,
-                            completedQuests: [1],
-                            currentQuestId: 2,
-                            questProgress: {
-                                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 60, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86000000).toISOString() }
-                            } as any,
-                        }
-                    },
-                    {
-                        id: 's2',
-                        name: 'Ameerah',
-                        avatar: '👧',
-                        beadPassHash: hash3,
-                        gradeLevel: 'K',
-                        progress: {
-                            studentName: 'Ameerah',
-                            emotionalState: 'excited',
-                            totalCoins: 0,
-                            level: 1,
-                            xp: 0,
-                            completedQuests: [],
-                            currentQuestId: 1,
-                            questProgress: {} as any,
-                        }
-                    },
-                    {
-                        id: 's3',
-                        name: 'Sally',
-                        avatar: '👱‍♀️',
-                        beadPassHash: hash1,
-                        gradeLevel: '1-2',
-                        progress: {
-                            studentName: 'Sally',
-                            emotionalState: 'focused',
-                            totalCoins: 150,
-                            level: 4,
-                            xp: 500,
-                            completedQuests: [1, 2, 3],
-                            currentQuestId: 4,
-                            questProgress: {
-                                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 80, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 172800000).toISOString(), completedAt: new Date(Date.now() - 172000000).toISOString() },
-                                2: { questId: 2, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 50, postTestScore: 90, coinsEarned: 25, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 85000000).toISOString() },
-                                3: { questId: 3, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 40, postTestScore: 95, coinsEarned: 30, startedAt: new Date(Date.now() - 40000000).toISOString(), completedAt: new Date(Date.now() - 38000000).toISOString() }
-                            } as any
-                        }
-                    },
-                    {
-                        id: 's4',
-                        name: 'Jimmy',
-                        avatar: '🧢',
-                        beadPassHash: hash2,
-                        gradeLevel: 'K',
-                        progress: {
-                            studentName: 'Jimmy',
-                            emotionalState: 'confused',
-                            totalCoins: 5,
-                            level: 1,
-                            xp: 20,
-                            completedQuests: [],
-                            currentQuestId: 1,
-                            questProgress: {
-                                1: { questId: 1, currentStep: 'learn', stepIndex: 2, completed: false, preTestScore: 20, postTestScore: 0, coinsEarned: 0, startedAt: new Date(Date.now() - 10000000).toISOString() }
-                            } as any
-                        }
-                    },
-                    {
-                        id: 's5',
-                        name: 'Pete',
-                        avatar: '👓',
-                        beadPassHash: hash4,
-                        gradeLevel: '1-2',
-                        lastLogin: new Date(Date.now() - 604800000).toISOString(), // 1 week ago
-                        progress: {
-                            studentName: 'Pete',
-                            emotionalState: 'calm',
-                            totalCoins: 80,
-                            level: 3,
-                            xp: 300,
-                            completedQuests: [1, 2],
-                            currentQuestId: 3,
-                            questProgress: {
-                                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 90, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 1209600000).toISOString(), completedAt: new Date(Date.now() - 1200000000).toISOString() },
-                                2: { questId: 2, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 70, postTestScore: 85, coinsEarned: 25, startedAt: new Date(Date.now() - 604800000).toISOString(), completedAt: new Date(Date.now() - 600000000).toISOString() }
-                            } as any
-                        }
-                    },
-                    {
-                        id: 's6',
-                        name: 'Kim',
-                        avatar: '🎨',
-                        beadPassHash: hash6,
-                        gradeLevel: 'K',
-                        progress: {
-                            studentName: 'Kim',
-                            emotionalState: 'happy',
-                            totalCoins: 45,
-                            level: 2,
-                            xp: 150,
-                            completedQuests: [1],
-                            currentQuestId: 2,
-                            questProgress: {
-                                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 50, postTestScore: 90, coinsEarned: 20, startedAt: new Date(Date.now() - 200000000).toISOString(), completedAt: new Date(Date.now() - 198000000).toISOString() }
-                            } as any
-                        }
-                    },
-                    {
-                        id: 's7',
-                        name: 'Siddiq',
-                        avatar: '⚽',
-                        beadPassHash: hash8,
-                        gradeLevel: '1-2',
-                        progress: {
-                            studentName: 'Siddiq',
-                            emotionalState: 'excited',
-                            totalCoins: 0,
-                            level: 1,
-                            xp: 0,
-                            completedQuests: [],
-                            currentQuestId: null,
-                            questProgress: {} as any
-                        }
-                    },
-                    teacherProfile
-                ];
-
                 setStudents(dummyStudents);
                 localStorage.setItem('abaquest_students', JSON.stringify(dummyStudents));
             }

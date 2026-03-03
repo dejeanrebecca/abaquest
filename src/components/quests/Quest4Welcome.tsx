@@ -39,7 +39,7 @@ export function Quest4Welcome({ onStart }: Quest4WelcomeProps) {
                     </h1>
 
                     <p className="text-2xl text-sky-700 mb-8 leading-relaxed">
-                        Get ready for a chilly adventure in the Ice Valley!
+                        Get ready for a new adventure with Ameer and Ameerah!
                         <br />
                         We will learn the power of <strong>Zero</strong> and how it freezes numbers!
                     </p>

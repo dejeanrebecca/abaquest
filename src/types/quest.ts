@@ -62,7 +62,7 @@ export interface StudentProfile {
 export const QUESTS: Record<QuestId, Quest> = {
   1: {
     id: 1,
-    title: 'The Naming',
+    title: 'Quest 1',
     description: 'Name your Junior Counter and meet your new classmates at the School of Mental Math!',
     icon: '✏️',
     color: 'from-sunburst-yellow to-orange-400',
@@ -72,7 +72,7 @@ export const QUESTS: Record<QuestId, Quest> = {
   },
   2: {
     id: 2,
-    title: 'Parts of the Counter',
+    title: 'Quest 2',
     description: 'Learn the Upper Bead (Head), Lower Beads (Legs), and Answer Rod (Body)!',
     icon: '🧩',
     color: 'from-aqua-blue to-blue-500',
@@ -82,7 +82,7 @@ export const QUESTS: Record<QuestId, Quest> = {
   },
   3: {
     id: 3,
-    title: 'Position Numbers 0-9',
+    title: 'Quest 3',
     description: 'Discover where each number lives on the Junior Counter!',
     icon: '🔢',
     color: 'from-deep-blue to-purple-600',
@@ -92,7 +92,7 @@ export const QUESTS: Record<QuestId, Quest> = {
   },
   4: {
     id: 4,
-    title: 'Freeze + Addition',
+    title: 'Quest 4',
     description: 'Master the Freeze rule (+0) and learn to add numbers on your counter!',
     icon: '➕',
     color: 'from-abacus-red to-pink-500',

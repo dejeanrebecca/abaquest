@@ -39,25 +39,13 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
             let audioUrlPromise = audioCache.get(cacheKey);
 
             if (!audioUrlPromise) {
-                // If no API key is set, fallback to Web Speech API or just simulate
+                // If no API key is set, we don't want to fallback to the synthesizer voice
                 if (!apiKey || apiKey === 'your_api_key_here') {
-                    console.warn("ElevenLabs API Key is missing. Falling back to Web Speech API.");
-                    if ('speechSynthesis' in window) {
-                        const utterance = new SpeechSynthesisUtterance(text);
-                        utterance.onend = () => {
-                            setIsPlaying(false);
-                            if (onComplete) onComplete();
-                        };
-                        window.speechSynthesis.speak(utterance);
-                        return;
-                    } else {
-                        // Fallback simulation
-                        setTimeout(() => {
-                            setIsPlaying(false);
-                            if (onComplete) onComplete();
-                        }, 2000);
-                        return;
-                    }
+                    console.warn("ElevenLabs API Key is missing. Narration is disabled.");
+                    // Immediately trigger onComplete to allow the UI to progress
+                    if (onComplete) onComplete();
+                    setIsPlaying(false);
+                    return;
                 }
 
                 audioUrlPromise = fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
