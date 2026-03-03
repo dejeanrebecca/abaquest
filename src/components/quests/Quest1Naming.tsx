@@ -39,7 +39,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
-  const { playAudio, prefetchAudio } = useElevenLabs();
+  const { playAudio, stopAudio, prefetchAudio } = useElevenLabs();
 
   useEffect(() => {
     if (step === 'naming' && counterName && counterName.trim().length >= 2) {
@@ -50,6 +50,11 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
       return () => clearTimeout(timeoutId);
     }
   }, [step, counterName, prefetchAudio]);
+
+  // Ensure audio stops when navigating away from the quest
+  useEffect(() => {
+    return () => stopAudio();
+  }, [stopAudio]);
 
 
   // Pre-test and Post-test questions (MUST BE IDENTICAL)

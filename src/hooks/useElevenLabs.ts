@@ -12,6 +12,7 @@ interface UseElevenLabsOptions {
 export function useElevenLabs(options?: UseElevenLabsOptions) {
     const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const currentRequestIdRef = useRef<number>(0);
 
     // Default to a specific voice ID if provided, otherwise use env var
     const defaultVoiceId = options?.voiceId || import.meta.env.VITE_ELEVENLABS_VOICE_ID;
@@ -24,6 +25,9 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
             if (onComplete) onComplete();
             return;
         }
+
+        // Increment request ID to cancel any pending requests
+        const requestId = ++currentRequestIdRef.current;
 
         // Stop current audio if playing
         if (audioRef.current) {
@@ -79,31 +83,43 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
 
             const audioUrl = await audioUrlPromise;
 
+            // Check if this request was cancelled during the await
+            if (requestId !== currentRequestIdRef.current) {
+                return;
+            }
+
             // Play the audio URL
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
 
             audio.onended = () => {
-                setIsPlaying(false);
-                if (onComplete) onComplete();
+                if (requestId === currentRequestIdRef.current) {
+                    setIsPlaying(false);
+                    if (onComplete) onComplete();
+                }
             };
 
             audio.onerror = () => {
                 console.error("Error playing audio.");
-                setIsPlaying(false);
-                if (onComplete) onComplete();
+                if (requestId === currentRequestIdRef.current) {
+                    setIsPlaying(false);
+                    if (onComplete) onComplete();
+                }
             };
 
             await audio.play();
 
         } catch (error) {
             console.error("Failed to play audio:", error);
-            setIsPlaying(false);
-            if (onComplete) onComplete();
+            if (requestId === currentRequestIdRef.current) {
+                setIsPlaying(false);
+                if (onComplete) onComplete();
+            }
         }
     }, [apiKey, defaultVoiceId]);
 
     const stopAudio = useCallback(() => {
+        currentRequestIdRef.current++; // Cancel any pending loading
         if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
