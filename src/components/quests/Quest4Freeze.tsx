@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { QuestClose } from '../quest-screens/QuestClose';
 import { PostTestCheckIn } from '../quest-screens/PostTestCheckIn';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { useDataLogger } from '../DataLogger';
+import { useElevenLabs } from '../../hooks/useElevenLabs';
 
 // Placeholder imports for components we are about to create
 import { Quest4PreTest } from './Quest4PreTest';
@@ -35,6 +36,13 @@ export function Quest4Freeze({ onComplete }: Quest4FreezeProps) {
   const [preTestScore, setPreTestScore] = useState(0);
   const [postTestScore, setPostTestScore] = useState(0);
   const { logInteraction } = useDataLogger();
+
+  const { stopAudio } = useElevenLabs();
+
+  // Ensure audio stops when navigating away from the quest
+  useEffect(() => {
+    return () => stopAudio();
+  }, [stopAudio]);
 
   const handlePreTestComplete = (score: number) => {
     setPreTestScore(score);

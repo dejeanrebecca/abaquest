@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Quest3PreTest } from '../quests/Quest3PreTest';
 import { Quest3Explainer } from '../quests/Quest3Explainer';
 import { Quest3Learn } from '../quests/Quest3Learn';
@@ -6,6 +6,7 @@ import { Quest3Practice } from '../quests/Quest3Practice';
 import { Quest3Story } from '../quests/Quest3Story';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
+import { useElevenLabs } from '../../hooks/useElevenLabs';
 
 interface PositionNumbersProps {
   onNext: (results?: { pre: number; post: number }) => void;
@@ -15,6 +16,12 @@ type Phase = 'welcome' | 'pretest' | 'explainer' | 'learn' | 'practice' | 'trans
 
 export function PositionNumbers({ onNext }: PositionNumbersProps) {
   const [phase, setPhase] = useState<Phase>('welcome');
+  const { stopAudio } = useElevenLabs();
+
+  // Ensure audio stops when navigating away from the quest
+  useEffect(() => {
+    return () => stopAudio();
+  }, [stopAudio]);
 
   const handleNextPhase = (nextPhase?: Phase) => {
     if (nextPhase) {
@@ -43,7 +50,6 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
           questTitle="Quest 3: Position Numbers"
           questIcon="123"
           welcomeMessage="Great work so far, AbaQuester! Now that you know the parts of your Junior Counter, it's time to find out where the numbers 0 to 9 live. Every number has its own special place!"
-          audioWelcomeMessage="Great work so far, AbaQuester! Now that you know the parts of your Junior Counter, it's time to find out where the numbers 0 to 9 liv. Every number has its own special place!"
           onNext={() => handleNextPhase()}
           showEmotionalCheckIn={false}
         />

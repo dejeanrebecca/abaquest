@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { useState, useRef, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 
 // In-memory cache to prevent re-fetching the same audio
 // Maps string (text + voiceId) to a Promise of a Blob URL
@@ -9,10 +9,12 @@ interface UseElevenLabsOptions {
     voiceId?: string;
 }
 
+// Global state to track currently playing audio across all instances of the hook
+let globalAudio: HTMLAudioElement | null = null;
+let globalRequestId = 0;
+
 export function useElevenLabs(options?: UseElevenLabsOptions) {
     const [isPlaying, setIsPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const currentRequestIdRef = useRef<number>(0);
 
     // Default to a specific voice ID if provided, otherwise use env var
     const defaultVoiceId = options?.voiceId || import.meta.env.VITE_ELEVENLABS_VOICE_ID;
@@ -26,13 +28,13 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
             return;
         }
 
-        // Increment request ID to cancel any pending requests
-        const requestId = ++currentRequestIdRef.current;
+        // Increment global request ID to cancel any pending requests
+        const requestId = ++globalRequestId;
 
-        // Stop current audio if playing
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current = null;
+        // Stop any currently playing audio globally
+        if (globalAudio) {
+            globalAudio.pause();
+            globalAudio = null;
         }
 
         setIsPlaying(true);
@@ -46,7 +48,6 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
                 // If no API key is set, we don't want to fallback to the synthesizer voice
                 if (!apiKey || apiKey === 'your_api_key_here') {
                     console.warn("ElevenLabs API Key is missing. Narration is disabled.");
-                    // Immediately trigger onComplete to allow the UI to progress
                     if (onComplete) onComplete();
                     setIsPlaying(false);
                     return;
@@ -83,26 +84,28 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
 
             const audioUrl = await audioUrlPromise;
 
-            // Check if this request was cancelled during the await
-            if (requestId !== currentRequestIdRef.current) {
+            // Check if this request was cancelled during the await (globally)
+            if (requestId !== globalRequestId) {
                 return;
             }
 
             // Play the audio URL
             const audio = new Audio(audioUrl);
-            audioRef.current = audio;
+            globalAudio = audio;
 
             audio.onended = () => {
-                if (requestId === currentRequestIdRef.current) {
+                if (requestId === globalRequestId) {
                     setIsPlaying(false);
+                    globalAudio = null;
                     if (onComplete) onComplete();
                 }
             };
 
             audio.onerror = () => {
                 console.error("Error playing audio.");
-                if (requestId === currentRequestIdRef.current) {
+                if (requestId === globalRequestId) {
                     setIsPlaying(false);
+                    globalAudio = null;
                     if (onComplete) onComplete();
                 }
             };
@@ -111,7 +114,7 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
 
         } catch (error) {
             console.error("Failed to play audio:", error);
-            if (requestId === currentRequestIdRef.current) {
+            if (requestId === globalRequestId) {
                 setIsPlaying(false);
                 if (onComplete) onComplete();
             }
@@ -119,11 +122,10 @@ export function useElevenLabs(options?: UseElevenLabsOptions) {
     }, [apiKey, defaultVoiceId]);
 
     const stopAudio = useCallback(() => {
-        currentRequestIdRef.current++; // Cancel any pending loading
-        if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.currentTime = 0;
-            audioRef.current = null;
+        globalRequestId++; // Cancel any pending loading globally
+        if (globalAudio) {
+            globalAudio.pause();
+            globalAudio = null;
         } else if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
         }

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { QuestClose } from '../quest-screens/QuestClose';
 import { Quest2Assessment } from './Quest2Assessment';
 import { Quest2Learn } from './Quest2Learn';
 import { Quest2Story } from './Quest2Story';
 import { TransitionScreen } from '../common/TransitionScreen';
+import { useElevenLabs } from '../../hooks/useElevenLabs';
 // import storyBookImage from '../../assets/story-book.png';
 
 interface Quest2PartsProps {
@@ -18,6 +19,13 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
   const [step, setStep] = useState<Step>('welcome');
   const [preTestScore, setPreTestScore] = useState(0);
   const [postTestScore, setPostTestScore] = useState(0);
+
+  const { stopAudio } = useElevenLabs();
+
+  // Ensure audio stops when navigating away from the quest
+  useEffect(() => {
+    return () => stopAudio();
+  }, [stopAudio]);
 
 
   const calculateScore = (answers: boolean[]): number => {
