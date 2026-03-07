@@ -8,6 +8,18 @@ const __dirname = path.dirname(__filename);
 
 import fs from 'fs';
 
+// Log everything for Cloud Run debugging
+process.on('uncaughtException', (err) => {
+    console.error('UNCAUGHT EXCEPTION:', err.stack || err);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('UNHANDLED REJECTION:', reason);
+});
+
+console.log('Server process starting...');
+
 const server = jsonServer.create();
 
 // Support external volume mounts for persistence on GCP
@@ -61,6 +73,7 @@ server.get('*', (req, res) => {
     }
 });
 
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
     console.log(`JSON Server with React static serving is running on port ${port}`);
+    console.log(`Server is ready to handle requests.`);
 });
