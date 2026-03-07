@@ -59,6 +59,14 @@ function AppContent() {
     setCurrentScreen('library');
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentScreen('library');
+    if (currentQuest) {
+      exitQuest();
+    }
+  };
+
   const renderContent = () => {
     // If a quest is active, render the quest screen
     if (currentQuest) {
@@ -125,6 +133,7 @@ function AppContent() {
               currentScreen={currentScreen}
               currentQuest={currentQuest}
               onHome={handleHomeClick}
+              onLogout={handleLogout}
             />
 
             {/* Main Content Area */}

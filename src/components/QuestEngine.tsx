@@ -23,6 +23,7 @@ interface QuestEngineContextType {
 const QuestEngineContext = createContext<QuestEngineContextType | undefined>(undefined);
 
 const INITIAL_PROGRESS: StudentProgress = {
+  studentId: '',
   studentName: '',
   emotionalState: '',
   totalCoins: 0,
@@ -43,6 +44,24 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
   // Save to localStorage whenever progress changes
   useEffect(() => {
     localStorage.setItem('abaquest_progress', JSON.stringify(studentProgress));
+
+    // Also sync back to the master student list if we have a studentId
+    if (studentProgress.studentId) {
+      const savedStudents = localStorage.getItem('abaquest_students');
+      if (savedStudents) {
+        try {
+          const students = JSON.parse(savedStudents) as StudentProfile[];
+          const updatedStudents = students.map(s =>
+            s.id === studentProgress.studentId
+              ? { ...s, progress: studentProgress }
+              : s
+          );
+          localStorage.setItem('abaquest_students', JSON.stringify(updatedStudents));
+        } catch (e) {
+          console.error('Error syncing progress to master list:', e);
+        }
+      }
+    }
   }, [studentProgress]);
 
   const currentQuest = studentProgress.currentQuestId;
@@ -202,7 +221,10 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
         completeStep,
         completeQuest,
         isQuestUnlocked,
-        loadProfile: (profile: StudentProfile) => setStudentProgress(profile.progress),
+        loadProfile: (profile: StudentProfile) => setStudentProgress({
+          ...profile.progress,
+          studentId: profile.id
+        }),
         setStudentName,
         setEmotionalState,
 

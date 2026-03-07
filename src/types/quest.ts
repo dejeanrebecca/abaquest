@@ -34,6 +34,7 @@ export interface QuestProgress {
 }
 
 export interface StudentProgress {
+  studentId?: string; // Links progress to a specific StudentProfile
   studentName: string;
   emotionalState: string;
   totalCoins: number;
@@ -48,9 +49,10 @@ export interface StudentProfile {
   id: string;
   name: string;
   avatar: string; // Emoji char
-  beadPassHash: string; // SHA-256 hash of the sequence
+  emojiPass: string[]; // Array of 3 emojis
   gradeLevel: 'K' | '1-2';
   role?: 'student' | 'teacher'; // Default is 'student'
+  teacherId?: string; // ID of the teacher this student belongs to
   lastLogin?: string; // ISO timestamp
   progress: StudentProgress;
 }

@@ -1,169 +1,332 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { StudentSelect } from './StudentSelect';
-import { BeadPassChallenge } from './BeadPassChallenge';
+import { TeacherSelect } from './TeacherSelect';
+import { EmojiPassChallenge } from './EmojiPassChallenge';
+import { TeacherRosterDashboard } from './TeacherRosterDashboard';
 import { StudentProfile } from '../../types/quest';
-import { hashBeadPattern } from '../../utils/auth';
+import { Button } from '../ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 interface AuthScreenProps {
     onAuthenticated: (student: StudentProfile) => void;
 }
 
+const INITIAL_PROFILES: StudentProfile[] = [
+    {
+        id: 'teacher1',
+        name: 'Ms. Teacher',
+        avatar: '👩‍🏫',
+        emojiPass: ['🍎', '🍎', '🍎'],
+        gradeLevel: 'K',
+        role: 'teacher',
+        progress: {
+            studentName: 'Ms. Teacher',
+            emotionalState: '',
+            totalCoins: 0,
+            level: 99,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: null,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 'teacher2',
+        name: 'Mr. Smith',
+        avatar: '👨‍🏫',
+        emojiPass: ['🚗', '🚗', '🚗'],
+        gradeLevel: 'K',
+        role: 'teacher',
+        progress: {
+            studentName: 'Mr. Smith',
+            emotionalState: '',
+            totalCoins: 0,
+            level: 99,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: null,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's1',
+        name: 'Ameer',
+        avatar: '👦',
+        emojiPass: ['🐶', '🐶', '🐶'],
+        gradeLevel: 'K',
+        teacherId: 'teacher1',
+        progress: {
+            studentName: 'Ameer',
+            emotionalState: 'happy',
+            totalCoins: 20,
+            level: 2,
+            xp: 100,
+            completedQuests: [1],
+            currentQuestId: 2,
+            questProgress: {
+                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 60, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86000000).toISOString() }
+            } as any,
+        }
+    },
+    {
+        id: 's2',
+        name: 'Ameerah',
+        avatar: '👧',
+        emojiPass: ['⭐', '⭐', '⭐'],
+        gradeLevel: 'K',
+        teacherId: 'teacher1',
+        progress: {
+            studentName: 'Ameerah',
+            emotionalState: 'excited',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's3',
+        name: 'Liam',
+        avatar: '👱‍♂️',
+        emojiPass: ['🚗', '🚗', '🚗'],
+        gradeLevel: 'K',
+        teacherId: 'teacher2',
+        progress: {
+            studentName: 'Liam',
+            emotionalState: 'happy',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's4',
+        name: 'Noah',
+        avatar: '👦🏽',
+        emojiPass: ['🍎', '🍎', '🍎'],
+        gradeLevel: 'K',
+        teacherId: 'teacher2',
+        progress: {
+            studentName: 'Noah',
+            emotionalState: 'happy',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    }
+];
+
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
-    const [view, setView] = useState<'select' | 'challenge'>('select');
+    const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard'>('teacher-select');
+    const [selectedTeacher, setSelectedTeacher] = useState<StudentProfile | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
-    const [students, setStudents] = useState<StudentProfile[]>([]);
+    const [profiles, setProfiles] = useState<StudentProfile[]>(() => {
+        const saved = localStorage.getItem('abaquest_students');
+        if (!saved) return INITIAL_PROFILES;
+
+        try {
+            const savedProfiles = JSON.parse(saved) as StudentProfile[];
+            // Merge strategy:
+            // 1. For each initial profile, if a saved version exists, use that.
+            // 2. Add any custom profiles that are NOT in the initial set.
+            const mergedInitial = INITIAL_PROFILES.map(ip => {
+                const savedVersion = savedProfiles.find(sp => sp.id === ip.id);
+                return savedVersion || ip;
+            });
+            const customProfiles = savedProfiles.filter(sp =>
+                !INITIAL_PROFILES.some(dp => dp.id === sp.id)
+            );
+            return [...mergedInitial, ...customProfiles];
+        } catch (e) {
+            console.error('Error loading profiles from localStorage:', e);
+            return INITIAL_PROFILES;
+        }
+    });
 
     useEffect(() => {
-        // Initialize with dummy data if empty (simulate fetching from DB/LocalStorage)
-        const loadStudents = async () => {
-            // Hash for pattern "5" (Ameer) -> SHA-256
-            const hash5 = await hashBeadPattern([5]);
-            // Hash for pattern "3" (Ameerah) -> SHA-256
-            const hash3 = await hashBeadPattern([3]);
-            // Hash for pattern "9" (Teacher) -> SHA-256
-            const hash9 = await hashBeadPattern([9]);
+        localStorage.setItem('abaquest_students', JSON.stringify(profiles));
+    }, [profiles]);
 
-            const teacherProfile: StudentProfile = {
-                id: 'teacher1',
-                name: 'Ms. Teacher',
-                avatar: '👩‍🏫',
-                beadPassHash: hash9,
-                gradeLevel: 'K',
-                role: 'teacher',
-                progress: {
-                    studentName: 'Ms. Teacher',
-                    emotionalState: '',
-                    totalCoins: 0,
-                    level: 99,
-                    xp: 0,
-                    completedQuests: [],
-                    currentQuestId: null,
-                    questProgress: {} as any,
-                }
-            };
 
-            // Check LocalStorage first
-            const saved = localStorage.getItem('abaquest_students');
-            const dummyStudents: StudentProfile[] = [
-                {
-                    id: 's1',
-                    name: 'Ameer',
-                    avatar: '👦',
-                    beadPassHash: hash5,
-                    gradeLevel: 'K',
-                    progress: {
-                        studentName: 'Ameer',
-                        emotionalState: 'happy',
-                        totalCoins: 20,
-                        level: 2,
-                        xp: 100,
-                        completedQuests: [1],
-                        currentQuestId: 2,
-                        questProgress: {
-                            1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 60, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86000000).toISOString() }
-                        } as any,
-                    }
-                },
-                {
-                    id: 's2',
-                    name: 'Ameerah',
-                    avatar: '👧',
-                    beadPassHash: hash3,
-                    gradeLevel: 'K',
-                    progress: {
-                        studentName: 'Ameerah',
-                        emotionalState: 'excited',
-                        totalCoins: 0,
-                        level: 1,
-                        xp: 0,
-                        completedQuests: [],
-                        currentQuestId: 1,
-                        questProgress: {} as any,
-                    }
-                },
-                teacherProfile
-            ];
 
-            if (saved) {
-                let loadedStudents = JSON.parse(saved) as StudentProfile[];
-
-                // Migration: If we have more than our expected profiles, or the teacher is missing, reset to defaults.
-                // This ensures existing users see the 3-profile list.
-                const hasExtraProfiles = loadedStudents.length > 3;
-                const missingTeacher = !loadedStudents.find(s => s.role === 'teacher');
-
-                if (hasExtraProfiles || missingTeacher) {
-                    loadedStudents = dummyStudents;
-                    localStorage.setItem('abaquest_students', JSON.stringify(dummyStudents));
-                }
-
-                setStudents(loadedStudents);
-            } else {
-                setStudents(dummyStudents);
-                localStorage.setItem('abaquest_students', JSON.stringify(dummyStudents));
-            }
-        };
-        loadStudents();
-    }, []);
-
+    const handleTeacherSelect = (teacher: StudentProfile) => {
+        setSelectedTeacher(teacher);
+        setView('student-select');
+    };
 
     const handleStudentSelect = (student: StudentProfile) => {
         setSelectedStudent(student);
-        setView('challenge');
+        setView('confirm');
     };
+
+    const teachers = profiles.filter(p => p.role === 'teacher');
+    const classStudents = profiles.filter(p => p.teacherId === selectedTeacher?.id);
 
     return (
         <div className="min-h-screen bg-warm-neutral flex flex-col items-center justify-center p-4">
-            <header className="mb-8 text-center">
-                <h1 className="text-4xl font-bold text-deep-blue mb-2">School of Mental Math</h1>
-                <p className="text-xl text-deep-blue/60">Who is playing today?</p>
+            <header className="mb-8 text-center relative w-full max-w-4xl flex items-center justify-center">
+                {view !== 'teacher-select' && view !== 'teacher-dashboard' && (
+                    <Button
+                        variant="ghost"
+                        onClick={() => {
+                            if (view === 'student-select') {
+                                setView('teacher-select');
+                                setSelectedTeacher(null);
+                            } else if (view === 'confirm') {
+                                setView('student-select');
+                                setSelectedStudent(null);
+                            } else if (view === 'challenge') {
+                                setView('student-select');
+                                setSelectedStudent(null);
+                            }
+                        }}
+                        className="absolute left-0 text-deep-blue hover:bg-white/50 px-4 py-2"
+                    >
+                        <ArrowLeft className="w-6 h-6 mr-2" />
+                        Back
+                    </Button>
+                )}
+                <div>
+                    <h1 className="text-4xl font-bold text-deep-blue mb-2">School of Mental Math</h1>
+                    <p className="text-xl text-deep-blue/60">
+                        {view === 'teacher-select' && "Who is your teacher?"}
+                        {view === 'student-select' && `Welcome to ${selectedTeacher?.name}'s Class!`}
+                        {(view === 'confirm' || view === 'challenge') && "Almost there!"}
+                    </p>
+                </div>
             </header>
 
             <AnimatePresence mode="wait">
-                {view === 'select' ? (
+                {view === 'teacher-select' ? (
                     <motion.div
-                        key="select"
+                        key="teacher-select"
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
                         className="w-full max-w-4xl"
                     >
-                        <StudentSelect students={students} onSelect={handleStudentSelect} />
+                        <TeacherSelect teachers={teachers} onSelect={handleTeacherSelect} />
                     </motion.div>
-                ) : (
+                ) : view === 'student-select' ? (
+                    <motion.div
+                        key="student-select"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="w-full max-w-5xl max-h-[70vh] overflow-y-auto px-4 pb-12 rounded-3xl"
+                    >
+                        <div className="flex justify-center mb-8">
+                            <button
+                                onClick={() => {
+                                    handleStudentSelect(selectedTeacher!); // Teachers logging in directly
+                                }}
+                                className="bg-white/80 hover:bg-white border-2 border-deep-blue/20 rounded-xl px-6 py-3 text-deep-blue font-semibold shadow-sm transition-all flex items-center gap-3"
+                            >
+                                <span className="text-2xl">{selectedTeacher?.avatar}</span>
+                                I am {selectedTeacher?.name}
+                            </button>
+                        </div>
+                        <StudentSelect students={classStudents} onSelect={handleStudentSelect} />
+                    </motion.div>
+                ) : view === 'confirm' ? (
+                    <motion.div
+                        key="confirm"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        className="w-full max-w-lg bg-white border-4 border-deep-blue rounded-3xl p-8 shadow-2xl text-center"
+                    >
+                        {selectedStudent && (
+                            <>
+                                <div className="text-[120px] mb-6 leading-none animate-bounce">{selectedStudent.avatar}</div>
+                                <h2 className="text-4xl font-bold text-deep-blue mb-10">Are you {selectedStudent.name}?</h2>
+                                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedStudent(null);
+                                            setView('student-select');
+                                        }}
+                                        className="flex-1 px-8 py-5 rounded-2xl text-2xl font-bold border-4 border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors active:scale-95"
+                                    >
+                                        No
+                                    </button>
+                                    <button
+                                        onClick={() => setView('challenge')}
+                                        className="flex-1 px-8 py-5 rounded-2xl text-2xl font-bold bg-green-500 text-white shadow-lg border-4 border-green-600 hover:bg-green-600 transition-colors active:scale-95"
+                                    >
+                                        Yes!
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </motion.div>
+                ) : view === 'challenge' ? (
                     <motion.div
                         key="challenge"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        className="w-full"
+                        className="w-full relative min-h-[500px]"
                     >
                         {selectedStudent && (
-                            <BeadPassChallenge
+                            <EmojiPassChallenge
                                 student={selectedStudent}
                                 onSuccess={() => {
-                                    // Update last login time
                                     const now = new Date().toISOString();
                                     const updatedStudent = { ...selectedStudent, lastLogin: now };
 
-                                    // Update local storage
-                                    const updatedStudents = students.map(s =>
-                                        s.id === selectedStudent.id ? updatedStudent : s
+                                    const updatedProfiles = profiles.map(p =>
+                                        p.id === selectedStudent.id ? updatedStudent : p
                                     );
-                                    setStudents(updatedStudents);
-                                    localStorage.setItem('abaquest_students', JSON.stringify(updatedStudents));
+                                    setProfiles(updatedProfiles);
+                                    localStorage.setItem('abaquest_students', JSON.stringify(updatedProfiles));
 
-                                    onAuthenticated(updatedStudent);
+                                    if (updatedStudent.role === 'teacher') {
+                                        setView('teacher-dashboard');
+                                    } else {
+                                        onAuthenticated(updatedStudent);
+                                    }
                                 }}
                                 onBack={() => {
                                     setSelectedStudent(null);
-                                    setView('select');
+                                    setView('student-select');
                                 }}
                             />
                         )}
                     </motion.div>
-                )}
+                ) : view === 'teacher-dashboard' ? (
+                    <motion.div
+                        key="teacher-dashboard"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="w-full fixed inset-0 bg-warm-neutral z-50 overflow-y-auto"
+                    >
+                        {selectedStudent && (
+                            <TeacherRosterDashboard
+                                teacher={selectedStudent}
+                                allProfiles={profiles}
+                                onUpdateProfiles={(newProfiles) => {
+                                    setProfiles(newProfiles);
+                                    localStorage.setItem('abaquest_students', JSON.stringify(newProfiles));
+                                }}
+                                onLogout={() => {
+                                    setSelectedStudent(null);
+                                    setView('teacher-select');
+                                }}
+                            />
+                        )}
+                    </motion.div>
+                ) : null}
             </AnimatePresence>
         </div>
     );
