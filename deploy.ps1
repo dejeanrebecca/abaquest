@@ -4,7 +4,7 @@ $SERVICE_NAME = "abaquest-frontend"
 $REGION = "us-central1"
 $IMAGE_TAG = "latest"
 
-$IMAGE_NAME = "gcr.io/$PROJECT_ID/$SERVICE_NAME`:$IMAGE_TAG"
+$IMAGE_NAME = "us-central1-docker.pkg.dev/$PROJECT_ID/youtube/$SERVICE_NAME`:$IMAGE_TAG"
 
 Write-Host "----------------------------------------" -ForegroundColor Cyan
 Write-Host "CONFIGURATION" -ForegroundColor Cyan
@@ -34,12 +34,7 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerreg
 Write-Host "Building container image: $IMAGE_NAME"
 gcloud builds submit --tag $IMAGE_NAME .
 
-# 3. Create persistent storage bucket if missing
-$BUCKET_NAME = "$PROJECT_ID-abaquest-db"
-Write-Host "Ensuring DB storage bucket exists gs://$BUCKET_NAME..." -ForegroundColor Cyan
-gsutil mb -l $REGION "gs://$BUCKET_NAME" 2>$null
-
-# 4. Deploy to Cloud Run
+# 3. Deploy to Cloud Run
 Write-Host "Deploying to Cloud Run: $SERVICE_NAME"
 gcloud run deploy $SERVICE_NAME `
   --image $IMAGE_NAME `
@@ -47,9 +42,7 @@ gcloud run deploy $SERVICE_NAME `
   --platform managed `
   --allow-unauthenticated `
   --memory 512Mi `
-  --execution-environment gen2 `
-  --add-volume "name=db-vol,type=cloud-storage,bucket=$BUCKET_NAME" `
-  --add-volume-mount "volume=db-vol,mount-path=/app/data" `
-  --update-env-vars "DATA_DIR=/app/data"
+  --clear-volumes `
+  --clear-volume-mounts
 
 Write-Host "Deployment Complete!" -ForegroundColor Green
