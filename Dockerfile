@@ -23,7 +23,7 @@ RUN npm ci --omit=dev
 COPY --from=build /app/build ./build
 
 # Copy the server file and the database file
-COPY server.js .
+COPY server.cjs .
 COPY db.json .
 
 EXPOSE 8080

@@ -67,6 +67,6 @@
             "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
             "build": "vite build",
             "preview": "vite preview",
-            "start": "node server.js"
+            "start": "node server.cjs"
       }
 }
