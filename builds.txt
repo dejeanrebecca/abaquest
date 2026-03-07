@@ -1,0 +1,6 @@
+﻿ID                                    CREATE_TIME                DURATION  SOURCE                                                                                  IMAGES                                       STATUS
+4321dd6a-5ef2-4026-9770-cc0061f71440  2026-03-03T02:07:42+00:00  1M6S      gs://abaquest_cloudbuild/source/1772503488.812548-cf3840c38a394632b64edb9ecd760639.tgz  gcr.io/abaquest/abaquest-frontend (+1 more)  SUCCESS
+ff0a2510-4085-4ce3-b23f-50f67e1cd88e  2026-03-03T01:38:12+00:00  1M1S      gs://abaquest_cloudbuild/source/1772501765.794998-34bdfc5f9499404180c1c68dbf3d1413.tgz  gcr.io/abaquest/abaquest-frontend (+1 more)  SUCCESS
+07af271a-49c6-48db-8594-8215eeff6920  2026-03-03T01:29:55+00:00  1M4S      gs://abaquest_cloudbuild/source/1772501250.14552-57bab538094b4a48a3aba3be99b01e3b.tgz   gcr.io/abaquest/abaquest-frontend (+1 more)  SUCCESS
+468a6c80-917c-4c47-b489-7a602295822b  2026-03-01T20:47:46+00:00  1M8S      gs://abaquest_cloudbuild/source/1772398032.380007-e0202697832644838fd6f325946be672.tgz  gcr.io/abaquest/abaquest-frontend (+1 more)  SUCCESS
+edf04351-c83b-451a-a335-f059fbd8f498  2026-02-28T20:36:50+00:00  1M41S     gs://abaquest_cloudbuild/source/1772310910.132183-aa32ae84bc39452aa2a94ce7821aa219.tgz  gcr.io/abaquest/abaquest-frontend (+1 more)  SUCCESS

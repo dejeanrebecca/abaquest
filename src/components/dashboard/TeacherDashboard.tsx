@@ -4,6 +4,7 @@ import { StudentProfile, QuestId } from '../../types/quest';
 import { Button } from '../ui/button';
 import { hashBeadPattern } from '../../utils/auth';
 import { ArrowLeft, RefreshCw, Trophy, Star, Coins, Calendar, X, BarChart2 } from 'lucide-react';
+import { DbService, useDbSync } from '../../services/db.service';
 
 interface TeacherDashboardProps {
     onBack: () => void;
@@ -15,35 +16,24 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
     const [resettingStudent, setResettingStudent] = useState<StudentProfile | null>(null);
 
     useEffect(() => {
-        const loadStudents = () => {
-            const saved = localStorage.getItem('abaquest_students');
-            if (saved) {
-                // Filter out the teacher
-                const allProfiles = JSON.parse(saved) as StudentProfile[];
-                setStudents(allProfiles.filter(s => s.role !== 'teacher'));
-            }
+        const loadStudents = async () => {
+            const allProfiles = await DbService.getProfiles();
+            setStudents(allProfiles.filter(s => s.role !== 'teacher'));
         };
         loadStudents();
     }, []);
+
+    useDbSync(async () => {
+        const allProfiles = await DbService.getProfiles();
+        setStudents(allProfiles.filter(s => s.role !== 'teacher'));
+    });
 
     const handleResetPass = async (student: StudentProfile) => {
         // Reset to default pattern "1-2-3"
         const defaultHash = await hashBeadPattern([1, 2, 3]);
 
-        const updatedStudents = students.map(s =>
-            s.id === student.id ? { ...s, beadPassHash: defaultHash } : s
-        );
-
-        setStudents(updatedStudents);
-
-        // Update local storage (need to include teacher back in)
-        const saved = localStorage.getItem('abaquest_students');
-        if (saved) {
-            const allProfiles = JSON.parse(saved) as StudentProfile[];
-            const teacher = allProfiles.find(s => s.role === 'teacher');
-            const dataToSave = teacher ? [...updatedStudents, teacher] : updatedStudents;
-            localStorage.setItem('abaquest_students', JSON.stringify(dataToSave));
-        }
+        const updatedStudent = { ...student, beadPassHash: defaultHash };
+        await DbService.updateProfile(updatedStudent);
 
         setResettingStudent(null);
         alert(`Bead Pass for ${student.name} reset to: 1-2-3`);
