@@ -10,11 +10,22 @@ COPY . .
 RUN npm run build
 
 # Production Stage
-FROM nginx:alpine
+FROM node:18-alpine
 
-COPY --from=build /app/build /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
+
+# Copy production dependencies
+COPY package*.json ./
+# Install only production dependencies
+RUN npm ci --omit=dev
+
+# Copy the built React app
+COPY --from=build /app/dist ./dist
+
+# Copy the server file and the database file
+COPY server.js .
+COPY db.json .
 
 EXPOSE 8080
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npm", "start"]

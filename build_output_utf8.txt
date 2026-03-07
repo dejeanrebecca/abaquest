@@ -1,0 +1,203 @@
+﻿--------------- REMOTE BUILD OUTPUT ----------------
+starting build "4321dd6a-5ef2-4026-9770-cc0061f71440"
+
+FETCHSOURCE
+Fetching storage object: gs://abaquest_cloudbuild/source/1772503488.812548-cf3840c38a394632b64edb9ecd760639.tgz#1772503661822955
+Copying gs://abaquest_cloudbuild/source/1772503488.812548-cf3840c38a394632b64edb9ecd760639.tgz#1772503661822955...
+/ [0 files][    0.0 B/141.0 MiB]                                                
+-
+- [0 files][ 80.4 MiB/141.0 MiB]                                                
+\
+\ [1 files][141.0 MiB/141.0 MiB]                                                
+|
+
+Operation completed over 1 objects/141.0 MiB.                                    
+tar: Ignoring unknown extended header keyword 'SCHILY.fflags'
+BUILD
+Already have image (with digest): gcr.io/cloud-builders/gcb-internal
+Sending build context to Docker daemon  154.5MB
+
+
+Step 1/11 : FROM node:18-alpine as build
+18-alpine: Pulling from library/node
+f18232174bc9: Pulling fs layer
+dd71dde834b5: Pulling fs layer
+1e5a4c89cee5: Pulling fs layer
+25ff2da83641: Pulling fs layer
+1e5a4c89cee5: Verifying Checksum
+1e5a4c89cee5: Download complete
+25ff2da83641: Download complete
+f18232174bc9: Verifying Checksum
+f18232174bc9: Download complete
+f18232174bc9: Pull complete
+dd71dde834b5: Verifying Checksum
+dd71dde834b5: Download complete
+dd71dde834b5: Pull complete
+1e5a4c89cee5: Pull complete
+25ff2da83641: Pull complete
+Digest: sha256:8d6421d663b4c28fd3ebc498332f249011d118945588d0a35cb9bc4b8ca09d9e
+Status: Downloaded newer image for node:18-alpine
+ ---> ee77c6cd7c18
+Step 2/11 : WORKDIR /app
+ ---> Running in 07d243816f32
+Removing intermediate container 07d243816f32
+ ---> 0b9260f5e481
+Step 3/11 : COPY package*.json ./
+ ---> a6bfa860f163
+Step 4/11 : RUN npm ci
+ ---> Running in 44b34c0a1635
+
+added 191 packages, and audited 192 packages in 11s
+
+15 packages are looking for funding
+  run `npm fund` for details
+
+3 vulnerabilities (2 moderate, 1 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues, run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+[91mnpm notice
+npm notice New major version of npm available! 10.8.2 -> 11.11.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+npm notice To update run: npm install -g npm@11.11.0
+npm notice
+[0mRemoving intermediate container 44b34c0a1635
+ ---> 9a634096cabe
+Step 5/11 : COPY . .
+ ---> 548d8bee5d6f
+Step 6/11 : RUN npm run build
+ ---> Running in d8a614ea008f
+
+> Design AbaQuest Learning App@0.1.0 build
+> vite build
+
+vite v6.3.5 building for production...
+transforming...
+? 2709 modules transformed.
+rendering chunks...
+computing gzip size...
+build/index.html                               0.46 kB ? gzip:   0.29 kB
+build/assets/quest-3-img9-BaUG0rlr.png        12.03 kB
+build/assets/quest-3-img0-DkORC6aN.png        13.15 kB
+build/assets/quest-3-img1-UvsYFSnV.png        26.04 kB
+build/assets/Ameer-BdllKEOj.png               34.26 kB
+build/assets/Abby-gLc00QA0.png                38.30 kB
+build/assets/Ameerah-CbXOgkEL.png             40.15 kB
+build/assets/quest-3-img5-Bdx8TIEW.png        68.07 kB
+build/assets/Quest-4_Image4-CBOrIVXp.png      81.10 kB
+build/assets/Teacher-B4xhTh10.png             93.39 kB
+build/assets/Quest-3Bye-BGhshCLG.png          98.56 kB
+build/assets/AfterClass-CNeB18eu.png         105.51 kB
+build/assets/Beads_Learning-Cs6a_Hev.png     111.72 kB
+build/assets/Quest-4_Image1-p8tMV_Sp.png     116.68 kB
+build/assets/Quest-3_Image2-Czm2YVD-.png     126.25 kB
+build/assets/Quest-4_Image2-CJ06aELg.png     131.61 kB
+build/assets/Quest-4_Image3-C1hSjGCw.png     139.17 kB
+build/assets/Nine-BHQMQJSz.png               149.85 kB
+build/assets/Quest-3_Image1-Bvj8Kau4.png     157.28 kB
+build/assets/One-D--mgWAL.png                168.85 kB
+build/assets/zero-CqgRWTGB.png               175.59 kB
+build/assets/Finding_Counter-DSxecSh3.png    178.88 kB
+build/assets/Counter_Found-BJSkN5N_.png      183.53 kB
+build/assets/five-BMghOke3.png               190.75 kB
+build/assets/Bead_Slip-DW6w678Q.png          191.85 kB
+build/assets/School_Boat-ldIcwQlf.png        259.80 kB
+build/assets/logo-Bdrvsuo4.jpg               335.98 kB
+build/assets/Reached_School-DQEVo8O1.png     527.58 kB
+build/assets/Naming-B-km-ySd.png             542.07 kB
+build/assets/Quest-4_Image11-D1I9KrQr.png  1,125.76 kB
+build/assets/Quest-4_Image6-DG61gICZ.png   1,320.45 kB
+build/assets/Quest-4_Image7-D3kilqgC.png   2,072.01 kB
+build/assets/Quest-4_Image8-DTswWSto.png   2,405.88 kB
+build/assets/Quest-4_Image9-DbXq69O5.png   2,442.13 kB
+build/assets/Quest-4_Image10-Dz1hWoPY.png  2,452.33 kB
+build/assets/index-XM9WYmsK.css              112.24 kB ? gzip:  17.16 kB
+build/assets/index-BWYMlMtr.js               823.05 kB ? gzip: 240.57 kB
+[91m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+[0m? built in 12.23s
+Removing intermediate container d8a614ea008f
+ ---> a20fa328cc6b
+Step 7/11 : FROM nginx:alpine
+alpine: Pulling from library/nginx
+589002ba0eae: Already exists
+bca5d04786e1: Pulling fs layer
+3e2c181db1b0: Pulling fs layer
+6b7b6c7061b7: Pulling fs layer
+399d0898a94e: Pulling fs layer
+955a8478f9ac: Pulling fs layer
+6d397a54a185: Pulling fs layer
+5e7756927bef: Pulling fs layer
+5e7756927bef: Waiting
+3e2c181db1b0: Verifying Checksum
+3e2c181db1b0: Download complete
+6d397a54a185: Verifying Checksum
+6d397a54a185: Download complete
+955a8478f9ac: Verifying Checksum
+955a8478f9ac: Download complete
+399d0898a94e: Verifying Checksum
+399d0898a94e: Download complete
+6b7b6c7061b7: Verifying Checksum
+6b7b6c7061b7: Download complete
+bca5d04786e1: Verifying Checksum
+bca5d04786e1: Download complete
+bca5d04786e1: Pull complete
+3e2c181db1b0: Pull complete
+5e7756927bef: Verifying Checksum
+5e7756927bef: Download complete
+6b7b6c7061b7: Pull complete
+399d0898a94e: Pull complete
+955a8478f9ac: Pull complete
+6d397a54a185: Pull complete
+5e7756927bef: Pull complete
+Digest: sha256:1d13701a5f9f3fb01aaa88cef2344d65b6b5bf6b7d9fa4cf0dca557a8d7702ba
+Status: Downloaded newer image for nginx:alpine
+ ---> b76de378d572
+Step 8/11 : COPY --from=build /app/build /usr/share/nginx/html
+ ---> 12627d84e119
+Step 9/11 : COPY nginx.conf /etc/nginx/conf.d/default.conf
+ ---> 345804905c86
+Step 10/11 : EXPOSE 8080
+ ---> Running in 42d33e27d110
+Removing intermediate container 42d33e27d110
+ ---> ddf728d83d49
+Step 11/11 : CMD ["nginx", "-g", "daemon off;"]
+ ---> Running in 09bc3fe4de69
+Removing intermediate container 09bc3fe4de69
+ ---> 44d281166718
+Successfully built 44d281166718
+Successfully tagged gcr.io/abaquest/abaquest-frontend:latest
+PUSH
+Pushing gcr.io/abaquest/abaquest-frontend:latest
+The push refers to repository [gcr.io/abaquest/abaquest-frontend]
+5cb78cd69dad: Preparing
+5ad1ec36edfb: Preparing
+da3ac26fdf0f: Preparing
+7b2903554e63: Preparing
+6c0e59fd138a: Preparing
+aa0fc249df10: Preparing
+f35bcec50d8c: Preparing
+660f9a93104f: Preparing
+53998a5033c3: Preparing
+989e799e6349: Preparing
+989e799e6349: Layer already exists
+f35bcec50d8c: Layer already exists
+6c0e59fd138a: Layer already exists
+da3ac26fdf0f: Layer already exists
+7b2903554e63: Layer already exists
+660f9a93104f: Layer already exists
+aa0fc249df10: Layer already exists
+53998a5033c3: Layer already exists
+5cb78cd69dad: Pushed
+5ad1ec36edfb: Pushed
+latest: digest: sha256:75ed4c583a1709677a8d3a556c94e0bf55ac20b81f70dd2df7e7885a20dd5664 size: 2408
+DONE
+----------------------------------------------------

@@ -1,134 +1,102 @@
 import { StudentProfile } from '../types/quest';
-import { INITIAL_PROFILES } from './seedData';
 
-type StorageEventCallback = () => void;
+type SyncCallback = () => void;
 
-interface DB {
-    profiles: StudentProfile[];
-}
-
-const DB_KEY = 'abaquest_db';
-const LEGACY_KEY = 'abaquest_students';
+// Base API URL respects the current origin to support both local dev and production
+const API_BASE = '/api/profiles';
 
 class DatabaseService {
-    private listeners: StorageEventCallback[] = [];
+    private listeners: SyncCallback[] = [];
 
     constructor() {
-        if (typeof window !== 'undefined') {
-            window.addEventListener('storage', (e) => {
-                if (e.key === DB_KEY) {
-                    this.notifyListeners();
-                }
-            });
-        }
+        // We can no longer rely on 'storage' events for cross-tab sync easily without websockets or polling.
+        // For simplicity in this iteration, we'll just expose the notify wrapper.
     }
 
-    public subscribe(callback: StorageEventCallback): () => void {
+    public subscribe(callback: SyncCallback): () => void {
         this.listeners.push(callback);
         return () => {
             this.listeners = this.listeners.filter(cb => cb !== callback);
         };
     }
 
-    private notifyListeners(): void {
+    public notifyListeners(): void {
         this.listeners.forEach(cb => cb());
     }
 
     public async init(): Promise<void> {
-        // Run migration if needed
-        const existingData = localStorage.getItem(DB_KEY);
-        if (!existingData) {
-            const legacyData = localStorage.getItem(LEGACY_KEY);
-            if (legacyData) {
-                try {
-                    console.log('Migrating legacy data to new schema...');
-                    const parsedLegacy: StudentProfile[] = JSON.parse(legacyData);
-                    const newDb: DB = { profiles: parsedLegacy };
-                    localStorage.setItem(DB_KEY, JSON.stringify(newDb));
-                } catch (error) {
-                    console.error('Migration failed:', error);
-                    const newDb: DB = { profiles: INITIAL_PROFILES };
-                    localStorage.setItem(DB_KEY, JSON.stringify(newDb));
-                }
-            } else {
-                console.log('No existing data, using seed data...');
-                const newDb: DB = { profiles: INITIAL_PROFILES };
-                localStorage.setItem(DB_KEY, JSON.stringify(newDb));
-            }
+        // json-server auto-inits from db.json. We just ensure we can reach it.
+        try {
+            await fetch(API_BASE);
+            console.log('Connected to backend JSON store.');
+        } catch (e) {
+            console.warn('Could not connect to backend JSON store. Is json-server running?');
         }
-    }
-
-    private getDb(): DB {
-        const data = localStorage.getItem(DB_KEY);
-        if (data) {
-            try {
-                return JSON.parse(data);
-            } catch (e) {
-                return { profiles: [] };
-            }
-        }
-        return { profiles: [] };
-    }
-
-    private saveDb(db: DB): void {
-        localStorage.setItem(DB_KEY, JSON.stringify(db));
-        // Manually trigger for same-window updates
-        window.dispatchEvent(new Event('local-db-updated'));
-        this.notifyListeners();
     }
 
     // --- Students / Profiles ---
 
     public async getProfiles(): Promise<StudentProfile[]> {
-        return this.getDb().profiles;
+        const res = await fetch(API_BASE);
+        if (!res.ok) return [];
+        return await res.json();
     }
 
     public async getTeachers(): Promise<StudentProfile[]> {
-        return this.getDb().profiles.filter(p => p.role === 'teacher');
+        const profiles = await this.getProfiles();
+        return profiles.filter(p => p.role === 'teacher');
     }
 
     public async getStudentsForTeacher(teacherId: string): Promise<StudentProfile[]> {
-        return this.getDb().profiles.filter(p => p.teacherId === teacherId);
+        // json-server supports filtering via query params
+        const res = await fetch(`${API_BASE}?teacherId=${teacherId}`);
+        if (!res.ok) return [];
+        return await res.json();
     }
 
     public async addProfile(profile: StudentProfile): Promise<void> {
-        const db = this.getDb();
-        db.profiles.push(profile);
-        this.saveDb(db);
+        await fetch(API_BASE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(profile)
+        });
+        this.notifyListeners();
     }
 
     public async updateProfile(updatedProfile: StudentProfile): Promise<void> {
-        const db = this.getDb();
-        db.profiles = db.profiles.map(p => p.id === updatedProfile.id ? updatedProfile : p);
-        this.saveDb(db);
+        await fetch(`${API_BASE}/${updatedProfile.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedProfile)
+        });
+        this.notifyListeners();
     }
 
     public async deleteProfile(profileId: string): Promise<void> {
-        const db = this.getDb();
-        db.profiles = db.profiles.filter(p => p.id !== profileId);
-        this.saveDb(db);
+        await fetch(`${API_BASE}/${profileId}`, {
+            method: 'DELETE'
+        });
+        this.notifyListeners();
     }
 
     public async updateProfilesBulk(profiles: StudentProfile[]): Promise<void> {
-        const db = this.getDb();
-        db.profiles = profiles;
-        this.saveDb(db);
+        // json-server doesn't natively support bulk PUT to replace everything easily without custom routes.
+        // For this app, we iterate and update individually or just delete all and insert.
+        // For safety, we will update individually.
+        for (const p of profiles) {
+            await this.updateProfile(p);
+        }
+        this.notifyListeners();
     }
 }
 
 export const DbService = new DatabaseService();
 
-// For components that need a custom hook to stay synced:
+// Simplistic hook to allow components to manually refresh if a user triggers an action
 export function useDbSync(callback: () => void) {
     if (typeof window !== 'undefined') {
-        const handleSync = () => callback();
-        window.addEventListener('local-db-updated', handleSync);
-        const unsubscribe = DbService.subscribe(handleSync);
-
-        return () => {
-            window.removeEventListener('local-db-updated', handleSync);
-            unsubscribe();
-        };
+        const unsubscribe = DbService.subscribe(callback);
+        return () => unsubscribe();
     }
     return () => { };
 }
