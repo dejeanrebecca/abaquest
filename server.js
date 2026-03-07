@@ -49,7 +49,7 @@ server.get('/health', (req, res) => {
 server.use(jsonServer.bodyParser);
 
 // Serve the static React build
-server.use(express.static(path.join(__dirname, 'dist')));
+server.use(express.static(path.join(__dirname, 'build')));
 
 // Mount the API on /api
 server.use('/api', router);
@@ -57,7 +57,7 @@ server.use('/api', router);
 // Catch-all to serve index.html for React Router (if using client-side routing)
 server.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+        res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
 });
 

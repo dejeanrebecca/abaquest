@@ -20,7 +20,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy the built React app
-COPY --from=build /app/dist ./dist
+COPY --from=build /app/build ./build
 
 # Copy the server file and the database file
 COPY server.js .
