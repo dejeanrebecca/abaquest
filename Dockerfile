@@ -1,31 +1,16 @@
-# Build Stage
-FROM node:18-alpine as build
+FROM node:18
 
 WORKDIR /app
 
+# Copy all files for simplicity in debugging
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 COPY . .
+
+# Run build if needed (though server.cjs won't use it yet)
 RUN npm run build
-
-# Production Stage
-FROM node:18-alpine
-
-WORKDIR /app
-
-# Copy production dependencies
-COPY package*.json ./
-# Install only production dependencies
-RUN npm ci --omit=dev
-
-# Copy the built React app
-COPY --from=build /app/build ./build
-
-# Copy the server file and the database file
-COPY server.cjs .
-COPY db.json .
 
 EXPOSE 8080
 
-CMD ["npm", "start"]
+ENTRYPOINT ["node", "server.cjs"]
