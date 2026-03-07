@@ -14,11 +14,22 @@ const server = jsonServer.create();
 const dataDir = process.env.DATA_DIR || '.';
 const dbPath = path.join(dataDir, 'db.json');
 
+console.log(`Starting server in ${__dirname}`);
+console.log(`Database target path: ${dbPath}`);
+
 // If the database doesn't exist in the mounted volume yet, copy it from the built-in seed
 if (!fs.existsSync(dbPath)) {
     console.log(`Database not found at ${dbPath}. Seeding it now...`);
-    fs.copyFileSync('db.json', dbPath);
-    console.log(`Successfully seeded database.`);
+    try {
+        // Ensure directory exists if we are mounting a volume
+        if (dataDir !== '.') {
+            fs.mkdirSync(dataDir, { recursive: true });
+        }
+        fs.copyFileSync('db.json', dbPath);
+        console.log(`Successfully seeded database.`);
+    } catch (err) {
+        console.error(`Error seeding database: ${err.message}`);
+    }
 }
 
 const router = jsonServer.router(dbPath);
