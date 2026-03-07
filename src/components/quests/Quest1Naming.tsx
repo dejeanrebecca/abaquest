@@ -35,11 +35,36 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [preTestAnswers, setPreTestAnswers] = useState<boolean[]>([]);
   const [postTestAnswers] = useState<boolean[]>([]);
   const [counterName, setCounterName] = useState('');
+  const [lastPlayedName, setLastPlayedName] = useState('');
   const [showPreTestIntro, setShowPreTestIntro] = useState(true);
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
   const { playAudio, stopAudio, prefetchAudio } = useElevenLabs();
+
+  const speakText = (text: string, onComplete?: () => void) => {
+    playAudio(text, onComplete);
+  };
+
+  const playNameConfirmation = (name: string, onComplete?: () => void) => {
+    const trimmedName = name.trim();
+    if (trimmedName && trimmedName.length >= 2 && trimmedName !== lastPlayedName) {
+      setLastPlayedName(trimmedName);
+      speakText(`Great name! ${trimmedName} is ready for math quests!`, onComplete);
+    } else if (onComplete) {
+      onComplete();
+    }
+  };
+
+  // Debounced audio for custom name typing
+  useEffect(() => {
+    if (step === 'naming' && counterName) {
+      const timeoutId = setTimeout(() => {
+        playNameConfirmation(counterName);
+      }, 1000); // 1s delay after typing stops
+      return () => clearTimeout(timeoutId);
+    }
+  }, [step, counterName]);
 
   useEffect(() => {
     if (step === 'naming' && counterName && counterName.trim().length >= 2) {
@@ -405,15 +430,14 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
       const finalName = counterName ? counterName.trim() : '';
       if (finalName) {
         setStudentName(finalName);
-        speakText(`Great name! ${finalName} is ready for math quests!`, () => {
+        // Play audio if it hasn't been played for this exact name yet, then proceed
+        playNameConfirmation(finalName, () => {
           setStep('posttest');
         });
       }
     };
 
-    const speakText = (text: string, onComplete?: () => void) => {
-      playAudio(text, onComplete);
-    };
+
 
     return (
       <motion.div
@@ -431,6 +455,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
               text="You heard what your friends named their junior counters. Now it's your turn! Choose a name you like or create your own special name."
               speaker="abby"
               compact
+              autoPlay
             />
 
             <div className="my-8">
@@ -441,7 +466,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                     key={name}
                     onClick={() => {
                       setCounterName(name);
-                      speakText(`Great name! ${name} is ready for math quests!`);
+                      playNameConfirmation(name);
                     }}
                     className={`p-4 rounded-xl border-4 transition-all ${counterName === name
                       ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
@@ -467,9 +492,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   className="text-center text-xl py-6 rounded-2xl border-4 border-gray-200 focus:border-aqua-blue"
                   maxLength={15}
                   onBlur={() => {
-                    if (counterName && counterName.trim().length >= 2) {
-                      speakText(`Great name! ${counterName.trim()} is ready for math quests!`);
-                    }
+                    playNameConfirmation(counterName);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
