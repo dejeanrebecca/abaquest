@@ -38,30 +38,34 @@ if (!fs.existsSync(dbPath)) {
     }
 }
 
-const router = jsonServer.router(dbPath);
-const middlewares = jsonServer.defaults();
-const port = process.env.PORT || 8080;
-
-server.set('query parser', 'extended');
-server.use(middlewares);
-
+// 1. Health check - absolute priority
 server.get('/health', (req, res) => {
+    console.log('Health check requested');
     res.json({ 
         status: 'ok', 
-        engine: 'json-server-0.17.4',
+        engine: 'json-server-0.17.4-v6',
         db: dbPath,
         time: new Date().toISOString()
     });
 });
 
+const router = jsonServer.router(dbPath);
+const middlewares = jsonServer.defaults();
+const port = process.env.PORT || 8080;
+
+server.set('query parser', 'extended');
+
+// 2. API Routes - mount before static catch-all
+server.use('/api', router);
+
+// 3. Body Parser for POST/PUT
 server.use(jsonServer.bodyParser);
 
-// Serve the static React build
-// Ensure it's mounted before the router to prioritize actual static assets
-server.use(express.static(path.join(__dirname, 'build')));
+// 4. Default middlewares (logger, cors, etc.)
+server.use(middlewares);
 
-// Mount the API on /api
-server.use('/api', router);
+// 5. Serve static files
+server.use(express.static(path.join(__dirname, 'build')));
 
 // Catch-all to serve index.html for React Router
 server.get('*', (req, res) => {
