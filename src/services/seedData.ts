@@ -47,14 +47,12 @@ export const INITIAL_PROFILES: StudentProfile[] = [
         progress: {
             studentName: 'Ameer',
             emotionalState: 'happy',
-            totalCoins: 20,
-            level: 2,
-            xp: 100,
-            completedQuests: [1],
-            currentQuestId: 2,
-            questProgress: {
-                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 60, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86000000).toISOString() }
-            } as any,
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
         }
     },
     {

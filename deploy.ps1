@@ -34,13 +34,22 @@ gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerreg
 Write-Host "Building container image: $IMAGE_NAME"
 gcloud builds submit --tag $IMAGE_NAME .
 
-# 3. Deploy to Cloud Run
+# 3. Create persistent storage bucket if missing
+$BUCKET_NAME = "$PROJECT_ID-abaquest-db"
+Write-Host "Ensuring DB storage bucket exists gs://$BUCKET_NAME..." -ForegroundColor Cyan
+gsutil mb -l $REGION "gs://$BUCKET_NAME" 2>$null
+
+# 4. Deploy to Cloud Run
 Write-Host "Deploying to Cloud Run: $SERVICE_NAME"
 gcloud run deploy $SERVICE_NAME `
   --image $IMAGE_NAME `
   --region $REGION `
   --platform managed `
   --allow-unauthenticated `
-  --memory 512Mi
+  --memory 512Mi `
+  --execution-environment gen2 `
+  --add-volume "name=db-vol,type=cloud-storage,bucket=$BUCKET_NAME" `
+  --add-volume-mount "volume=db-vol,mount-path=/app/data" `
+  --update-env-vars "DATA_DIR=/app/data"
 
 Write-Host "Deployment Complete!" -ForegroundColor Green
