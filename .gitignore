@@ -7,3 +7,5 @@ key.json
 .env
 .env.local
 .env.*
+
+~$*.pptx

@@ -3,18 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { StudentProfile } from '../../types/quest';
 import { LogOut, Plus, Trash2, X, AlertCircle } from 'lucide-react';
+import { DbService } from '../../services/db.service';
 
 interface TeacherDashboardProps {
     teacher: StudentProfile;
     allProfiles: StudentProfile[];
-    onUpdateProfiles: (profiles: StudentProfile[]) => void;
     onLogout: () => void;
 }
 
 const AVATARS = ['👦', '👧', '👦🏽', '👧🏽', '👱‍♂️', '👱‍♀️', '🧑‍🦱', '👩‍🦱'];
 const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸'];
 
-export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout }: TeacherDashboardProps) {
+export function TeacherRosterDashboard({ teacher, allProfiles, onLogout }: TeacherDashboardProps) {
     const [isAddingStudent, setIsAddingStudent] = useState(false);
     const [newStudentName, setNewStudentName] = useState('');
     const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
@@ -67,8 +67,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             }
         };
 
-        const updatedProfiles = [...allProfiles, newStudent];
-        onUpdateProfiles(updatedProfiles);
+        await DbService.addProfile(newStudent);
 
         // Reset form
         setIsAddingStudent(false);
@@ -77,10 +76,9 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         setNewPassword([]);
     };
 
-    const handleDeleteStudent = (studentId: string) => {
+    const handleDeleteStudent = async (studentId: string) => {
         if (window.confirm('Are you sure you want to delete this student? All their progress will be lost.')) {
-            const updatedProfiles = allProfiles.filter(p => p.id !== studentId);
-            onUpdateProfiles(updatedProfiles);
+            await DbService.deleteProfile(studentId);
         }
     };
 

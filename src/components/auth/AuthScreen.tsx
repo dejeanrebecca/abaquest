@@ -7,154 +7,46 @@ import { TeacherRosterDashboard } from './TeacherRosterDashboard';
 import { StudentProfile } from '../../types/quest';
 import { Button } from '../ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { DbService, useDbSync } from '../../services/db.service';
 
 interface AuthScreenProps {
     onAuthenticated: (student: StudentProfile) => void;
 }
 
-const INITIAL_PROFILES: StudentProfile[] = [
-    {
-        id: 'teacher1',
-        name: 'Ms. Teacher',
-        avatar: '👩‍🏫',
-        emojiPass: ['🍎', '🍎', '🍎'],
-        gradeLevel: 'K',
-        role: 'teacher',
-        progress: {
-            studentName: 'Ms. Teacher',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 'teacher2',
-        name: 'Mr. Smith',
-        avatar: '👨‍🏫',
-        emojiPass: ['🚗', '🚗', '🚗'],
-        gradeLevel: 'K',
-        role: 'teacher',
-        progress: {
-            studentName: 'Mr. Smith',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's1',
-        name: 'Ameer',
-        avatar: '👦',
-        emojiPass: ['🐶', '🐶', '🐶'],
-        gradeLevel: 'K',
-        teacherId: 'teacher1',
-        progress: {
-            studentName: 'Ameer',
-            emotionalState: 'happy',
-            totalCoins: 20,
-            level: 2,
-            xp: 100,
-            completedQuests: [1],
-            currentQuestId: 2,
-            questProgress: {
-                1: { questId: 1, currentStep: 'close', stepIndex: 5, completed: true, preTestScore: 60, postTestScore: 100, coinsEarned: 20, startedAt: new Date(Date.now() - 86400000).toISOString(), completedAt: new Date(Date.now() - 86000000).toISOString() }
-            } as any,
-        }
-    },
-    {
-        id: 's2',
-        name: 'Ameerah',
-        avatar: '👧',
-        emojiPass: ['⭐', '⭐', '⭐'],
-        gradeLevel: 'K',
-        teacherId: 'teacher1',
-        progress: {
-            studentName: 'Ameerah',
-            emotionalState: 'excited',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's3',
-        name: 'Liam',
-        avatar: '👱‍♂️',
-        emojiPass: ['🚗', '🚗', '🚗'],
-        gradeLevel: 'K',
-        teacherId: 'teacher2',
-        progress: {
-            studentName: 'Liam',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's4',
-        name: 'Noah',
-        avatar: '👦🏽',
-        emojiPass: ['🍎', '🍎', '🍎'],
-        gradeLevel: 'K',
-        teacherId: 'teacher2',
-        progress: {
-            studentName: 'Noah',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    }
-];
-
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard'>('teacher-select');
     const [selectedTeacher, setSelectedTeacher] = useState<StudentProfile | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
-    const [profiles, setProfiles] = useState<StudentProfile[]>(() => {
-        const saved = localStorage.getItem('abaquest_students');
-        if (!saved) return INITIAL_PROFILES;
+    const [profiles, setProfiles] = useState<StudentProfile[]>([]);
 
-        try {
-            const savedProfiles = JSON.parse(saved) as StudentProfile[];
-            // Merge strategy:
-            // 1. For each initial profile, if a saved version exists, use that.
-            // 2. Add any custom profiles that are NOT in the initial set.
-            const mergedInitial = INITIAL_PROFILES.map(ip => {
-                const savedVersion = savedProfiles.find(sp => sp.id === ip.id);
-                return savedVersion || ip;
-            });
-            const customProfiles = savedProfiles.filter(sp =>
-                !INITIAL_PROFILES.some(dp => dp.id === sp.id)
-            );
-            return [...mergedInitial, ...customProfiles];
-        } catch (e) {
-            console.error('Error loading profiles from localStorage:', e);
-            return INITIAL_PROFILES;
-        }
-    });
+    // Check for initialization
+    const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
-        localStorage.setItem('abaquest_students', JSON.stringify(profiles));
-    }, [profiles]);
+        const initDb = async () => {
+            await DbService.init();
+            setIsInitialized(true);
+            const loadedProfiles = await DbService.getProfiles();
+            setProfiles(loadedProfiles);
+        };
+        initDb();
+    }, []);
+
+    // Sync across tabs and local DB updates
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        const fetchProfiles = async () => {
+            const loadedProfiles = await DbService.getProfiles();
+            setProfiles(loadedProfiles);
+        };
+
+        const unsubscribe = useDbSync(fetchProfiles);
+
+        return () => {
+            unsubscribe();
+        }
+    }, [isInitialized]);
 
 
 
@@ -280,16 +172,13 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                         {selectedStudent && (
                             <EmojiPassChallenge
                                 student={selectedStudent}
-                                onSuccess={() => {
+                                onSuccess={async () => {
                                     const now = new Date().toISOString();
                                     const updatedStudent = { ...selectedStudent, lastLogin: now };
 
-                                    const updatedProfiles = profiles.map(p =>
-                                        p.id === selectedStudent.id ? updatedStudent : p
-                                    );
-                                    setProfiles(updatedProfiles);
-                                    localStorage.setItem('abaquest_students', JSON.stringify(updatedProfiles));
+                                    await DbService.updateProfile(updatedStudent);
 
+                                    // Local state update happens automatically via subscription
                                     if (updatedStudent.role === 'teacher') {
                                         setView('teacher-dashboard');
                                     } else {
@@ -315,10 +204,6 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                             <TeacherRosterDashboard
                                 teacher={selectedStudent}
                                 allProfiles={profiles}
-                                onUpdateProfiles={(newProfiles) => {
-                                    setProfiles(newProfiles);
-                                    localStorage.setItem('abaquest_students', JSON.stringify(newProfiles));
-                                }}
                                 onLogout={() => {
                                     setSelectedStudent(null);
                                     setView('teacher-select');
