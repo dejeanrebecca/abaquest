@@ -531,54 +531,43 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
                                     {/* Learning Curve Chart */}
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Progress Trajectory (Learning Gain %)</h4>
-                                        <div className="h-64 w-full">
+                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Class Learning Progression (Gain %)</h4>
+                                        <div className="h-80 w-full">
                                             {(() => {
-                                                // Create a time-series progression of learning gain for this specific quest
-                                                const curveData = completedStudents
-                                                    .filter(s => s.progress?.completedAt && s.progress?.preTestScore !== undefined && s.progress?.postTestScore !== undefined)
-                                                    .map(s => {
-                                                        const pre = s.progress!.preTestScore!;
-                                                        const post = s.progress!.postTestScore!;
-                                                        return {
-                                                            name: s.student.name,
-                                                            gain: post - pre,
-                                                            date: new Date(s.progress!.completedAt!).getTime()
-                                                        };
-                                                    })
-                                                    .sort((a, b) => a.date - b.date) // Chronological order
-                                                    .map((data, index) => ({
-                                                        student: data.name,
-                                                        gain: data.gain,
-                                                        time: `Student ${index + 1}`
-                                                    }));
+                                                // Create a multi-line data structure for all 4 quests
+                                                const chartData = classStudents.map(student => {
+                                                    const row: any = { name: student.name };
+                                                    ([1, 2, 3, 4] as QuestId[]).forEach(qId => {
+                                                        const p = student.progress?.questProgress?.[qId];
+                                                        if (p?.preTestScore !== undefined && p?.postTestScore !== undefined) {
+                                                            row[`q${qId}`] = p.postTestScore - p.preTestScore;
+                                                        }
+                                                    });
+                                                    return row;
+                                                }).filter(row => Object.keys(row).length > 1); // Only students with at least 1 quest started
 
-                                                if (curveData.length === 0) {
+                                                if (chartData.length === 0) {
                                                     return (
                                                         <div className="flex items-center justify-center h-full text-slate-400">
-                                                            No completed quest data available to generate a learning curve.
+                                                            No student data available to generate the progression chart.
                                                         </div>
                                                     );
                                                 }
 
                                                 return (
                                                     <ResponsiveContainer width="100%" height="100%">
-                                                        <LineChart data={curveData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                                        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                                            <XAxis dataKey="time" />
+                                                            <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 12 }} />
                                                             <YAxis tickFormatter={(val) => `${val > 0 ? '+' : ''}${val}%`} />
                                                             <Tooltip
                                                                 formatter={(val: number) => [`${val > 0 ? '+' : ''}${val}%`, 'Gain']}
-                                                                labelFormatter={(label, payload) => payload?.[0]?.payload?.student || label}
                                                             />
-                                                            <Line
-                                                                type="monotone"
-                                                                dataKey="gain"
-                                                                stroke="#3b82f6"
-                                                                strokeWidth={3}
-                                                                dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
-                                                                activeDot={{ r: 6 }}
-                                                            />
+                                                            <Legend verticalAlign="top" height={36} />
+                                                            <Line type="monotone" dataKey="q1" name="Quest 1" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
+                                                            <Line type="monotone" dataKey="q2" name="Quest 2" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
+                                                            <Line type="monotone" dataKey="q3" name="Quest 3" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
+                                                            <Line type="monotone" dataKey="q4" name="Quest 4" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
                                                         </LineChart>
                                                     </ResponsiveContainer>
                                                 );
