@@ -30,7 +30,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     const [isEditingTeacherAvatar, setIsEditingTeacherAvatar] = useState(false);
 
     const currentTeacher = allProfiles.find(p => p.id === teacher.id) || teacher;
-    const classStudents = allProfiles.filter(p => p.teacherId === teacher.id);
+    const classStudents = allProfiles.filter(p => p.role === 'student' || (!p.role && p.id !== teacher.id));
 
     const handleUpdateTeacherAvatar = async (newAvatar: string) => {
         const updatedTeacher = { ...currentTeacher, avatar: newAvatar };
