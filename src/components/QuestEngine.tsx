@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { QuestId, QuestStep, QuestProgress, StudentProgress, QUESTS, StudentProfile } from '../types/quest';
+import { DbService } from '../services/db.service';
 
 
 interface QuestEngineContextType {
@@ -35,34 +36,37 @@ const INITIAL_PROGRESS: StudentProgress = {
 };
 
 export function QuestEngineProvider({ children }: { children: ReactNode }) {
-  const [studentProgress, setStudentProgress] = useState<StudentProgress>(() => {
-    // Try to load from localStorage
-    const saved = localStorage.getItem('abaquest_progress');
-    return saved ? JSON.parse(saved) : INITIAL_PROGRESS;
-  });
+  const [studentProgress, setStudentProgress] = useState<StudentProgress>(INITIAL_PROGRESS);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Save to localStorage whenever progress changes
+  // Initial load
   useEffect(() => {
-    localStorage.setItem('abaquest_progress', JSON.stringify(studentProgress));
+    const init = async () => {
+      await DbService.init();
+      setIsLoading(false);
+    };
+    init();
+  }, []);
 
-    // Also sync back to the master student list if we have a studentId
-    if (studentProgress.studentId) {
-      const savedStudents = localStorage.getItem('abaquest_students');
-      if (savedStudents) {
+  // Save to backend whenever progress changes
+  useEffect(() => {
+    if (isLoading) return;
+
+    const syncToBackend = async () => {
+      if (studentProgress.studentId) {
         try {
-          const students = JSON.parse(savedStudents) as StudentProfile[];
-          const updatedStudents = students.map(s =>
-            s.id === studentProgress.studentId
-              ? { ...s, progress: studentProgress }
-              : s
-          );
-          localStorage.setItem('abaquest_students', JSON.stringify(updatedStudents));
+          const profiles = await DbService.getProfiles();
+          const p = profiles.find(s => s.id === studentProgress.studentId);
+          if (p) {
+            await DbService.updateProfile({ ...p, progress: studentProgress });
+          }
         } catch (e) {
-          console.error('Error syncing progress to master list:', e);
+          console.error('Error syncing progress to backend:', e);
         }
       }
-    }
-  }, [studentProgress]);
+    };
+    syncToBackend();
+  }, [studentProgress, isLoading]);
 
   const currentQuest = studentProgress.currentQuestId;
   const currentQuestProgress = currentQuest ? studentProgress.questProgress[currentQuest] : null;
@@ -201,7 +205,6 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
 
   const resetProgress = () => {
     setStudentProgress(INITIAL_PROGRESS);
-    localStorage.removeItem('abaquest_progress');
   };
 
   const exitQuest = () => {
@@ -234,7 +237,7 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
         exitQuest,
       }}
     >
-      {children}
+      {isLoading ? null : children}
     </QuestEngineContext.Provider>
   );
 }

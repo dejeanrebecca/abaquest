@@ -1,9 +1,9 @@
 # Configuration
 $PROJECT_ID = "abaquest"
-$SERVICE_NAME = "abaquest-frontend"
+$SERVICE_NAME = "abaquest-app"
 $REGION = "us-central1"
 
-$IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:latest"
+$IMAGE_NAME = "gcr.io/$PROJECT_ID/abaquest-frontend:latest"
 
 Write-Host "----------------------------------------"
 Write-Host "Project ID:   $PROJECT_ID"
