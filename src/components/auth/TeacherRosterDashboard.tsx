@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { StudentProfile } from '../../types/quest';
@@ -28,9 +28,32 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     const [viewingStudent, setViewingStudent] = useState<StudentProfile | null>(null);
     const [selectedQuest, setSelectedQuest] = useState<QuestId>(1);
     const [isEditingTeacherAvatar, setIsEditingTeacherAvatar] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
 
     const currentTeacher = allProfiles.find(p => p.id === teacher.id) || teacher;
-    const classStudents = allProfiles.filter(p => p.teacherId === teacher.id);
+
+    // Dynamically calculate class roster (all students in the system)
+    const classStudents = useMemo(() => {
+        return allProfiles.filter(p => (p.role === 'student' || !p.role) && p.id !== teacher.id);
+    }, [allProfiles, teacher.id]);
+
+    // Calculate aggregated interactions for the selected quest
+    const aggregatedInteractions = useMemo(() => {
+        return classStudents.reduce(
+            (acc, student) => {
+                const questData = student.progress?.questProgress?.[selectedQuest];
+                if (questData?.interactions) {
+                    acc.total += questData.interactions.total || 0;
+                    acc.preTest += questData.interactions.preTest || 0;
+                    acc.practice += questData.interactions.practice || 0;
+                    acc.postTest += questData.interactions.postTest || 0;
+                    acc.story += questData.interactions.story || 0;
+                }
+                return acc;
+            },
+            { total: 0, preTest: 0, practice: 0, postTest: 0, story: 0 }
+        );
+    }, [classStudents, selectedQuest]);
 
     const handleUpdateTeacherAvatar = async (newAvatar: string) => {
         const updatedTeacher = { ...currentTeacher, avatar: newAvatar };
@@ -42,22 +65,6 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             console.error('Failed to update teacher avatar:', error);
         }
     };
-
-    // Calculate aggregated interactions for the selected quest
-    const aggregatedInteractions = classStudents.reduce(
-        (acc, student) => {
-            const questData = student.progress?.questProgress?.[selectedQuest];
-            if (questData?.interactions) {
-                acc.total += questData.interactions.total || 0;
-                acc.preTest += questData.interactions.preTest || 0;
-                acc.practice += questData.interactions.practice || 0;
-                acc.postTest += questData.interactions.postTest || 0;
-                acc.story += questData.interactions.story || 0;
-            }
-            return acc;
-        },
-        { total: 0, preTest: 0, practice: 0, postTest: 0, story: 0 }
-    );
 
     const handleAddEmoji = (emoji: string) => {
         if (newPassword.length < 3) {
@@ -169,6 +176,20 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         }
     };
 
+    const handleResetAllData = async () => {
+        if (window.confirm('⚠️ CRITICAL ACTION: Are you sure you want to RESET ALL progress for ALL students? This will clear all coins, scores, and levels. This cannot be undone.')) {
+            setIsResetting(true);
+            try {
+                await studentService.resetProfiles(classStudents);
+                // Profiles will auto-update through the subscription in AuthScreen
+            } catch (error) {
+                alert('Failed to reset student data. Please try again.');
+            } finally {
+                setIsResetting(false);
+            }
+        }
+    };
+
     const calculateDuration = (start?: string, end?: string) => {
         if (!start || !end) return '-';
         const diffMs = new Date(end).getTime() - new Date(start).getTime();
@@ -230,15 +251,19 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         document.body.removeChild(link);
     };
 
-    const calculateClassMetrics = () => {
-        const questAverages = [1, 2, 3, 4].map(qId => {
+    // Dynamically calculate aggregated metrics for all quests
+    const classMetricsData = useMemo(() => {
+        return ([1, 2, 3, 4] as QuestId[]).map(qId => {
             let totalPre = 0;
             let totalPost = 0;
             let countPre = 0;
             let countPost = 0;
+            let completedCount = 0;
+            let maxPost = 0;
+            let totalCoins = 0;
 
             classStudents.forEach(student => {
-                const progress = student.progress?.questProgress?.[qId as QuestId];
+                const progress = student.progress?.questProgress?.[qId];
                 if (progress?.preTestScore !== undefined) {
                     totalPre += progress.preTestScore;
                     countPre++;
@@ -246,18 +271,27 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                 if (progress?.postTestScore !== undefined) {
                     totalPost += progress.postTestScore;
                     countPost++;
+                    if (progress.postTestScore > maxPost) maxPost = progress.postTestScore;
                 }
+                if (progress?.completed) {
+                    completedCount++;
+                }
+                totalCoins += (progress?.coinsEarned || 0);
             });
 
             return {
+                id: qId,
                 name: `Quest ${qId}`,
+                icon: ['✏️', '🧩', '🔢', '➕'][qId - 1],
                 preTest: countPre > 0 ? Math.round(totalPre / countPre) : 0,
-                postTest: countPost > 0 ? Math.round(totalPost / countPost) : 0
+                postTest: countPost > 0 ? Math.round(totalPost / countPost) : 0,
+                completedCount,
+                totalCount: classStudents.length,
+                maxPost,
+                totalCoins
             };
         });
-        return questAverages;
-    };
-    const classMetricsData = calculateClassMetrics();
+    }, [classStudents]);
 
     return (
         <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
@@ -305,8 +339,14 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         </AnimatePresence>
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-deep-blue">Welcome, {currentTeacher.name}!</h1>
-                        <p className="text-deep-blue/60">Manage your classroom</p>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-deep-blue">Welcome, {currentTeacher.name}!</h1>
+                            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 flex items-center gap-1 shadow-sm">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                Live Class: {classStudents.length} Students
+                            </span>
+                        </div>
+                        <p className="text-deep-blue/60 mt-1">Manage your classroom analytics and student roster</p>
                     </div>
                 </div>
                 <Button variant="outline" onClick={onLogout} className="text-deep-blue border-deep-blue hover:bg-red-50 hover:text-red-600 hover:border-red-200">
@@ -432,30 +472,88 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         </div>
                     </div>
 
-                    {/* Quest Tabs */}
-                    <div className="flex border-b-2 border-slate-100">
-                        {([1, 2, 3, 4] as QuestId[]).map(qId => (
-                            <button
-                                key={qId}
-                                onClick={() => setSelectedQuest(qId)}
-                                className={`flex-1 py-4 px-4 text-center font-bold transition-all relative ${selectedQuest === qId
-                                    ? 'text-deep-blue bg-white'
-                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                                    }`}
+                    <div className="p-6 border-b-2 border-slate-100 bg-white">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold text-deep-blue">Class-Wide Overview (All Quests)</h3>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleResetAllData}
+                                disabled={isResetting || classStudents.length === 0}
+                                className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-all font-bold gap-2"
                             >
-                                <span className="text-lg">{['✏️', '🧩', '🔢', '➕'][qId - 1]}</span>
-                                <span className="ml-2">Quest {qId}</span>
-                                {selectedQuest === qId && (
-                                    <motion.div
-                                        layoutId="quest-tab-underline"
-                                        className="absolute bottom-0 left-0 right-0 h-1 bg-deep-blue rounded-t-full"
-                                    />
+                                {isResetting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-4 h-4" />
                                 )}
-                            </button>
-                        ))}
+                                Reset Class Progress
+                            </Button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 text-slate-500 uppercase text-xs font-bold border-y-2 border-slate-100">
+                                        <th className="p-4">Quest</th>
+                                        <th className="p-4 text-center">Completed</th>
+                                        <th className="p-4 text-center">Avg Pre-Test</th>
+                                        <th className="p-4 text-center">Avg Post-Test</th>
+                                        <th className="p-4 text-center">Avg Gain</th>
+                                        <th className="p-4 text-center">Highest Score</th>
+                                        <th className="p-4 text-center">Total Coins</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {classMetricsData.map((data) => {
+                                        const gain = data.postTest - data.preTest;
+                                        const isSelected = selectedQuest === data.id;
+                                        return (
+                                            <tr
+                                                key={data.id}
+                                                onClick={() => setSelectedQuest(data.id)}
+                                                className={`cursor-pointer transition-all ${isSelected ? 'bg-blue-50/50 border-l-4 border-l-blue-500 shadow-sm' : 'hover:bg-slate-50/80 border-l-4 border-l-transparent'}`}
+                                            >
+                                                <td className="p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-2xl">{data.icon}</span>
+                                                        <span className="font-bold text-deep-blue">{data.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-center font-bold text-slate-600">
+                                                    {data.completedCount}/{data.totalCount}
+                                                </td>
+                                                <td className="p-4 text-center text-blue-600 font-semibold">
+                                                    {data.preTest}%
+                                                </td>
+                                                <td className="p-4 text-center text-green-600 font-semibold">
+                                                    {data.postTest}%
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <span className={`px-2 py-1 rounded-lg font-bold text-sm ${gain > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                        {gain > 0 ? '+' : ''}{gain}%
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <div className="flex items-center justify-center gap-1 text-amber-600 font-bold">
+                                                        <Trophy className="w-4 h-4" />
+                                                        {data.maxPost}%
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold">
+                                                        <Coins className="w-4 h-4 fill-yellow-400" />
+                                                        {data.totalCoins}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="text-center text-slate-400 text-xs mt-4 italic">Tip: Click a quest row to view detailed student scores and the learning curve below.</p>
                     </div>
 
-                    {/* Class Score Table */}
                     <div className="p-6">
                         {(() => {
                             const studentsWithProgress = classStudents.map(s => {
@@ -463,109 +561,55 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                 return { student: s, progress: p };
                             });
                             const completedStudents = studentsWithProgress.filter(s => s.progress?.completed);
-                            const avgPre = completedStudents.length > 0
-                                ? Math.round(completedStudents.reduce((sum, s) => sum + (s.progress?.preTestScore || 0), 0) / completedStudents.length)
-                                : 0;
-                            const avgPost = completedStudents.length > 0
-                                ? Math.round(completedStudents.reduce((sum, s) => sum + (s.progress?.postTestScore || 0), 0) / completedStudents.length)
-                                : 0;
-
-                            const maxPostTest = completedStudents.length > 0
-                                ? Math.max(...completedStudents.map(s => s.progress?.postTestScore || 0))
-                                : 0;
-                            const totalCoins = completedStudents.reduce((sum, s) => {
-                                const qProgress = s.student.progress?.questProgress?.[selectedQuest];
-                                return sum + (qProgress?.coinsEarned || 0);
-                            }, 0);
 
                             return (
                                 <>
-                                    {/* Summary Cards */}
-                                    <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-                                        <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-200">
-                                            <p className="text-xs font-bold text-slate-400 uppercase mb-1">Completed</p>
-                                            <p className="text-2xl font-bold text-deep-blue">{completedStudents.length}/{classStudents.length}</p>
-                                        </div>
-                                        <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
-                                            <p className="text-xs font-bold text-blue-400 uppercase mb-1">Avg Pre-Test</p>
-                                            <p className="text-2xl font-bold text-blue-700">{avgPre}%</p>
-                                        </div>
-                                        <div className="bg-green-50 rounded-xl p-4 text-center border border-green-200">
-                                            <p className="text-xs font-bold text-green-400 uppercase mb-1">Avg Post-Test</p>
-                                            <p className="text-2xl font-bold text-green-700">{avgPost}%</p>
-                                        </div>
-                                        <div className={`rounded-xl p-4 text-center border ${avgPost - avgPre > 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
-                                            <p className="text-xs font-bold text-slate-400 uppercase mb-1">Avg Gain</p>
-                                            <p className={`text-2xl font-bold ${avgPost - avgPre > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                                {avgPost - avgPre > 0 ? '+' : ''}{avgPost - avgPre}%
-                                            </p>
-                                        </div>
-                                        <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-200 shadow-sm shadow-amber-100">
-                                            <p className="text-xs font-bold text-amber-500 uppercase mb-1">Highest Score</p>
-                                            <p className="text-2xl font-bold text-amber-600 gap-1 justify-center flex items-center">
-                                                <Trophy className="w-5 h-5" />
-                                                {maxPostTest}%
-                                            </p>
-                                        </div>
-                                        <div className="bg-yellow-50 rounded-xl p-4 text-center border border-yellow-200 shadow-sm shadow-yellow-100">
-                                            <p className="text-xs font-bold text-yellow-600 uppercase mb-1">Total Coins</p>
-                                            <p className="text-2xl font-bold text-yellow-500 gap-1 justify-center flex items-center">
-                                                <Coins className="w-5 h-5 fill-yellow-400" />
-                                                {totalCoins}
-                                            </p>
-                                        </div>
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <div className="h-8 w-1 bg-green-500 rounded-full"></div>
+                                        <h3 className="text-xl font-bold text-deep-blue">
+                                            Student Performance Overview (All Quests)
+                                        </h3>
                                     </div>
 
                                     {/* Learning Curve Chart */}
-                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Learning Curve (Gain %)</h4>
-                                        <div className="h-64 w-full">
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
+                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Class Learning Progression (Gain %)</h4>
+                                        <div className="h-80 w-full">
                                             {(() => {
-                                                // Create a time-series progression of learning gain for this specific quest
-                                                const curveData = completedStudents
-                                                    .filter(s => s.progress?.completedAt && s.progress?.preTestScore !== undefined && s.progress?.postTestScore !== undefined)
-                                                    .map(s => {
-                                                        const pre = s.progress!.preTestScore!;
-                                                        const post = s.progress!.postTestScore!;
-                                                        return {
-                                                            name: s.student.name,
-                                                            gain: post - pre,
-                                                            date: new Date(s.progress!.completedAt!).getTime()
-                                                        };
-                                                    })
-                                                    .sort((a, b) => a.date - b.date) // Chronological order
-                                                    .map((data, index) => ({
-                                                        student: data.name,
-                                                        gain: data.gain,
-                                                        time: `Student ${index + 1}`
-                                                    }));
+                                                // Create a multi-line data structure for all 4 quests
+                                                const chartData = classStudents.map(student => {
+                                                    const row: any = { name: student.name };
+                                                    ([1, 2, 3, 4] as QuestId[]).forEach(qId => {
+                                                        const p = student.progress?.questProgress?.[qId];
+                                                        if (p?.preTestScore !== undefined && p?.postTestScore !== undefined) {
+                                                            row[`q${qId}`] = p.postTestScore - p.preTestScore;
+                                                        }
+                                                    });
+                                                    return row;
+                                                }).filter(row => Object.keys(row).length > 1);
 
-                                                if (curveData.length === 0) {
+                                                if (chartData.length === 0) {
                                                     return (
                                                         <div className="flex items-center justify-center h-full text-slate-400">
-                                                            No completed quest data available to generate a learning curve.
+                                                            No student data available to generate the progression chart.
                                                         </div>
                                                     );
                                                 }
 
                                                 return (
                                                     <ResponsiveContainer width="100%" height="100%">
-                                                        <LineChart data={curveData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                                        <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
                                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                                            <XAxis dataKey="time" />
+                                                            <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} tick={{ fontSize: 12 }} />
                                                             <YAxis tickFormatter={(val) => `${val > 0 ? '+' : ''}${val}%`} />
                                                             <Tooltip
                                                                 formatter={(val: number) => [`${val > 0 ? '+' : ''}${val}%`, 'Gain']}
-                                                                labelFormatter={(label, payload) => payload?.[0]?.payload?.student || label}
                                                             />
-                                                            <Line
-                                                                type="monotone"
-                                                                dataKey="gain"
-                                                                stroke="#3b82f6"
-                                                                strokeWidth={3}
-                                                                dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
-                                                                activeDot={{ r: 6 }}
-                                                            />
+                                                            <Legend verticalAlign="top" height={36} />
+                                                            <Line type="monotone" dataKey="q1" name="Quest 1" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
+                                                            <Line type="monotone" dataKey="q2" name="Quest 2" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
+                                                            <Line type="monotone" dataKey="q3" name="Quest 3" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
+                                                            <Line type="monotone" dataKey="q4" name="Quest 4" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} connectNulls />
                                                         </LineChart>
                                                     </ResponsiveContainer>
                                                 );
@@ -573,69 +617,79 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                         </div>
                                     </div>
 
-                                    {/* Student Table */}
+                                    {/* All Quests Student Table */}
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-slate-100 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
-                                                <tr>
-                                                    <th className="p-3">Student</th>
-                                                    <th className="p-3">Status</th>
-                                                    <th className="p-3 text-center">Pre-Test</th>
-                                                    <th className="p-3 text-center">Post-Test</th>
-                                                    <th className="p-3 text-center">Gain</th>
-                                                    <th className="p-3 text-center">Time</th>
-                                                    <th className="p-3 text-right">Completed</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100">
-                                                {studentsWithProgress.map(({ student, progress: p }) => {
-                                                    const isCompleted = p?.completed;
-                                                    const isStarted = !!p?.startedAt;
-                                                    const pre = p?.preTestScore;
-                                                    const post = p?.postTestScore;
-                                                    const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
-                                                    const duration = calculateDuration(p?.startedAt, p?.completedAt);
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-bold border-b border-slate-200">
+                                                    <tr>
+                                                        <th className="p-4 sticky left-0 bg-slate-50 z-10 w-48">Student</th>
+                                                        {([1, 2, 3, 4] as QuestId[]).map(qId => (
+                                                            <th key={qId} className="p-4 text-center min-w-[140px]">
+                                                                {['✏️ Q1', '🧩 Q2', '🔢 Q3', '➕ Q4'][qId - 1]}
+                                                            </th>
+                                                        ))}
+                                                        <th className="p-4 text-center">Total Coins</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100">
+                                                    {classStudents.map(student => {
+                                                        const totalStudentCoins = [1, 2, 3, 4].reduce((sum, qId) => {
+                                                            return sum + (student.progress?.questProgress?.[qId as QuestId]?.coinsEarned || 0);
+                                                        }, 0);
 
-                                                    return (
-                                                        <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
-                                                            <td className="p-3">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-xl">{student.avatar}</span>
-                                                                    <span className="font-bold text-deep-blue">{student.name}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="p-3">
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${isCompleted ? 'bg-green-100 text-green-700' :
-                                                                    isStarted ? 'bg-amber-100 text-amber-700' :
-                                                                        'bg-slate-100 text-slate-500'
-                                                                    }`}>
-                                                                    {isCompleted ? '✅ Done' : isStarted ? '⏳ In Progress' : '🔒 Not Started'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="p-3 text-center font-mono text-slate-600">
-                                                                {pre !== undefined ? `${pre}%` : '-'}
-                                                            </td>
-                                                            <td className="p-3 text-center font-mono font-bold text-deep-blue">
-                                                                {post !== undefined ? `${post}%` : '-'}
-                                                            </td>
-                                                            <td className="p-3 text-center">
-                                                                {gain !== null ? (
-                                                                    <span className={`font-bold ${gain > 0 ? 'text-green-600' : 'text-slate-400'}`}>
-                                                                        {gain > 0 ? `+${gain}%` : `${gain}%`}
-                                                                    </span>
-                                                                ) : '-'}
-                                                            </td>
-                                                            <td className="p-3 text-center text-sm text-slate-500">
-                                                                {duration}
-                                                            </td>
-                                                            <td className="p-3 text-right text-sm text-slate-500">
-                                                                {p?.completedAt ? new Date(p.completedAt).toLocaleDateString() : '-'}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
+                                                        return (
+                                                            <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                                <td className="p-4 sticky left-0 bg-white group-hover:bg-slate-50/50 z-10 border-r border-slate-100 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-xl">{student.avatar}</span>
+                                                                        <span className="font-bold text-deep-blue">{student.name}</span>
+                                                                    </div>
+                                                                </td>
+                                                                {([1, 2, 3, 4] as QuestId[]).map(qId => {
+                                                                    const p = student.progress?.questProgress?.[qId];
+                                                                    const isCompleted = !!p?.completed;
+                                                                    const isStarted = !!p?.startedAt;
+                                                                    const pre = p?.preTestScore;
+                                                                    const post = p?.postTestScore;
+                                                                    const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
+
+                                                                    return (
+                                                                        <td key={qId} className="p-4 text-center">
+                                                                            <div className="flex flex-col items-center gap-1">
+                                                                                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${isCompleted ? 'bg-green-100 text-green-700' :
+                                                                                    isStarted ? 'bg-amber-100 text-amber-700' :
+                                                                                        'bg-slate-100 text-slate-400'
+                                                                                    }`}>
+                                                                                    {isCompleted ? 'Done' : isStarted ? 'Solving' : 'Locked'}
+                                                                                </span>
+                                                                                {(post !== undefined) && (
+                                                                                    <div className="font-bold text-deep-blue text-sm">
+                                                                                        {post}%
+                                                                                        {gain !== null && (
+                                                                                            <span className={`text-[10px] ml-1 ${gain > 0 ? 'text-green-500' : 'text-slate-400'}`}>
+                                                                                                ({gain > 0 ? '+' : ''}{gain}%)
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                                {!isStarted && <span className="text-slate-300">-</span>}
+                                                                            </div>
+                                                                        </td>
+                                                                    );
+                                                                })}
+                                                                <td className="p-4 text-center">
+                                                                    <div className="flex items-center justify-center gap-1 font-bold text-yellow-500">
+                                                                        <Coins className="w-4 h-4 fill-yellow-400" />
+                                                                        {totalStudentCoins}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </>
                             );
