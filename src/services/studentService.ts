@@ -4,7 +4,8 @@ import {
     setDoc,
     doc,
     deleteDoc,
-    onSnapshot
+    onSnapshot,
+    writeBatch
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { StudentProfile } from '../types/quest';
@@ -60,5 +61,37 @@ export const studentService = {
         }, (error) => {
             console.error("Firestore subscription error:", error);
         });
+    },
+
+    /**
+     * Reset progress for multiple student profiles in a single batch
+     */
+    async resetProfiles(profiles: StudentProfile[]): Promise<void> {
+        try {
+            const batch = writeBatch(db);
+
+            profiles.forEach(profile => {
+                const docRef = doc(db, COLLECTION_NAME, profile.id);
+                const resetProfile: StudentProfile = {
+                    ...profile,
+                    progress: {
+                        studentName: profile.name,
+                        emotionalState: 'happy',
+                        totalCoins: 0,
+                        level: 1,
+                        xp: 0,
+                        completedQuests: [],
+                        currentQuestId: 1,
+                        questProgress: {} as any,
+                    }
+                };
+                batch.set(docRef, resetProfile);
+            });
+
+            await batch.commit();
+        } catch (error) {
+            console.error("Error resetting profiles in Firestore:", error);
+            throw error;
+        }
     }
 };

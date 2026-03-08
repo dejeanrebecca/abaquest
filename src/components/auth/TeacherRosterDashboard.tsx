@@ -28,6 +28,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     const [viewingStudent, setViewingStudent] = useState<StudentProfile | null>(null);
     const [selectedQuest, setSelectedQuest] = useState<QuestId>(1);
     const [isEditingTeacherAvatar, setIsEditingTeacherAvatar] = useState(false);
+    const [isResetting, setIsResetting] = useState(false);
 
     const currentTeacher = allProfiles.find(p => p.id === teacher.id) || teacher;
 
@@ -171,6 +172,20 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                 onUpdateProfiles(updatedProfiles);
             } catch (error) {
                 alert('Failed to delete student from cloud.');
+            }
+        }
+    };
+
+    const handleResetAllData = async () => {
+        if (window.confirm('⚠️ CRITICAL ACTION: Are you sure you want to RESET ALL progress for ALL students? This will clear all coins, scores, and levels. This cannot be undone.')) {
+            setIsResetting(true);
+            try {
+                await studentService.resetProfiles(classStudents);
+                // Profiles will auto-update through the subscription in AuthScreen
+            } catch (error) {
+                alert('Failed to reset student data. Please try again.');
+            } finally {
+                setIsResetting(false);
             }
         }
     };
@@ -457,9 +472,24 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         </div>
                     </div>
 
-                    {/* All Quests Overview Table */}
                     <div className="p-6 border-b-2 border-slate-100 bg-white">
-                        <h3 className="text-xl font-bold text-deep-blue mb-4">Class-Wide Overview (All Quests)</h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-xl font-bold text-deep-blue">Class-Wide Overview (All Quests)</h3>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleResetAllData}
+                                disabled={isResetting || classStudents.length === 0}
+                                className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-all font-bold gap-2"
+                            >
+                                {isResetting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                )}
+                                Reset Class Progress
+                            </Button>
+                        </div>
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
