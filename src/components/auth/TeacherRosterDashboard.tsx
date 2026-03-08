@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { StudentProfile } from '../../types/quest';
-import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp } from 'lucide-react';
+import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp, Edit2 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { QuestId } from '../../types/quest';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -18,7 +18,8 @@ const AVATARS = ['👦', '👧', '👦🏽', '👧🏽', '👱‍♂️', '👱�
 const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸'];
 
 export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout }: TeacherDashboardProps) {
-    const [isAddingStudent, setIsAddingStudent] = useState(false);
+    const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
+    const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
     const [newStudentName, setNewStudentName] = useState('');
     const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
     const [newPassword, setNewPassword] = useState<string[]>([]);
@@ -57,6 +58,24 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         }
     };
 
+    const openModalForAdd = () => {
+        setEditingStudentId(null);
+        setNewStudentName('');
+        setSelectedAvatar(AVATARS[0]);
+        setNewPassword([]);
+        setError('');
+        setIsEditingModalOpen(true);
+    };
+
+    const openModalForEdit = (student: StudentProfile) => {
+        setEditingStudentId(student.id);
+        setNewStudentName(student.name);
+        setSelectedAvatar(student.avatar || AVATARS[0]);
+        setNewPassword(student.emojiPass || []);
+        setError('');
+        setIsEditingModalOpen(true);
+    };
+
     const handleSaveStudent = async () => {
         if (!newStudentName.trim()) {
             setError('Please enter a student name.');
@@ -70,35 +89,51 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         setError('');
         setIsSaving(true);
 
-        const newStudent: StudentProfile = {
-            id: `student_${Date.now()}`,
-            name: newStudentName.trim(),
-            avatar: selectedAvatar,
-            emojiPass: [...newPassword],
-            gradeLevel: 'K',
-            role: 'student',
-            teacherId: teacher.id,
-            progress: {
-                studentName: newStudentName.trim(),
-                emotionalState: 'happy',
-                totalCoins: 0,
-                level: 1,
-                xp: 0,
-                completedQuests: [],
-                currentQuestId: 1,
-                questProgress: {} as any,
-            }
-        };
-
         try {
-            await studentService.saveProfile(newStudent);
-
-            // UI will update via parent's hook subscription, 
-            // but we call onUpdateProfiles to keep local state stable if needed.
-            onUpdateProfiles([...allProfiles, newStudent]);
+            if (editingStudentId) {
+                // Edit existing student
+                const existingStudent = allProfiles.find(p => p.id === editingStudentId);
+                if (existingStudent) {
+                    const updatedStudent: StudentProfile = {
+                        ...existingStudent,
+                        name: newStudentName.trim(),
+                        avatar: selectedAvatar,
+                        emojiPass: [...newPassword],
+                        progress: {
+                            ...existingStudent.progress,
+                            studentName: newStudentName.trim(),
+                        }
+                    };
+                    await studentService.saveProfile(updatedStudent);
+                    onUpdateProfiles(allProfiles.map(p => p.id === updatedStudent.id ? updatedStudent : p));
+                }
+            } else {
+                // Add new student
+                const newStudent: StudentProfile = {
+                    id: `student_${Date.now()}`,
+                    name: newStudentName.trim(),
+                    avatar: selectedAvatar,
+                    emojiPass: [...newPassword],
+                    gradeLevel: 'K',
+                    role: 'student',
+                    teacherId: teacher.id,
+                    progress: {
+                        studentName: newStudentName.trim(),
+                        emotionalState: 'happy',
+                        totalCoins: 0,
+                        level: 1,
+                        xp: 0,
+                        completedQuests: [],
+                        currentQuestId: 1,
+                        questProgress: {} as any,
+                    }
+                };
+                await studentService.saveProfile(newStudent);
+                onUpdateProfiles([...allProfiles, newStudent]);
+            }
 
             // Reset form
-            setIsAddingStudent(false);
+            setIsEditingModalOpen(false);
             setNewStudentName('');
             setSelectedAvatar(AVATARS[0]);
             setNewPassword([]);
@@ -230,7 +265,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-deep-blue/5">
                 <div className="p-6 border-b-2 border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <h2 className="text-2xl font-bold text-deep-blue">Your Roster ({classStudents.length})</h2>
-                    <Button onClick={() => setIsAddingStudent(true)} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg px-6 py-2 rounded-xl border-none">
+                    <Button onClick={openModalForAdd} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg px-6 py-2 rounded-xl border-none">
                         <Plus className="w-5 h-5 mr-2" />
                         Add Student
                     </Button>
@@ -260,13 +295,22 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                 <p className="text-sm text-slate-500">Level {student.progress.level}</p>
                                             </div>
                                         </div>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); handleDeleteStudent(student.id); }}
-                                            className="text-slate-400 hover:text-red-500 transition-colors p-2 bg-white rounded-full hover:bg-red-50"
-                                            title="Delete Student"
-                                        >
-                                            <Trash2 className="w-5 h-5" />
-                                        </button>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); openModalForEdit(student); }}
+                                                className="text-slate-400 hover:text-blue-500 transition-colors p-2 bg-white rounded-full hover:bg-blue-50"
+                                                title="Edit Student"
+                                            >
+                                                <Edit2 className="w-5 h-5" />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleDeleteStudent(student.id); }}
+                                                className="text-slate-400 hover:text-red-500 transition-colors p-2 bg-white rounded-full hover:bg-red-50"
+                                                title="Delete Student"
+                                            >
+                                                <Trash2 className="w-5 h-5" />
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div className="bg-white rounded-xl p-3 border border-slate-100 flex items-center justify-between">
@@ -667,7 +711,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
             {/* Add Student Modal */}
             <AnimatePresence>
-                {isAddingStudent && (
+                {isEditingModalOpen && (
                     <div className="fixed inset-0 bg-deep-blue/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
@@ -676,8 +720,8 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                             className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
                         >
                             <div className="p-6 border-b-2 border-slate-100 flex justify-between items-center bg-slate-50">
-                                <h2 className="text-2xl font-bold text-deep-blue">Add New Student</h2>
-                                <button onClick={() => setIsAddingStudent(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                                <h2 className="text-2xl font-bold text-deep-blue">{editingStudentId ? "Edit Student" : "Add New Student"}</h2>
+                                <button onClick={() => setIsEditingModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
                                     <X className="w-6 h-6" />
                                 </button>
                             </div>
@@ -757,7 +801,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                             </div>
 
                             <div className="p-6 border-t-2 border-slate-100 bg-slate-50 flex justify-end gap-4">
-                                <Button variant="outline" onClick={() => setIsAddingStudent(false)} className="px-6 py-6 text-lg rounded-xl border-slate-300 text-slate-600 hover:bg-slate-100 font-semibold">
+                                <Button variant="outline" onClick={() => setIsEditingModalOpen(false)} className="px-6 py-6 text-lg rounded-xl border-slate-300 text-slate-600 hover:bg-slate-100 font-semibold">
                                     Cancel
                                 </Button>
                                 <Button
