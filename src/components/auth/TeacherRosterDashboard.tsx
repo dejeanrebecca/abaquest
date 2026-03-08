@@ -417,10 +417,18 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                 ? Math.round(completedStudents.reduce((sum, s) => sum + (s.progress?.postTestScore || 0), 0) / completedStudents.length)
                                 : 0;
 
+                            const maxPostTest = completedStudents.length > 0
+                                ? Math.max(...completedStudents.map(s => s.progress?.postTestScore || 0))
+                                : 0;
+                            const totalCoins = completedStudents.reduce((sum, s) => {
+                                const qProgress = s.student.progress?.questProgress?.[selectedQuest];
+                                return sum + (qProgress?.coinsEarned || 0);
+                            }, 0);
+
                             return (
                                 <>
                                     {/* Summary Cards */}
-                                    <div className="grid grid-cols-4 gap-4 mb-6">
+                                    <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
                                         <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-200">
                                             <p className="text-xs font-bold text-slate-400 uppercase mb-1">Completed</p>
                                             <p className="text-2xl font-bold text-deep-blue">{completedStudents.length}/{classStudents.length}</p>
@@ -437,6 +445,20 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                             <p className="text-xs font-bold text-slate-400 uppercase mb-1">Avg Gain</p>
                                             <p className={`text-2xl font-bold ${avgPost - avgPre > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
                                                 {avgPost - avgPre > 0 ? '+' : ''}{avgPost - avgPre}%
+                                            </p>
+                                        </div>
+                                        <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-200 shadow-sm shadow-amber-100">
+                                            <p className="text-xs font-bold text-amber-500 uppercase mb-1">Highest Score</p>
+                                            <p className="text-2xl font-bold text-amber-600 gap-1 justify-center flex items-center">
+                                                <Trophy className="w-5 h-5" />
+                                                {maxPostTest}%
+                                            </p>
+                                        </div>
+                                        <div className="bg-yellow-50 rounded-xl p-4 text-center border border-yellow-200 shadow-sm shadow-yellow-100">
+                                            <p className="text-xs font-bold text-yellow-600 uppercase mb-1">Total Coins</p>
+                                            <p className="text-2xl font-bold text-yellow-500 gap-1 justify-center flex items-center">
+                                                <Coins className="w-5 h-5 fill-yellow-400" />
+                                                {totalCoins}
                                             </p>
                                         </div>
                                     </div>
