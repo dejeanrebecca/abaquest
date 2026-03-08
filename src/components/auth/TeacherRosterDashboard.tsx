@@ -465,21 +465,25 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
                                     {/* Learning Curve Chart */}
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Learning Curve (Post-Test Scores)</h4>
+                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Learning Curve (Gain %)</h4>
                                         <div className="h-64 w-full">
                                             {(() => {
-                                                // Create a time-series progression of scores for this specific quest
+                                                // Create a time-series progression of learning gain for this specific quest
                                                 const curveData = completedStudents
-                                                    .filter(s => s.progress?.completedAt)
-                                                    .map(s => ({
-                                                        name: s.student.name,
-                                                        score: s.progress?.postTestScore || 0,
-                                                        date: new Date(s.progress!.completedAt!).getTime()
-                                                    }))
+                                                    .filter(s => s.progress?.completedAt && s.progress?.preTestScore !== undefined && s.progress?.postTestScore !== undefined)
+                                                    .map(s => {
+                                                        const pre = s.progress!.preTestScore!;
+                                                        const post = s.progress!.postTestScore!;
+                                                        return {
+                                                            name: s.student.name,
+                                                            gain: post - pre,
+                                                            date: new Date(s.progress!.completedAt!).getTime()
+                                                        };
+                                                    })
                                                     .sort((a, b) => a.date - b.date) // Chronological order
                                                     .map((data, index) => ({
                                                         student: data.name,
-                                                        score: data.score,
+                                                        gain: data.gain,
                                                         time: `Student ${index + 1}`
                                                     }));
 
@@ -496,17 +500,17 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                         <LineChart data={curveData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                                             <XAxis dataKey="time" />
-                                                            <YAxis domain={[0, 100]} tickFormatter={(val) => `${val}%`} />
+                                                            <YAxis tickFormatter={(val) => `${val > 0 ? '+' : ''}${val}%`} />
                                                             <Tooltip
-                                                                formatter={(val: number) => [`${val}%`, 'Score']}
+                                                                formatter={(val: number) => [`${val > 0 ? '+' : ''}${val}%`, 'Gain']}
                                                                 labelFormatter={(label, payload) => payload?.[0]?.payload?.student || label}
                                                             />
                                                             <Line
                                                                 type="monotone"
-                                                                dataKey="score"
-                                                                stroke="#10b981"
+                                                                dataKey="gain"
+                                                                stroke="#3b82f6"
                                                                 strokeWidth={3}
-                                                                dot={{ r: 4, fill: "#10b981", strokeWidth: 2, stroke: "#fff" }}
+                                                                dot={{ r: 4, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
                                                                 activeDot={{ r: 6 }}
                                                             />
                                                         </LineChart>
