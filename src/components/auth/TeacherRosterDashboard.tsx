@@ -5,7 +5,7 @@ import { StudentProfile } from '../../types/quest';
 import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp, Edit2 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { QuestId } from '../../types/quest';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 interface TeacherDashboardProps {
     teacher: StudentProfile;
@@ -460,6 +460,59 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                 <Coins className="w-5 h-5 fill-yellow-400" />
                                                 {totalCoins}
                                             </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Learning Curve Chart */}
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Learning Curve (Post-Test Scores)</h4>
+                                        <div className="h-64 w-full">
+                                            {(() => {
+                                                // Create a time-series progression of scores for this specific quest
+                                                const curveData = completedStudents
+                                                    .filter(s => s.progress?.completedAt)
+                                                    .map(s => ({
+                                                        name: s.student.name,
+                                                        score: s.progress?.postTestScore || 0,
+                                                        date: new Date(s.progress!.completedAt!).getTime()
+                                                    }))
+                                                    .sort((a, b) => a.date - b.date) // Chronological order
+                                                    .map((data, index) => ({
+                                                        student: data.name,
+                                                        score: data.score,
+                                                        time: `Student ${index + 1}`
+                                                    }));
+
+                                                if (curveData.length === 0) {
+                                                    return (
+                                                        <div className="flex items-center justify-center h-full text-slate-400">
+                                                            No completed quest data available to generate a learning curve.
+                                                        </div>
+                                                    );
+                                                }
+
+                                                return (
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <LineChart data={curveData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                            <XAxis dataKey="time" />
+                                                            <YAxis domain={[0, 100]} tickFormatter={(val) => `${val}%`} />
+                                                            <Tooltip
+                                                                formatter={(val: number) => [`${val}%`, 'Score']}
+                                                                labelFormatter={(label, payload) => payload?.[0]?.payload?.student || label}
+                                                            />
+                                                            <Line
+                                                                type="monotone"
+                                                                dataKey="score"
+                                                                stroke="#10b981"
+                                                                strokeWidth={3}
+                                                                dot={{ r: 4, fill: "#10b981", strokeWidth: 2, stroke: "#fff" }}
+                                                                activeDot={{ r: 6 }}
+                                                            />
+                                                        </LineChart>
+                                                    </ResponsiveContainer>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
 
