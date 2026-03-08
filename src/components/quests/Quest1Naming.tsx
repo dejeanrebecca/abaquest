@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { QuestClose } from '../quest-screens/QuestClose';
@@ -35,52 +35,44 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [preTestAnswers, setPreTestAnswers] = useState<boolean[]>([]);
   const [postTestAnswers] = useState<boolean[]>([]);
   const [counterName, setCounterName] = useState('');
-  const [lastPlayedName, setLastPlayedName] = useState('');
   const [showPreTestIntro, setShowPreTestIntro] = useState(true);
 
   const { logInteraction } = useDataLogger();
   const { setEmotionalState, setStudentName } = useQuestEngine();
-  const { playAudio, stopAudio, prefetchAudio } = useElevenLabs();
+  const { playAudio, stopAudio } = useElevenLabs();
+  const lastPlayedNameRef = useRef('');
 
   const speakText = (text: string | string[], onComplete?: () => void) => {
     playAudio(text, onComplete);
   };
 
-  const playNameConfirmation = (name: string, onComplete?: () => void) => {
+  const handlePlayName = useCallback((name: string, onComplete?: () => void) => {
     const trimmedName = name.trim();
-    if (trimmedName && trimmedName.length >= 2 && trimmedName !== lastPlayedName) {
-      setLastPlayedName(trimmedName);
-      speakText(`Great name! ${trimmedName} is ready for math quests!`, onComplete);
-    } else if (onComplete) {
-      onComplete();
+    if (!trimmedName || trimmedName.length < 2 || trimmedName === lastPlayedNameRef.current) {
+      if (onComplete) onComplete();
+      return;
     }
-  };
+
+    lastPlayedNameRef.current = trimmedName;
+    const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
+    const isSuggested = suggestedNames.some(n => n.toLowerCase() === trimmedName.toLowerCase());
+
+    if (isSuggested) {
+      speakText(`q1_naming_${trimmedName.toLowerCase()}`, onComplete);
+    } else {
+      speakText(['q1_naming_great_name', trimmedName, 'q1_naming_is_ready'], onComplete);
+    }
+  }, [speakText]);
 
   // Debounced audio for custom name typing
   useEffect(() => {
-    if (step === 'naming' && counterName) {
-      const timeoutId = setTimeout(() => {
-        playNameConfirmation(counterName);
-      }, 1000); // 1s delay after typing stops
-      return () => clearTimeout(timeoutId);
-    }
-  }, [step, counterName]);
-
-  useEffect(() => {
     if (step === 'naming' && counterName && counterName.trim().length >= 2) {
-      const finalName = counterName.trim();
-      const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
-      const isSuggested = suggestedNames.some(n => n.toLowerCase() === finalName.toLowerCase());
       const timeoutId = setTimeout(() => {
-        if (isSuggested) {
-          prefetchAudio(`q1_naming_${finalName.toLowerCase()}`);
-        } else {
-          prefetchAudio(['q1_naming_great_name', finalName, 'q1_naming_is_ready']);
-        }
-      }, 300); // reduced timeout to prefetch faster
+        handlePlayName(counterName);
+      }, 1500); // increased delay to allow for more natural typing
       return () => clearTimeout(timeoutId);
     }
-  }, [step, counterName, prefetchAudio]);
+  }, [step, counterName, handlePlayName]);
 
   // Ensure audio stops when navigating away from the quest
   useEffect(() => {
@@ -445,13 +437,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
       const finalName = counterName ? counterName.trim() : '';
       if (finalName) {
         setStudentName(finalName);
-        const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
-        const isSuggested = suggestedNames.some(n => n.toLowerCase() === finalName.toLowerCase());
-        
-        // Use 3-part narration to save 11Labs tokens, or a single key for suggested names
-        const audioInput = isSuggested ? `q1_naming_${finalName.toLowerCase()}` : ['q1_naming_great_name', finalName, 'q1_naming_is_ready'];
-        
-        speakText(audioInput, () => {
+        handlePlayName(finalName, () => {
           setStep('posttest');
         });
       }
@@ -486,12 +472,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                     key={name}
                     onClick={() => {
                       setCounterName(name);
-                      const isSuggested = suggestedNames.some(n => n.toLowerCase() === name.toLowerCase());
-                      if (isSuggested) {
-                        speakText(`q1_naming_${name.toLowerCase()}`);
-                      } else {
-                        speakText(['q1_naming_great_name', name, 'q1_naming_is_ready']);
-                      }
+                      handlePlayName(name);
                     }}
                     className={`p-4 rounded-xl border-4 transition-all ${counterName === name
                       ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
@@ -518,14 +499,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   maxLength={15}
                   onBlur={() => {
                     if (counterName && counterName.trim().length >= 2) {
-                      const finalName = counterName.trim();
-                      const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
-                      const isSuggested = suggestedNames.some(n => n.toLowerCase() === finalName.toLowerCase());
-                      if (isSuggested) {
-                        speakText(`q1_naming_${finalName.toLowerCase()}`);
-                      } else {
-                        speakText(['q1_naming_great_name', finalName, 'q1_naming_is_ready']);
-                      }
+                      handlePlayName(counterName);
                     }
                   }}
                   onKeyDown={(e) => {

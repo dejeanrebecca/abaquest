@@ -67,7 +67,7 @@ export function Quest4Story({ onComplete }: Quest4StoryProps) {
         {
             imageSrc: quest4Scene10,
             speaker: 'mistress-creola',
-            narrationText: "Mistress Creola explains that to add 0 + 9, we build nine step by step. “Zero means we begin with nothing,” she says softly. First, she moves the top bead down. “That’s five.” Then she lifts four lower beads. “Six… seven… eight… nine.” The beads float almost like they are teleporting. She turns back to the class. “Did zero change our number?” “No!” Shouted Ameerah before any of his classmates could answer. Everyone including Mistress Creola turned and looked at him. “That’s right. Zero keeps the number the same. So zero plus nine equals nine. One five bead and four ones. That makes nine.” Mistress Creola looked at Ameer’s junior counter and said, “great job today Ameer!”",
+            narrationText: "Mistress Creola explains that to add 0 + 9, we build nine step by step. “Zero means we begin with nothing,” she says softly. First, she moves the top bead down. “That’s five.” Then she lifts four lower beads. “Six… seven… eight… nine.” The beads float almost like they are teleporting. She turns back to the class. “Did zero change our number?” “No!” Shouted Ameer before any of his classmates could answer. Everyone including Mistress Creola turned and looked at him. “That’s right. Zero keeps the number the same. So zero plus nine equals nine. One five bead and four ones. That makes nine.” Mistress Creola looked at Ameer’s junior counter and said, “great job today Ameer!”",
             audioKey: "q4_story_9"
         },
         {

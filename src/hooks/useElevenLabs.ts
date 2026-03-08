@@ -22,12 +22,17 @@ export function useElevenLabs() {
         // Stop any currently playing audio globally
         if (globalAudio) {
             globalAudio.pause();
+            globalAudio.onended = null; // Clear previous listeners
+            globalAudio.onerror = null;
             globalAudio = null;
         }
 
         // Also cancel any ongoing synthetic speech
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
+            // Mandatory delay to allow the engine to clear its queue before restarting
+            // Increased to 150ms to ensure finicky browser engines reset properly
+            await new Promise(resolve => setTimeout(resolve, 150));
         }
 
         setIsPlaying(true);
@@ -50,7 +55,9 @@ export function useElevenLabs() {
             }
 
             // Check if it's an audio key or raw text
-            const isKey = /^[a-zA-Z0-9_]+$/.test(currentItem);
+            // Refined: Keys MUST contain an underscore (e.g., q1_naming)
+            // This prevents custom names like "Max" from being mistaken for keys.
+            const isKey = /^[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(currentItem);
 
             if (isKey) {
                 // PLAY STATIC AUDIO FILE
@@ -87,17 +94,42 @@ export function useElevenLabs() {
                                          voices.find(v => v.lang.includes('en') && v.name.includes('Google')) ||
                                          voices.find(v => v.lang.includes('en'));
                                          
-                    if (preferredVoice) utterance.voice = preferredVoice;
+                    if (preferredVoice) {
+                        console.log(`SpeechSynthesis using voice: ${preferredVoice.name}`);
+                        utterance.voice = preferredVoice;
+                    }
+
+                    // Explicit settings to ensure consistency across browsers
+                    utterance.volume = 1.0;
+                    utterance.rate = 1.0;
+                    utterance.pitch = 1.0;
 
                     // Removed pitch/rate adjustments based on user feedback to make it sound more natural and match the speed of the other recordings better.
 
+                    let finished = false;
+                    const timeoutId = setTimeout(() => {
+                        if (!finished) {
+                            console.warn("SpeechSynthesis timeout - proceeding to next item");
+                            finished = true;
+                            playItem(index + 1);
+                        }
+                    }, 5000); // 5s safety fallback
+
                     utterance.onend = () => {
-                        playItem(index + 1);
+                        if (!finished) {
+                            finished = true;
+                            clearTimeout(timeoutId);
+                            playItem(index + 1);
+                        }
                     };
 
                     utterance.onerror = (e) => {
                         console.error("SpeechSynthesis error", e);
-                        playItem(index + 1);
+                        if (!finished) {
+                            finished = true;
+                            clearTimeout(timeoutId);
+                            playItem(index + 1);
+                        }
                     };
 
                     // Ensure voices are loaded. On some browsers (Chrome), they load async.

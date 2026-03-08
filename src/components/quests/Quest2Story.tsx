@@ -20,7 +20,7 @@ export function Quest2Story({ onComplete }: Quest2StoryProps) {
         {
             imageSrc: beadSlipImg,
             speaker: 'narrator',
-            narrationText: "Ameer and Ameerah eat Breakfast fast. Ameer says I want to get to school eary to practice the parts of my junior Counter! The twins hop in their boat. But—oh no! The boat rocks, and the Junior Counter slips from Ameer's hands and falls into the water!",
+            narrationText: "Ameer and Ameerah eat Breakfast fast. Ameer says I want to get to school early to practice the parts of my junior Counter! The twins hop in their boat. But—oh no! The boat rocks, and the Junior Counter slips from Ameer's hands and falls into the water!",
             audioKey: "q2_story_2",
         },
         {
