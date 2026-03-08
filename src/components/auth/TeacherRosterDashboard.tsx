@@ -14,7 +14,7 @@ interface TeacherDashboardProps {
     onLogout: () => void;
 }
 
-const AVATARS = ['👦', '👧', '👦🏽', '👧🏽', '👱‍♂️', '👱‍♀️', '🧑‍🦱', '👩‍🦱'];
+const AVATARS = ['👦', '👧', '👦🏽', '👧🏽', '👱‍♂️', '👱‍♀️', '🧑‍🦱', '👩‍🦱', '👨‍🏫', '👩‍🏫', '🧑‍🏫', '🦸‍♂️', '🦸‍♀️'];
 const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸'];
 
 export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout }: TeacherDashboardProps) {
@@ -27,8 +27,21 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     const [error, setError] = useState('');
     const [viewingStudent, setViewingStudent] = useState<StudentProfile | null>(null);
     const [selectedQuest, setSelectedQuest] = useState<QuestId>(1);
+    const [isEditingTeacherAvatar, setIsEditingTeacherAvatar] = useState(false);
 
+    const currentTeacher = allProfiles.find(p => p.id === teacher.id) || teacher;
     const classStudents = allProfiles.filter(p => p.teacherId === teacher.id);
+
+    const handleUpdateTeacherAvatar = async (newAvatar: string) => {
+        const updatedTeacher = { ...currentTeacher, avatar: newAvatar };
+        setIsEditingTeacherAvatar(false);
+        try {
+            await studentService.saveProfile(updatedTeacher);
+            onUpdateProfiles(allProfiles.map(p => p.id === updatedTeacher.id ? updatedTeacher : p));
+        } catch (error) {
+            console.error('Failed to update teacher avatar:', error);
+        }
+    };
 
     // Calculate aggregated interactions for the selected quest
     const aggregatedInteractions = classStudents.reduce(
@@ -250,9 +263,49 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
             <header className="flex justify-between items-center mb-10 bg-white p-6 rounded-3xl shadow-sm border-2 border-deep-blue/10">
                 <div className="flex items-center gap-4">
-                    <div className="text-5xl">{teacher.avatar}</div>
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsEditingTeacherAvatar(!isEditingTeacherAvatar)}
+                            className="text-5xl hover:scale-110 transition-transform cursor-pointer relative group flex items-center justify-center bg-slate-50 w-20 h-20 rounded-2xl border-2 border-slate-100"
+                        >
+                            {currentTeacher.avatar || '👨‍🏫'}
+                            <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity border border-slate-200">
+                                <Edit2 className="w-4 h-4 text-slate-500" />
+                            </div>
+                        </button>
+
+                        {/* Avatar Picker Dropdown */}
+                        <AnimatePresence>
+                            {isEditingTeacherAvatar && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute top-full mt-4 left-0 bg-white rounded-2xl p-4 shadow-xl border-2 border-slate-100 z-50 w-[280px]"
+                                >
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="font-bold text-deep-blue text-sm">Select Your Avatar</h3>
+                                        <button onClick={() => setIsEditingTeacherAvatar(false)} className="text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full p-1">
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-2">
+                                        {AVATARS.map(avatar => (
+                                            <button
+                                                key={avatar}
+                                                onClick={() => handleUpdateTeacherAvatar(avatar)}
+                                                className={`text-2xl p-2 rounded-xl hover:bg-slate-100 transition-all ${currentTeacher.avatar === avatar ? 'bg-blue-50 border-2 border-blue-200 scale-105 shadow-sm' : 'border-2 border-transparent hover:scale-105'}`}
+                                            >
+                                                {avatar}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-deep-blue">Welcome, {teacher.name}!</h1>
+                        <h1 className="text-3xl font-bold text-deep-blue">Welcome, {currentTeacher.name}!</h1>
                         <p className="text-deep-blue/60">Manage your classroom</p>
                     </div>
                 </div>
