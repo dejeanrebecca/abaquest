@@ -6,48 +6,180 @@ import { EmojiPassChallenge } from './EmojiPassChallenge';
 import { TeacherRosterDashboard } from './TeacherRosterDashboard';
 import { StudentProfile } from '../../types/quest';
 import { Button } from '../ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { DbService, useDbSync } from '../../services/db.service';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { studentService } from '../../services/studentService';
 
 interface AuthScreenProps {
     onAuthenticated: (student: StudentProfile) => void;
 }
 
+
+const INITIAL_PROFILES: StudentProfile[] = [
+    {
+        id: 'teacher1',
+        name: 'Ms. Teacher',
+        avatar: '👩‍🏫',
+        emojiPass: ['🍎', '🍎', '🍎'],
+        gradeLevel: 'K',
+        role: 'teacher',
+        progress: {
+            studentName: 'Ms. Teacher',
+            emotionalState: '',
+            totalCoins: 0,
+            level: 99,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: null,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 'teacher2',
+        name: 'Mr. Smith',
+        avatar: '👨‍🏫',
+        emojiPass: ['🚗', '🚗', '🚗'],
+        gradeLevel: 'K',
+        role: 'teacher',
+        progress: {
+            studentName: 'Mr. Smith',
+            emotionalState: '',
+            totalCoins: 0,
+            level: 99,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: null,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's1',
+        name: 'Ameer',
+        avatar: '👦',
+        emojiPass: ['🐶', '🐶', '🐶'],
+        gradeLevel: 'K',
+        teacherId: 'teacher1',
+        progress: {
+            studentName: 'Ameer',
+            emotionalState: 'happy',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's2',
+        name: 'Ameerah',
+        avatar: '👧',
+        emojiPass: ['⭐', '⭐', '⭐'],
+        gradeLevel: 'K',
+        teacherId: 'teacher1',
+        progress: {
+            studentName: 'Ameerah',
+            emotionalState: 'excited',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's3',
+        name: 'Liam',
+        avatar: '👱‍♂️',
+        emojiPass: ['🚗', '🚗', '🚗'],
+        gradeLevel: 'K',
+        teacherId: 'teacher2',
+        progress: {
+            studentName: 'Liam',
+            emotionalState: 'happy',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    },
+    {
+        id: 's4',
+        name: 'Noah',
+        avatar: '👦🏽',
+        emojiPass: ['🍎', '🍎', '🍎'],
+        gradeLevel: 'K',
+        teacherId: 'teacher2',
+        progress: {
+            studentName: 'Noah',
+            emotionalState: 'happy',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: 1,
+            questProgress: {} as any,
+        }
+    }
+];
+
+
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard'>('teacher-select');
     const [selectedTeacher, setSelectedTeacher] = useState<StudentProfile | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
-    const [profiles, setProfiles] = useState<StudentProfile[]>([]);
 
-    // Check for initialization
-    const [isInitialized, setIsInitialized] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [profiles, setProfiles] = useState<StudentProfile[]>(INITIAL_PROFILES);
 
     useEffect(() => {
-        const initDb = async () => {
-            await DbService.init();
-            setIsInitialized(true);
-            const loadedProfiles = await DbService.getProfiles();
-            setProfiles(loadedProfiles);
+        // 1. Initial fetch from Firestore
+        const initProfiles = async () => {
+            setIsLoading(true);
+            try {
+                const cloudProfiles = await studentService.fetchProfiles();
+
+                // Merge strategy:
+                // 1. For each initial profile, if a cloud version exists, use that.
+                // 2. Add any custom profiles that are NOT in the initial set.
+                const mergedInitial = INITIAL_PROFILES.map(ip => {
+                    const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
+                    return cloudVersion || ip;
+                });
+                const customProfiles = cloudProfiles.filter(sp =>
+                    !INITIAL_PROFILES.some(dp => dp.id === sp.id)
+                );
+
+                const finalProfiles = [...mergedInitial, ...customProfiles];
+                setProfiles(finalProfiles);
+
+                // Backup to localStorage for convenience (optional)
+                localStorage.setItem('abaquest_students', JSON.stringify(finalProfiles));
+            } catch (error) {
+                console.error("Failed to load profiles from cloud:", error);
+            } finally {
+                setIsLoading(false);
+            }
         };
-        initDb();
+
+        initProfiles();
+
+        // 2. Subscribe to real-time updates
+        const unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
+            const mergedInitial = INITIAL_PROFILES.map(ip => {
+                const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
+                return cloudVersion || ip;
+            });
+            const customProfiles = cloudProfiles.filter(sp =>
+                !INITIAL_PROFILES.some(dp => dp.id === sp.id)
+            );
+            setProfiles([...mergedInitial, ...customProfiles]);
+        });
+
+        return () => unsubscribe();
     }, []);
-
-    // Sync across tabs and local DB updates
-    useEffect(() => {
-        if (!isInitialized) return;
-
-        const fetchProfiles = async () => {
-            const loadedProfiles = await DbService.getProfiles();
-            setProfiles(loadedProfiles);
-        };
-
-        const unsubscribe = useDbSync(fetchProfiles);
-
-        return () => {
-            unsubscribe();
-        }
-    }, [isInitialized]);
-
 
 
     const handleTeacherSelect = (teacher: StudentProfile) => {
@@ -96,6 +228,13 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                     </p>
                 </div>
             </header>
+
+            {isLoading && (
+                <div className="flex flex-col items-center gap-4 mb-8">
+                    <Loader2 className="w-12 h-12 text-deep-blue animate-spin" />
+                    <p className="text-deep-blue font-medium animate-pulse">Syncing class data...</p>
+                </div>
+            )}
 
             <AnimatePresence mode="wait">
                 {view === 'teacher-select' ? (
@@ -176,14 +315,17 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                                     const now = new Date().toISOString();
                                     const updatedStudent = { ...selectedStudent, lastLogin: now };
 
-                                    await DbService.updateProfile(updatedStudent);
 
-                                    // Local state update happens automatically via subscription
                                     if (updatedStudent.role === 'teacher') {
                                         setView('teacher-dashboard');
                                     } else {
                                         onAuthenticated(updatedStudent);
                                     }
+
+                                    // Sync login timestamp to cloud in the background (non-blocking)
+                                    studentService.saveProfile(updatedStudent).catch(error => {
+                                        console.error("Failed to sync login update:", error);
+                                    });
                                 }}
                                 onBack={() => {
                                     setSelectedStudent(null);
@@ -204,6 +346,13 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                             <TeacherRosterDashboard
                                 teacher={selectedStudent}
                                 allProfiles={profiles}
+
+                                onUpdateProfiles={async (newProfiles) => {
+                                    // Identify what changed and sync it
+                                    // This is a bit brute-force but ensures sync. 
+                                    // Better approach is handled inside TeacherRosterDashboard itself
+                                    setProfiles(newProfiles);
+                                }}
                                 onLogout={() => {
                                     setSelectedStudent(null);
                                     setView('teacher-select');

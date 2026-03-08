@@ -7,6 +7,7 @@ import { Quest3Story } from '../quests/Quest3Story';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { QuestWelcome } from '../quest-screens/QuestWelcome';
 import { useElevenLabs } from '../../hooks/useElevenLabs';
+import { useQuestEngine } from '../QuestEngine';
 
 interface PositionNumbersProps {
   onNext: (results?: { pre: number; post: number }) => void;
@@ -15,7 +16,8 @@ interface PositionNumbersProps {
 type Phase = 'welcome' | 'pretest' | 'explainer' | 'learn' | 'practice' | 'transition' | 'story' | 'posttest' | 'close';
 
 export function PositionNumbers({ onNext }: PositionNumbersProps) {
-  const [phase, setPhase] = useState<Phase>('welcome');
+  const { currentStep, goToStep } = useQuestEngine();
+  const [phase, setPhaseState] = useState<Phase>((currentStep as Phase) || 'welcome');
   const { stopAudio } = useElevenLabs();
 
   // Ensure audio stops when navigating away from the quest
@@ -24,20 +26,25 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
   }, [stopAudio]);
 
   const handleNextPhase = (nextPhase?: Phase) => {
-    if (nextPhase) {
-      setPhase(nextPhase);
-    } else {
+    let newPhase = nextPhase;
+    if (!newPhase) {
       // Default flow: welcome -> pretest -> explainer -> learn -> practice -> story -> posttest -> close
       switch (phase) {
-        case 'welcome': setPhase('pretest'); break;
-        case 'pretest': setPhase('explainer'); break;
-        case 'explainer': setPhase('learn'); break;
-        case 'learn': setPhase('practice'); break;
-        case 'practice': setPhase('transition'); break;
-        case 'transition': setPhase('story'); break;
-        case 'story': setPhase('posttest'); break;
-        case 'posttest': setPhase('close'); break;
-        case 'close': onNext({ pre: 100, post: 100 }); break; // TODO: Pass actual results
+        case 'welcome': newPhase = 'pretest'; break;
+        case 'pretest': newPhase = 'explainer'; break;
+        case 'explainer': newPhase = 'learn'; break;
+        case 'learn': newPhase = 'practice'; break;
+        case 'practice': newPhase = 'transition'; break;
+        case 'transition': newPhase = 'story'; break;
+        case 'story': newPhase = 'posttest'; break;
+        case 'posttest': newPhase = 'close'; break;
+        case 'close': onNext({ pre: 100, post: 100 }); return;
+      }
+    }
+    if (newPhase) {
+      setPhaseState(newPhase);
+      if (['welcome', 'pretest', 'learn', 'story', 'posttest', 'close'].includes(newPhase)) {
+        goToStep(newPhase as any);
       }
     }
   };

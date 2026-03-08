@@ -28,7 +28,16 @@ interface Quest1NamingProps {
 type Step = 'welcome' | 'pretest' | 'learn' | 'transition' | 'story' | 'naming' | 'posttest' | 'close';
 
 export function Quest1Naming({ onComplete }: Quest1NamingProps) {
-  const [step, setStep] = useState<Step>('welcome');
+  const { setEmotionalState, setStudentName, currentStep, goToStep } = useQuestEngine();
+  const [step, setStepState] = useState<Step>((currentStep as Step) || 'welcome');
+
+  const setStep = (newStep: Step) => {
+    setStepState(newStep);
+    if (['welcome', 'pretest', 'learn', 'story', 'posttest', 'close'].includes(newStep)) {
+      goToStep(newStep as any);
+    }
+  };
+
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [showFeedback, setShowFeedback] = useState<'correct' | 'wrong' | 'skip' | null>(null);
   const [startTime, setStartTime] = useState(Date.now());
@@ -38,8 +47,8 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const [showPreTestIntro, setShowPreTestIntro] = useState(true);
 
   const { logInteraction } = useDataLogger();
-  const { setEmotionalState, setStudentName } = useQuestEngine();
-  const { playAudio, stopAudio } = useElevenLabs();
+
+  const { playAudio, stopAudio, prefetchAudio } = useElevenLabs();
   const lastPlayedNameRef = useRef('');
 
   const speakText = (text: string | string[], onComplete?: () => void) => {

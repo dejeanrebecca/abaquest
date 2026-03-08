@@ -31,6 +31,15 @@ export interface QuestProgress {
   coinsEarned: number;
   startedAt: string;
   completedAt?: string;
+
+  // Tracking interaction metrics
+  interactions?: {
+    total: number;
+    preTest: number;
+    practice: number;
+    postTest: number;
+    story: number;
+  };
 }
 
 export interface StudentProgress {

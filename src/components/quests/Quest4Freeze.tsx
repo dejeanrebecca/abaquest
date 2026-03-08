@@ -6,6 +6,7 @@ import { PostTestCheckIn } from '../quest-screens/PostTestCheckIn';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { useDataLogger } from '../DataLogger';
 import { useElevenLabs } from '../../hooks/useElevenLabs';
+import { useQuestEngine } from '../QuestEngine';
 
 // Placeholder imports for components we are about to create
 import { Quest4PreTest } from './Quest4PreTest';
@@ -32,7 +33,16 @@ interface Quest4FreezeProps {
 }
 
 export function Quest4Freeze({ onComplete }: Quest4FreezeProps) {
-  const [step, setStep] = useState<QuestStep>('welcome');
+  const { currentStep, goToStep } = useQuestEngine();
+  const [step, setStepState] = useState<QuestStep>((currentStep as QuestStep) || 'welcome');
+
+  const setStep = (newStep: QuestStep) => {
+    setStepState(newStep);
+    if (['welcome', 'pretest', 'learn', 'story', 'posttest', 'close'].includes(newStep)) {
+      goToStep(newStep as any);
+    }
+  };
+
   const [preTestScore, setPreTestScore] = useState(0);
   const [postTestScore, setPostTestScore] = useState(0);
   const { logInteraction } = useDataLogger();

@@ -6,6 +6,7 @@ import { Quest2Learn } from './Quest2Learn';
 import { Quest2Story } from './Quest2Story';
 import { TransitionScreen } from '../common/TransitionScreen';
 import { useElevenLabs } from '../../hooks/useElevenLabs';
+import { useQuestEngine } from '../QuestEngine';
 // import storyBookImage from '../../assets/story-book.png';
 
 interface Quest2PartsProps {
@@ -16,7 +17,16 @@ interface Quest2PartsProps {
 type Step = 'welcome' | 'pretest' | 'learn' | 'story-transition' | 'story' | 'posttest' | 'close';
 
 export function Quest2Parts({ onComplete }: Quest2PartsProps) {
-  const [step, setStep] = useState<Step>('welcome');
+  const { currentStep, goToStep } = useQuestEngine();
+  const [step, setStepState] = useState<Step>((currentStep as Step) || 'welcome');
+
+  const setStep = (newStep: Step) => {
+    setStepState(newStep);
+    if (['welcome', 'pretest', 'learn', 'story', 'posttest', 'close'].includes(newStep)) {
+      goToStep(newStep as any);
+    }
+  };
+
   const [preTestScore, setPreTestScore] = useState(0);
   const [postTestScore, setPostTestScore] = useState(0);
 
