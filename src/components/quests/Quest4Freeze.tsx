@@ -81,6 +81,7 @@ export function Quest4Freeze({ onComplete }: Quest4FreezeProps) {
             questTitle="Quest 4: Freeze Addition"
             questIcon={<span className="text-6xl">❄️</span>}
             welcomeMessage="Great job Abaquester! You have learned so much already. Today we will learn to add using our Junior counter and practise the Freeze Rule!"
+            audioKey="q4_welcome_msg"
             onNext={() => setStep('pretest-transition')}
           />
         )}

@@ -50,6 +50,7 @@ export function PositionNumbers({ onNext }: PositionNumbersProps) {
           questTitle="Quest 3: Position Numbers"
           questIcon="123"
           welcomeMessage="Great work so far, AbaQuester! Now that you know the parts of your Junior Counter, it's time to find out where the numbers 0 to 9 live. Every number has its own special place!"
+          audioKey="q3_welcome_msg"
           onNext={() => handleNextPhase()}
           showEmotionalCheckIn={false}
         />

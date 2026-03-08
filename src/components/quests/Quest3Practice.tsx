@@ -91,7 +91,12 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
         return `Move the beads to show the number ${practiceNumbers[index]}!`;
     };
 
+    const getAudioKey = (index: number) => {
+        return `q3_practice_${practiceNumbers[index]}`;
+    };
+
     const currentText = getQuestionText(currentQuestion);
+    const currentAudioKey = getAudioKey(currentQuestion);
 
     return (
         <motion.div
@@ -125,6 +130,7 @@ export function Quest3Practice({ onComplete }: Quest3PracticeProps) {
                             <AudioNarration
                                 key={`practice-audio-${currentPractice}`}
                                 text={currentText}
+                                audioKey={currentAudioKey}
                                 speaker="abby"
                                 compact
                                 autoPlay

@@ -16,25 +16,29 @@ const questions = [
         id: 1,
         problem: "0 + 3",
         answer: 3,
-        distractors: [0, 30]
+        distractors: [0, 30],
+        audioKey: 'q4_test_0_3'
     },
     {
         id: 2,
         problem: "0 + 2",
         answer: 2,
-        distractors: [0, 4]
+        distractors: [0, 4],
+        audioKey: 'q4_test_0_2'
     },
     {
         id: 3,
         problem: "0 + 4",
         answer: 4,
-        distractors: [0, 5]
+        distractors: [0, 5],
+        audioKey: 'q4_test_0_4'
     },
     {
         id: 4,
         problem: "0 + 5",
         answer: 5,
-        distractors: [0, 50]
+        distractors: [0, 50],
+        audioKey: 'q4_test_0_5'
     }
 ];
 
@@ -130,6 +134,7 @@ export function Quest4PreTest({ onComplete, isPreTest = true }: Quest4PreTestPro
                             <AudioNarration
                                 key={`q4-quickcheck-${currentQuestion}`}
                                 text={`What is ${question.problem.replace('+', 'plus')}?`}
+                                audioKey={question.audioKey}
                                 speaker="abby"
                                 compact
                                 autoPlay

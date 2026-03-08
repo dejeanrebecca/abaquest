@@ -68,6 +68,16 @@ export function Quest4Learn({ onComplete }: Quest4LearnProps) {
         }
     };
 
+    const getAudioKey = () => {
+        switch (step) {
+            case 0: return "q4_learn_0";
+            case 1: return "q4_learn_1";
+            case 2: return "q4_learn_2";
+            case 3: return "q4_learn_3";
+            default: return undefined;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-warm-neutral p-4 flex flex-col items-center">
             {/* Abby Helper */}
@@ -91,6 +101,7 @@ export function Quest4Learn({ onComplete }: Quest4LearnProps) {
                     </p>
                     <AudioNarration
                         text={getAudioText()}
+                        audioKey={getAudioKey()}
                         speaker="abby"
                         autoPlay={true}
                         key={step} // Re-run effect on step change

@@ -25,6 +25,7 @@ export function Quest4Explainer({ onNext }: Quest4ExplainerProps) {
                     <div className="space-y-6">
                         <AudioNarration
                             text="When you add Zero to a number, the number stays exactly the same. It's like a Freeze Ray!"
+                            audioKey="q4_zero_freeze"
                             speaker="abby"
                             compact
                             autoPlay

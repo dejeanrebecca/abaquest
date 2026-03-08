@@ -42,7 +42,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   const { setEmotionalState, setStudentName } = useQuestEngine();
   const { playAudio, stopAudio, prefetchAudio } = useElevenLabs();
 
-  const speakText = (text: string, onComplete?: () => void) => {
+  const speakText = (text: string | string[], onComplete?: () => void) => {
     playAudio(text, onComplete);
   };
 
@@ -68,9 +68,15 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   useEffect(() => {
     if (step === 'naming' && counterName && counterName.trim().length >= 2) {
+      const finalName = counterName.trim();
+      const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
+      const isSuggested = suggestedNames.some(n => n.toLowerCase() === finalName.toLowerCase());
       const timeoutId = setTimeout(() => {
-        console.log("Prefetching name:", counterName.trim());
-        prefetchAudio(`Great name! ${counterName.trim()} is ready for math quests!`);
+        if (isSuggested) {
+          prefetchAudio(`q1_naming_${finalName.toLowerCase()}`);
+        } else {
+          prefetchAudio(['q1_naming_great_name', finalName, 'q1_naming_is_ready']);
+        }
       }, 300); // reduced timeout to prefetch faster
       return () => clearTimeout(timeoutId);
     }
@@ -82,10 +88,10 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
   }, [stopAudio]);
 
 
-  // Pre-test and Post-test questions (MUST BE IDENTICAL)
   const testQuestions = [
     {
       question: 'Tap the thing that helps you count!',
+      audioKey: 'q1_pretest_q1',
       type: 'interaction',
       options: [
         { id: 'ball', label: '⚽', isCorrect: false },
@@ -93,8 +99,8 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         { id: 'book', label: '📚', isCorrect: false }
       ]
     },
-    { question: 'Do you know what an abacus is?', type: 'knowledge' },
-    { question: 'Can you name a tool that helps with math?', type: 'recall' },
+    { question: 'Do you know what an abacus is?', audioKey: 'q1_pretest_q2', type: 'knowledge' },
+    { question: 'Can you name a tool that helps with math?', audioKey: 'q1_pretest_q3', type: 'recall' },
   ];
 
   useEffect(() => {
@@ -120,6 +126,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           </div>
         }
         welcomeMessage="Welcome, young AbaQuester! I'm so happy you're here. Today, you're joining a very special place — Mistress Creola's School of Mental Math! It's a magical school where numbers come alive, and every student learns to use their Junior Counter to solve puzzles and explore new worlds."
+        audioKey="q1_welcome_msg"
         onNext={() => setStep('transition')}
         onEmotionalCheckIn={setEmotionalState}
         showEmotionalCheckIn={true}
@@ -148,6 +155,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
               <AudioNarration
                 text="Before we begin our adventure, I want to see what you already know. Don't worry if you're not sure about the answers! You can always click 'I don't know yet' — that's totally okay!"
+                audioKey="q1_pretest_intro"
                 speaker="abby"
                 autoPlay
               />
@@ -224,7 +232,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           </div>
 
           <div className="bg-white rounded-2xl shadow-2xl p-8 border-4 border-aqua-blue">
-            <AudioNarration text={currentQ.question} speaker="abby" compact />
+            <AudioNarration text={currentQ.question} audioKey={currentQ.audioKey} speaker="abby" compact />
 
             <div className="my-8 text-center">
               <p className="text-2xl text-deep-blue">{currentQ.question}</p>
@@ -332,6 +340,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue">
             <AudioNarration
               text="This is your Junior Counter! It's a special tool that helps you think about numbers. At our school, every student names their Junior Counter — just like you'd name a friend or a pet. Your counter will go on every adventure with you!"
+              audioKey="q1_naming_intro"
               speaker="abby"
               autoPlay
             />
@@ -384,32 +393,38 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
         imageSrc: abbyImage,
         speaker: 'abby',
         narrationText: "Welcome, young AbaQuester! I'm Abby, your personal AI-bot! Today, you're joining a very special place — Mistress Creola's School of Mental Math!",
+        audioKey: 'q1_story_1'
       },
       {
         imageSrc: ameerImg,
         secondaryImageSrc: ameerahImg,
         speaker: 'narrator',
         narrationText: "Here's Ameer and Ameerah! Ameerah is smart, creative, and super brave. Ameer loves counting, reading maps, and finding new ways to solve problems.",
+        audioKey: 'q1_story_2'
       },
       {
         imageSrc: schoolBoatImg,
         speaker: 'narrator',
         narrationText: "It was the twins' first day at school. Ameerah was curious about who her friends would be, Ameer hoped the math wouldn't be too hard, he was nervous. Both were quiet, Ameerah smiled and said I will steer Today!!",
+        audioKey: 'q1_story_3'
       },
       {
         imageSrc: reachedSchoolImg,
         speaker: 'narrator',
         narrationText: "Ameer and Ameerah reached the school, Ameer is still worried the math would be hard, Ameerah still feels little brave!!",
+        audioKey: 'q1_story_4'
       },
       {
         imageSrc: teacherImg,
         speaker: 'mistress-creola',
         narrationText: "Math is not about being perfect. It's about trying, thinking, and believing in yourself!",
+        audioKey: 'q1_story_5'
       },
       {
         imageSrc: namingImg,
         speaker: 'abby',
         narrationText: "Todays hard work will be choosing a name for your junior counters. Ameer felt when he heard this. Naming his junior counter would be a fun and easy assignment",
+        audioKey: 'q1_story_6'
       }
     ];
 
@@ -430,13 +445,17 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
       const finalName = counterName ? counterName.trim() : '';
       if (finalName) {
         setStudentName(finalName);
-        // Play audio if it hasn't been played for this exact name yet, then proceed
-        playNameConfirmation(finalName, () => {
+        const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
+        const isSuggested = suggestedNames.some(n => n.toLowerCase() === finalName.toLowerCase());
+        
+        // Use 3-part narration to save 11Labs tokens, or a single key for suggested names
+        const audioInput = isSuggested ? `q1_naming_${finalName.toLowerCase()}` : ['q1_naming_great_name', finalName, 'q1_naming_is_ready'];
+        
+        speakText(audioInput, () => {
           setStep('posttest');
         });
       }
     };
-
 
 
     return (
@@ -453,6 +472,7 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
           <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-sunburst-yellow">
             <AudioNarration
               text="You heard what your friends named their junior counters. Now it's your turn! Choose a name you like or create your own special name."
+              audioKey="q1_naming_prompt"
               speaker="abby"
               compact
               autoPlay
@@ -466,7 +486,12 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                     key={name}
                     onClick={() => {
                       setCounterName(name);
-                      playNameConfirmation(name);
+                      const isSuggested = suggestedNames.some(n => n.toLowerCase() === name.toLowerCase());
+                      if (isSuggested) {
+                        speakText(`q1_naming_${name.toLowerCase()}`);
+                      } else {
+                        speakText(['q1_naming_great_name', name, 'q1_naming_is_ready']);
+                      }
                     }}
                     className={`p-4 rounded-xl border-4 transition-all ${counterName === name
                       ? 'border-aqua-blue bg-aqua-blue/10 scale-105'
@@ -492,7 +517,16 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
                   className="text-center text-xl py-6 rounded-2xl border-4 border-gray-200 focus:border-aqua-blue"
                   maxLength={15}
                   onBlur={() => {
-                    playNameConfirmation(counterName);
+                    if (counterName && counterName.trim().length >= 2) {
+                      const finalName = counterName.trim();
+                      const suggestedNames = ['Coco', 'Nova', 'Bolt', 'Zippy', 'Spark', 'Luna'];
+                      const isSuggested = suggestedNames.some(n => n.toLowerCase() === finalName.toLowerCase());
+                      if (isSuggested) {
+                        speakText(`q1_naming_${finalName.toLowerCase()}`);
+                      } else {
+                        speakText(['q1_naming_great_name', finalName, 'q1_naming_is_ready']);
+                      }
+                    }
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -530,7 +564,6 @@ export function Quest1Naming({ onComplete }: Quest1NamingProps) {
 
   }
 
-  // STEP 5: POST-TEST (Emotional Check-in)
   if (step === 'posttest') {
     return (
       <PostTestCheckIn
