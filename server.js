@@ -1,12 +1,12 @@
-import jsonServer from 'json-server';
+import jsonServerPkg from 'json-server';
+const { create, router: _router, defaults } = jsonServerPkg;
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-import fs from 'fs';
 
 // Log everything for Cloud Run debugging
 process.on('uncaughtException', (err) => {
@@ -18,9 +18,9 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('UNHANDLED REJECTION:', reason);
 });
 
-console.log('Server process starting...');
+console.log('Server process starting... v2');
 
-const server = jsonServer.create();
+const server = create();
 
 // Support external volume mounts for persistence on GCP
 const dataDir = process.env.DATA_DIR || '.';
