@@ -142,11 +142,18 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                 const cloudProfiles = await studentService.fetchProfiles();
 
                 // Merge strategy:
-                // 1. For each initial profile, if a cloud version exists, use that.
-                // 2. Add any custom profiles that are NOT in the initial set.
+                // 1. For each initial profile, if a cloud version exists, use cloud progress/data
+                //    but PRESERVE the hardcoded teacherId and role from INITIAL_PROFILES.
                 const mergedInitial = INITIAL_PROFILES.map(ip => {
                     const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
-                    return cloudVersion || ip;
+                    if (cloudVersion) {
+                        return {
+                            ...cloudVersion,
+                            teacherId: ip.teacherId, // Force the hardcoded assignment
+                            role: ip.role || 'student'
+                        };
+                    }
+                    return ip;
                 });
                 const customProfiles = cloudProfiles.filter(sp =>
                     !INITIAL_PROFILES.some(dp => dp.id === sp.id)
@@ -170,7 +177,14 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
         const unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
             const mergedInitial = INITIAL_PROFILES.map(ip => {
                 const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
-                return cloudVersion || ip;
+                if (cloudVersion) {
+                    return {
+                        ...cloudVersion,
+                        teacherId: ip.teacherId,
+                        role: ip.role || 'student'
+                    };
+                }
+                return ip;
             });
             const customProfiles = cloudProfiles.filter(sp =>
                 !INITIAL_PROFILES.some(dp => dp.id === sp.id)
