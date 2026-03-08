@@ -231,14 +231,17 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     };
 
     const calculateClassMetrics = () => {
-        const questAverages = [1, 2, 3, 4].map(qId => {
+        const questAverages = ([1, 2, 3, 4] as QuestId[]).map(qId => {
             let totalPre = 0;
             let totalPost = 0;
             let countPre = 0;
             let countPost = 0;
+            let completedCount = 0;
+            let maxPost = 0;
+            let totalCoins = 0;
 
             classStudents.forEach(student => {
-                const progress = student.progress?.questProgress?.[qId as QuestId];
+                const progress = student.progress?.questProgress?.[qId];
                 if (progress?.preTestScore !== undefined) {
                     totalPre += progress.preTestScore;
                     countPre++;
@@ -246,13 +249,23 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                 if (progress?.postTestScore !== undefined) {
                     totalPost += progress.postTestScore;
                     countPost++;
+                    if (progress.postTestScore > maxPost) maxPost = progress.postTestScore;
                 }
+                if (progress?.completed) {
+                    completedCount++;
+                }
+                totalCoins += (progress?.coinsEarned || 0);
             });
 
             return {
+                id: qId,
                 name: `Quest ${qId}`,
+                icon: ['✏️', '🧩', '🔢', '➕'][qId - 1],
                 preTest: countPre > 0 ? Math.round(totalPre / countPre) : 0,
-                postTest: countPost > 0 ? Math.round(totalPost / countPost) : 0
+                postTest: countPost > 0 ? Math.round(totalPost / countPost) : 0,
+                completedCount,
+                maxPost,
+                totalCoins
             };
         });
         return questAverages;
@@ -432,30 +445,73 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         </div>
                     </div>
 
-                    {/* Quest Tabs */}
-                    <div className="flex border-b-2 border-slate-100">
-                        {([1, 2, 3, 4] as QuestId[]).map(qId => (
-                            <button
-                                key={qId}
-                                onClick={() => setSelectedQuest(qId)}
-                                className={`flex-1 py-4 px-4 text-center font-bold transition-all relative ${selectedQuest === qId
-                                    ? 'text-deep-blue bg-white'
-                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
-                                    }`}
-                            >
-                                <span className="text-lg">{['✏️', '🧩', '🔢', '➕'][qId - 1]}</span>
-                                <span className="ml-2">Quest {qId}</span>
-                                {selectedQuest === qId && (
-                                    <motion.div
-                                        layoutId="quest-tab-underline"
-                                        className="absolute bottom-0 left-0 right-0 h-1 bg-deep-blue rounded-t-full"
-                                    />
-                                )}
-                            </button>
-                        ))}
+                    {/* All Quests Overview Table */}
+                    <div className="p-6 border-b-2 border-slate-100 bg-white">
+                        <h3 className="text-xl font-bold text-deep-blue mb-4">Class-Wide Overview (All Quests)</h3>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 text-slate-500 uppercase text-xs font-bold border-y-2 border-slate-100">
+                                        <th className="p-4">Quest</th>
+                                        <th className="p-4 text-center">Completed</th>
+                                        <th className="p-4 text-center">Avg Pre-Test</th>
+                                        <th className="p-4 text-center">Avg Post-Test</th>
+                                        <th className="p-4 text-center">Avg Gain</th>
+                                        <th className="p-4 text-center">Highest Score</th>
+                                        <th className="p-4 text-center">Total Coins</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {classMetricsData.map((data) => {
+                                        const gain = data.postTest - data.preTest;
+                                        const isSelected = selectedQuest === data.id;
+                                        return (
+                                            <tr
+                                                key={data.id}
+                                                onClick={() => setSelectedQuest(data.id)}
+                                                className={`cursor-pointer transition-all ${isSelected ? 'bg-blue-50/50 border-l-4 border-l-blue-500 shadow-sm' : 'hover:bg-slate-50/80 border-l-4 border-l-transparent'}`}
+                                            >
+                                                <td className="p-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-2xl">{data.icon}</span>
+                                                        <span className="font-bold text-deep-blue">{data.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-center font-bold text-slate-600">
+                                                    {data.completedCount}/{classStudents.length}
+                                                </td>
+                                                <td className="p-4 text-center text-blue-600 font-semibold">
+                                                    {data.preTest}%
+                                                </td>
+                                                <td className="p-4 text-center text-green-600 font-semibold">
+                                                    {data.postTest}%
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <span className={`px-2 py-1 rounded-lg font-bold text-sm ${gain > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                                                        {gain > 0 ? '+' : ''}{gain}%
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <div className="flex items-center justify-center gap-1 text-amber-600 font-bold">
+                                                        <Trophy className="w-4 h-4" />
+                                                        {data.maxPost}%
+                                                    </div>
+                                                </td>
+                                                <td className="p-4 text-center">
+                                                    <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold">
+                                                        <Coins className="w-4 h-4 fill-yellow-400" />
+                                                        {data.totalCoins}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p className="text-center text-slate-400 text-xs mt-4 italic">Tip: Click a quest row to view detailed student scores and the learning curve below.</p>
                     </div>
 
-                    {/* Class Score Table */}
                     <div className="p-6">
                         {(() => {
                             const studentsWithProgress = classStudents.map(s => {
@@ -463,62 +519,19 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                 return { student: s, progress: p };
                             });
                             const completedStudents = studentsWithProgress.filter(s => s.progress?.completed);
-                            const avgPre = completedStudents.length > 0
-                                ? Math.round(completedStudents.reduce((sum, s) => sum + (s.progress?.preTestScore || 0), 0) / completedStudents.length)
-                                : 0;
-                            const avgPost = completedStudents.length > 0
-                                ? Math.round(completedStudents.reduce((sum, s) => sum + (s.progress?.postTestScore || 0), 0) / completedStudents.length)
-                                : 0;
-
-                            const maxPostTest = completedStudents.length > 0
-                                ? Math.max(...completedStudents.map(s => s.progress?.postTestScore || 0))
-                                : 0;
-                            const totalCoins = completedStudents.reduce((sum, s) => {
-                                const qProgress = s.student.progress?.questProgress?.[selectedQuest];
-                                return sum + (qProgress?.coinsEarned || 0);
-                            }, 0);
 
                             return (
                                 <>
-                                    {/* Summary Cards */}
-                                    <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-                                        <div className="bg-slate-50 rounded-xl p-4 text-center border border-slate-200">
-                                            <p className="text-xs font-bold text-slate-400 uppercase mb-1">Completed</p>
-                                            <p className="text-2xl font-bold text-deep-blue">{completedStudents.length}/{classStudents.length}</p>
-                                        </div>
-                                        <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
-                                            <p className="text-xs font-bold text-blue-400 uppercase mb-1">Avg Pre-Test</p>
-                                            <p className="text-2xl font-bold text-blue-700">{avgPre}%</p>
-                                        </div>
-                                        <div className="bg-green-50 rounded-xl p-4 text-center border border-green-200">
-                                            <p className="text-xs font-bold text-green-400 uppercase mb-1">Avg Post-Test</p>
-                                            <p className="text-2xl font-bold text-green-700">{avgPost}%</p>
-                                        </div>
-                                        <div className={`rounded-xl p-4 text-center border ${avgPost - avgPre > 0 ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
-                                            <p className="text-xs font-bold text-slate-400 uppercase mb-1">Avg Gain</p>
-                                            <p className={`text-2xl font-bold ${avgPost - avgPre > 0 ? 'text-emerald-600' : 'text-slate-400'}`}>
-                                                {avgPost - avgPre > 0 ? '+' : ''}{avgPost - avgPre}%
-                                            </p>
-                                        </div>
-                                        <div className="bg-amber-50 rounded-xl p-4 text-center border border-amber-200 shadow-sm shadow-amber-100">
-                                            <p className="text-xs font-bold text-amber-500 uppercase mb-1">Highest Score</p>
-                                            <p className="text-2xl font-bold text-amber-600 gap-1 justify-center flex items-center">
-                                                <Trophy className="w-5 h-5" />
-                                                {maxPostTest}%
-                                            </p>
-                                        </div>
-                                        <div className="bg-yellow-50 rounded-xl p-4 text-center border border-yellow-200 shadow-sm shadow-yellow-100">
-                                            <p className="text-xs font-bold text-yellow-600 uppercase mb-1">Total Coins</p>
-                                            <p className="text-2xl font-bold text-yellow-500 gap-1 justify-center flex items-center">
-                                                <Coins className="w-5 h-5 fill-yellow-400" />
-                                                {totalCoins}
-                                            </p>
-                                        </div>
+                                    <div className="flex items-center gap-2 mb-6">
+                                        <div className="h-8 w-1 bg-blue-500 rounded-full"></div>
+                                        <h3 className="text-xl font-bold text-deep-blue">
+                                            Detailed Analysis: {['✏️ Quest 1', '🧩 Quest 2', '🔢 Quest 3', '➕ Quest 4'][selectedQuest - 1]}
+                                        </h3>
                                     </div>
 
                                     {/* Learning Curve Chart */}
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Learning Curve (Gain %)</h4>
+                                        <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Progress Trajectory (Learning Gain %)</h4>
                                         <div className="h-64 w-full">
                                             {(() => {
                                                 // Create a time-series progression of learning gain for this specific quest
