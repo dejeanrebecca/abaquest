@@ -1,0 +1,64 @@
+import {
+    collection,
+    getDocs,
+    setDoc,
+    doc,
+    deleteDoc,
+    onSnapshot
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { StudentProfile } from '../types/quest';
+
+const COLLECTION_NAME = 'students';
+
+export const studentService = {
+    /**
+     * Fetch all student profiles from Firestore
+     */
+    async fetchProfiles(): Promise<StudentProfile[]> {
+        try {
+            const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
+            return querySnapshot.docs.map(doc => doc.data() as StudentProfile);
+        } catch (error) {
+            console.error("Error fetching profiles from Firestore:", error);
+            return [];
+        }
+    },
+
+    /**
+     * Save or update a student profile in Firestore
+     */
+    async saveProfile(profile: StudentProfile): Promise<void> {
+        try {
+            // Use student ID as the document ID
+            await setDoc(doc(db, COLLECTION_NAME, profile.id), profile);
+        } catch (error) {
+            console.error("Error saving profile to Firestore:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Delete a student profile from Firestore
+     */
+    async deleteProfile(profileId: string): Promise<void> {
+        try {
+            await deleteDoc(doc(db, COLLECTION_NAME, profileId));
+        } catch (error) {
+            console.error("Error deleting profile from Firestore:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Listen for real-time updates to profiles
+     */
+    subscribeToProfiles(callback: (profiles: StudentProfile[]) => void) {
+        return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
+            const profiles = snapshot.docs.map(doc => doc.data() as StudentProfile);
+            callback(profiles);
+        }, (error) => {
+            console.error("Firestore subscription error:", error);
+        });
+    }
+};

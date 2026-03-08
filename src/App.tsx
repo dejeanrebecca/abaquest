@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DataLoggerProvider } from './components/DataLogger';
+import { DataLoggerProvider, useDataLogger } from './components/DataLogger';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuestEngineProvider, useQuestEngine } from './components/QuestEngine';
 import { Library } from './components/screens/Library';
@@ -29,9 +29,7 @@ function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('library');
 
   const { currentQuest, startQuest, exitQuest, completeQuest, loadProfile } = useQuestEngine();
-
-
-
+  const { interactions } = useDataLogger();
 
 
   const handleQuestSelect = (questId: QuestId) => {
@@ -43,8 +41,17 @@ function AppContent() {
     const preScore = results?.pre ?? 100;
     const postScore = results?.post ?? 100;
 
-    // Persist completion state
-    completeQuest(preScore, postScore);
+    // Tally interactions
+    const interactionMetrics = {
+      total: interactions.length,
+      preTest: interactions.filter((i: any) => i.interaction_type === 'pre_test').length,
+      practice: interactions.filter((i: any) => i.interaction_type === 'practice').length,
+      postTest: interactions.filter((i: any) => i.interaction_type === 'post_test').length,
+      story: interactions.filter((i: any) => i.interaction_type === 'story').length,
+    };
+
+    // Persist completion state with metrics
+    completeQuest(preScore, postScore, interactionMetrics);
 
     // Return to library
     exitQuest();

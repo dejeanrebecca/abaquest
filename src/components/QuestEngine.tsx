@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react';
 import { QuestId, QuestStep, QuestProgress, StudentProgress, QUESTS, StudentProfile } from '../types/quest';
-import { DbService } from '../services/db.service';
+import { studentService } from '../services/studentService';
 
 
 interface QuestEngineContextType {
@@ -9,7 +9,17 @@ interface QuestEngineContextType {
   currentStep: QuestStep | null;
   startQuest: (questId: QuestId) => void;
   completeStep: () => void;
-  completeQuest: (preTestScore: number, postTestScore: number) => void;
+  completeQuest: (
+    preTestScore: number,
+    postTestScore: number,
+    interactions?: {
+      total: number;
+      preTest: number;
+      practice: number;
+      postTest: number;
+      story: number;
+    }
+  ) => void;
   isQuestUnlocked: (questId: QuestId) => boolean;
   loadProfile: (profile: StudentProfile) => void;
   setStudentName: (name: string) => void;
@@ -37,36 +47,38 @@ const INITIAL_PROGRESS: StudentProgress = {
 
 export function QuestEngineProvider({ children }: { children: ReactNode }) {
   const [studentProgress, setStudentProgress] = useState<StudentProgress>(INITIAL_PROGRESS);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Initial load
+  // Save to localStorage AND Firestore whenever progress changes
+  const lastSyncRef = useRef<string>('');
+
   useEffect(() => {
-    const init = async () => {
-      await DbService.init();
-      setIsLoading(false);
-    };
-    init();
-  }, []);
+    const progressJson = JSON.stringify(studentProgress);
+    localStorage.setItem('abaquest_progress', progressJson);
 
-  // Save to backend whenever progress changes
-  useEffect(() => {
-    if (isLoading) return;
-
-    const syncToBackend = async () => {
-      if (studentProgress.studentId) {
+    // Sync to Firestore if changed and we have an ID
+    if (studentProgress.studentId && progressJson !== lastSyncRef.current) {
+      const timeoutId = setTimeout(async () => {
         try {
-          const profiles = await DbService.getProfiles();
-          const p = profiles.find(s => s.id === studentProgress.studentId);
-          if (p) {
-            await DbService.updateProfile({ ...p, progress: studentProgress });
+          const profiles = await studentService.fetchProfiles();
+          const currentProfile = profiles.find(p => p.id === studentProgress.studentId);
+
+          if (currentProfile) {
+            await studentService.saveProfile({
+              ...currentProfile,
+              progress: studentProgress
+            });
+            lastSyncRef.current = progressJson;
+            console.log("Synced progress to cloud");
           }
-        } catch (e) {
-          console.error('Error syncing progress to backend:', e);
+        } catch (error) {
+          console.error("Failed to sync progress to cloud:", error);
         }
-      }
-    };
-    syncToBackend();
-  }, [studentProgress, isLoading]);
+      }, 3000); // 3s debounce for progress syncing
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [studentProgress]);
 
   const currentQuest = studentProgress.currentQuestId;
   const currentQuestProgress = currentQuest ? studentProgress.questProgress[currentQuest] : null;
@@ -76,23 +88,36 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
     const quest = QUESTS[questId];
     const now = new Date().toISOString();
 
-    setStudentProgress(prev => ({
-      ...prev,
-      currentQuestId: questId,
-      questProgress: {
-        ...prev.questProgress,
-        [questId]: {
-          questId,
-          currentStep: quest.steps[0],
-          stepIndex: 0,
-          completed: false,
-          preTestScore: 0,
-          postTestScore: 0,
-          coinsEarned: 0,
-          startedAt: now,
+    setStudentProgress(prev => {
+      const existingProgress = prev.questProgress[questId];
+
+      // If there's existing incomplete progress, resume from where they left off
+      if (existingProgress && !existingProgress.completed) {
+        return {
+          ...prev,
+          currentQuestId: questId,
+        };
+      }
+
+      // Otherwise start fresh (new quest or replaying a completed quest)
+      return {
+        ...prev,
+        currentQuestId: questId,
+        questProgress: {
+          ...prev.questProgress,
+          [questId]: {
+            questId,
+            currentStep: quest.steps[0],
+            stepIndex: 0,
+            completed: false,
+            preTestScore: 0,
+            postTestScore: 0,
+            coinsEarned: 0,
+            startedAt: now,
+          },
         },
-      },
-    }));
+      };
+    });
   };
 
   const completeStep = () => {
@@ -140,7 +165,17 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const completeQuest = (preTestScore: number, postTestScore: number) => {
+  const completeQuest = (
+    preTestScore: number,
+    postTestScore: number,
+    interactionData?: {
+      total: number;
+      preTest: number;
+      practice: number;
+      postTest: number;
+      story: number;
+    }
+  ) => {
     if (!currentQuest) return;
 
     const quest = QUESTS[currentQuest];
@@ -149,6 +184,15 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
     setStudentProgress(prev => {
       const isAlreadyCompleted = prev.completedQuests.includes(currentQuest);
       const newCoins = isAlreadyCompleted ? 0 : quest.coinReward;
+      const existingProgress = prev.questProgress[currentQuest];
+
+      // Keep the best scores across attempts
+      const bestPreScore = isAlreadyCompleted && existingProgress
+        ? Math.max(existingProgress.preTestScore, preTestScore)
+        : preTestScore;
+      const bestPostScore = isAlreadyCompleted && existingProgress
+        ? Math.max(existingProgress.postTestScore, postTestScore)
+        : postTestScore;
 
       return {
         ...prev,
@@ -164,9 +208,10 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
             ...prev.questProgress[currentQuest],
             completed: true,
             completedAt: now,
-            preTestScore,
-            postTestScore,
+            preTestScore: bestPreScore,
+            postTestScore: bestPostScore,
             coinsEarned: newCoins,
+            ...(interactionData ? { interactions: interactionData } : {}),
           },
         },
         currentQuestId: null,
@@ -226,7 +271,8 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
         isQuestUnlocked,
         loadProfile: (profile: StudentProfile) => setStudentProgress({
           ...profile.progress,
-          studentId: profile.id
+          studentId: profile.id,
+          currentQuestId: null, // Always land on Library first; student resumes from there
         }),
         setStudentName,
         setEmotionalState,
