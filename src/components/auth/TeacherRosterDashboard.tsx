@@ -32,9 +32,9 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
     const currentTeacher = allProfiles.find(p => p.id === teacher.id) || teacher;
 
-    // Dynamically calculate class roster (all students in the system)
+    // Dynamically calculate class roster (students assigned to THIS teacher)
     const classStudents = useMemo(() => {
-        return allProfiles.filter(p => (p.role === 'student' || !p.role) && p.id !== teacher.id);
+        return allProfiles.filter(p => p.teacherId === teacher.id);
     }, [allProfiles, teacher.id]);
 
     // Calculate aggregated interactions for the selected quest
