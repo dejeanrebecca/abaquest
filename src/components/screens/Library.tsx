@@ -10,7 +10,7 @@ interface LibraryProps {
 }
 
 export function Library({ onSelectQuest }: LibraryProps) {
-  const { studentProgress, isQuestUnlocked, currentQuest } = useQuestEngine();
+  const { studentProgress, isQuestUnlocked } = useQuestEngine();
 
   return (
     <motion.div
@@ -51,8 +51,8 @@ export function Library({ onSelectQuest }: LibraryProps) {
           {(Object.values(QUESTS) as typeof QUESTS[QuestId][]).map((quest, index) => {
             const isUnlocked = isQuestUnlocked(quest.id);
             const isCompleted = studentProgress.completedQuests.includes(quest.id);
-            const isInProgress = currentQuest === quest.id;
             const progress = studentProgress.questProgress[quest.id];
+            const isInProgress = !!progress && !isCompleted;
 
             return (
               <motion.div
