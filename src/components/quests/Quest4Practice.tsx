@@ -22,6 +22,7 @@ export function Quest4Practice({ onComplete }: Quest4PracticeProps) {
             add: 3,
             target: 3,
             prompt: "Start at 0. Add 3 beads.",
+            audioKey: "q4_practice_add_3",
             hint: "Count 1, 2, 3 lower beads!"
         },
         {
@@ -30,6 +31,7 @@ export function Quest4Practice({ onComplete }: Quest4PracticeProps) {
             add: 2,
             target: 2,
             prompt: "Start at 0. Add 2 more beads.",
+            audioKey: "q4_practice_add_2",
             hint: "Push up 2 more lower beads!"
         },
         {
@@ -38,6 +40,7 @@ export function Quest4Practice({ onComplete }: Quest4PracticeProps) {
             add: 4,
             target: 4,
             prompt: "Start at 0. Add 4. (0 + 4)",
+            audioKey: "q4_practice_add_4",
             hint: "Push up 4 lower beads!"
         }
     ];
@@ -115,7 +118,7 @@ export function Quest4Practice({ onComplete }: Quest4PracticeProps) {
                 <div className="bg-sky-100 inline-block px-6 py-2 rounded-xl text-sky-800 font-mono text-xl">
                     {problem.start} + {problem.add} = ?
                 </div>
-                <AudioNarration text={problem.prompt} speaker="narrator" autoPlay />
+                <AudioNarration text={problem.prompt} audioKey={problem.audioKey} speaker="narrator" autoPlay />
             </motion.div>
 
             {/* Interaction Area */}

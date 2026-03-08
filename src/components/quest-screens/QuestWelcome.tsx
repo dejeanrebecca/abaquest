@@ -4,10 +4,12 @@ import { AudioNarration } from '../AudioNarration';
 import { Smile, Meh, Frown, Laugh } from 'lucide-react';
 
 
-interface QuestWelcomeProps {
+export interface QuestWelcomeProps {
   questTitle: string;
   questIcon: React.ReactNode;
   welcomeMessage: string;
+  audioWelcomeMessage?: string;
+  audioKey?: string;
   onNext: () => void;
   onEmotionalCheckIn?: (emotion: string) => void;
   showEmotionalCheckIn?: boolean;
@@ -17,6 +19,8 @@ export function QuestWelcome({
   questTitle,
   questIcon,
   welcomeMessage,
+  audioWelcomeMessage,
+  audioKey,
   onNext,
   onEmotionalCheckIn,
   showEmotionalCheckIn = false,
@@ -62,9 +66,8 @@ export function QuestWelcome({
           <h1 className="text-deep-blue mb-4">{questTitle}</h1>
         </div>
 
-        {/* Abby's Welcome Message */}
         <div className="mb-8">
-          <AudioNarration text={welcomeMessage} speaker="abby" autoPlay />
+          <AudioNarration text={welcomeMessage} audioText={audioWelcomeMessage} audioKey={audioKey} speaker="abby" autoPlay />
         </div>
 
         {/* Emotional Check-In */}

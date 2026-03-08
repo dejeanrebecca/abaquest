@@ -147,16 +147,48 @@
       "role": "student",
       "teacherId": "teacher1",
       "progress": {
-        "studentName": "Sarah",
-        "emotionalState": "happy",
-        "totalCoins": 0,
+        "studentName": "Spark",
+        "emotionalState": "excited",
+        "totalCoins": 45,
         "level": 1,
-        "xp": 0,
-        "completedQuests": [],
-        "currentQuestId": 1,
-        "questProgress": {}
+        "xp": 225,
+        "completedQuests": [
+          1,
+          2
+        ],
+        "currentQuestId": 2,
+        "questProgress": {
+          "1": {
+            "completed": true,
+            "completedAt": "2026-03-08T13:01:52.455Z",
+            "preTestScore": 100,
+            "postTestScore": 100,
+            "coinsEarned": 20
+          },
+          "2": {
+            "questId": 2,
+            "currentStep": "welcome",
+            "stepIndex": 0,
+            "completed": false,
+            "preTestScore": 0,
+            "postTestScore": 0,
+            "coinsEarned": 0,
+            "startedAt": "2026-03-08T13:10:40.244Z"
+          },
+          "4": {
+            "questId": 4,
+            "currentStep": "welcome",
+            "stepIndex": 0,
+            "completed": false,
+            "preTestScore": 0,
+            "postTestScore": 0,
+            "coinsEarned": 0,
+            "startedAt": "2026-03-08T13:04:39.110Z"
+          }
+        },
+        "studentId": "student_1772924115148"
       },
-      "lastLogin": "2026-03-07T22:55:46.903Z"
+      "lastLogin": "2026-03-08T12:53:07.273Z"
     }
   ]
 }

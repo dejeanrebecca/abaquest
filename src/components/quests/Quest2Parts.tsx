@@ -54,6 +54,7 @@ export function Quest2Parts({ onComplete }: Quest2PartsProps) {
         questTitle="Quest 2: Parts of the Counter"
         questIcon="🧩"
         welcomeMessage="Great work so far, AbaQuester! Now that you've named your Junior Counter, it's time to learn about its special parts. Every part has a job to do — and they all work together to help you think about numbers!"
+        audioKey="q2_welcome_msg"
         onNext={() => setStep('pretest')}
         showEmotionalCheckIn={false}
       />

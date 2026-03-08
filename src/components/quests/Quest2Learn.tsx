@@ -16,24 +16,27 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
     const [currentPart, setCurrentPart] = useState<Part | null>(null);
     const [completedParts, setCompletedParts] = useState<Part[]>([]);
 
-    const parts: Array<{ part: Part; name: string; description: string; color: string }> = [
+    const parts: Array<{ part: Part; name: string; description: string; color: string; audioKey: string }> = [
         {
             part: 'upper',
             name: 'Upper Bead (Head)',
             description: "This special bead is worth FIVE! It is like the head of your counter.",
             color: 'from-abacus-red to-red-700',
+            audioKey: 'q2_learn_upper'
         },
         {
             part: 'lower',
             name: 'Lower Beads (Legs)',
             description: 'These four beads are each worth ONE. They are like the legs that help you count!',
             color: 'from-aqua-blue to-blue-600',
+            audioKey: 'q2_learn_lower'
         },
         {
             part: 'rod',
             name: 'Answer rod',
             description: 'This rod holds everything together — like the body connects the head and legs!',
             color: 'from-gray-700 to-gray-900',
+            audioKey: 'q2_learn_rod'
         },
     ];
 
@@ -63,6 +66,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                 <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-deep-blue">
                     <AudioNarration
                         text="Your Junior Counter has three main parts, and each one has a special name and job. Tap on each part to learn about it!"
+                        audioKey="q2_learn_intro"
                         speaker="abby"
                         autoPlay={completedParts.length === 0}
                     />
@@ -103,6 +107,7 @@ export function Quest2Learn({ onComplete }: Quest2LearnProps) {
                             <AudioNarration
                                 key={`audio-${currentPart}`}
                                 text={`${parts.find(p => p.part === currentPart)?.name}. ${parts.find(p => p.part === currentPart)?.description}`}
+                                audioKey={parts.find(p => p.part === currentPart)?.audioKey}
                                 speaker="abby"
                                 compact
                                 autoPlay

@@ -22,10 +22,10 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
     const { logInteraction } = useDataLogger();
 
     const testQuestions = [
-        { target: 0, display: 'Zero' },
-        { target: 1, display: 'One' },
-        { target: 5, display: 'Five' },
-        { target: 9, display: 'Nine' },
+        { target: 0, display: 'Zero', audioKeyPre: 'q3_pretest_0', audioKeyPost: 'q3_posttest_0' },
+        { target: 1, display: 'One', audioKeyPre: 'q3_pretest_1', audioKeyPost: 'q3_posttest_1' },
+        { target: 5, display: 'Five', audioKeyPre: 'q3_pretest_5', audioKeyPost: 'q3_posttest_5' },
+        { target: 9, display: 'Nine', audioKeyPre: 'q3_pretest_9', audioKeyPost: 'q3_posttest_9' },
     ];
 
     const fullOptions = [0, 1, 5, 9];
@@ -96,6 +96,7 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
                         <AudioNarration
                             text="Before we learn where the numbers live, let's see what you already know. Remember: You can always say 'I don't know yet' — that's how we learn!"
                             audioText="Before we learn where the numbers liv, let's see what you already know. Remember: You can always say 'I don't know yet' — that's how we learn!"
+                            audioKey="q3_pretest_intro"
                             speaker="abby"
                             autoPlay
                         />
@@ -143,6 +144,7 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
                                 ? "Click the abacus that matches the number"
                                 : "Give it a try! Can you find the matching number"
                                 } ${currentQ.display}`}
+                            audioKey={isPostTest ? currentQ.audioKeyPost : currentQ.audioKeyPre}
                             speaker="abby"
                             compact
                             autoPlay

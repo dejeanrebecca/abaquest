@@ -25,10 +25,10 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
 
     const { logInteraction } = useDataLogger();
 
-    const testQuestions: Array<{ part: Part; question: string }> = [
-        { part: 'upper', question: 'Tap the Upper Bead (Head)' },
-        { part: 'lower', question: 'Tap the Lower Beads (Legs)' },
-        { part: 'rod', question: 'Tap the Answer Rod' },
+    const testQuestions: Array<{ part: Part; question: string; audioKeyPre: string; audioKeyPost: string }> = [
+        { part: 'upper', question: 'Tap the Upper Bead (Head)', audioKeyPre: 'q2_assess_upper_pre', audioKeyPost: 'q2_assess_upper_post' },
+        { part: 'lower', question: 'Tap the Lower Beads (Legs)', audioKeyPre: 'q2_assess_lower_pre', audioKeyPost: 'q2_assess_lower_post' },
+        { part: 'rod', question: 'Tap the Answer Rod', audioKeyPre: 'q2_assess_rod_pre', audioKeyPost: 'q2_assess_rod_post' },
     ];
 
     useEffect(() => {
@@ -83,6 +83,7 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
 
                         <AudioNarration
                             text="Before we explore the parts, let's see what you already know. Remember: You can always say 'I don't know yet' — that's how we learn!"
+                            audioKey="q2_pretest_intro"
                             speaker="abby"
                             autoPlay
                         />
@@ -118,6 +119,7 @@ export function Quest2Assessment({ type, onComplete }: Quest2AssessmentProps) {
                     <AudioNarration
                         key={`q2-assessment-${type}-${currentQuestion}`}
                         text={isPostTest ? `Let's see what you've learned! ${currentQ.question}` : currentQ.question}
+                        audioKey={isPostTest ? currentQ.audioKeyPost : currentQ.audioKeyPre}
                         speaker="abby"
                         compact
                         autoPlay

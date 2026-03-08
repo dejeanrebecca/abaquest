@@ -9,6 +9,7 @@ export type StorySceneData = {
     secondaryImageSrc?: string;
     altText?: string;
     narrationText: string;
+    audioKey?: string;
     speaker?: 'abby' | 'ameer' | 'ameerah' | 'mistress-creola' | 'narrator';
 };
 
@@ -100,6 +101,7 @@ export function StorySceneViewer({
                                 <AudioNarration
                                     key={`narration-${currentSceneIndex}`} // Force remount on scene change
                                     text={currentScene.narrationText}
+                                    audioKey={currentScene.audioKey}
                                     speaker={currentScene.speaker || 'narrator'}
                                     autoPlay={true}
                                     onComplete={() => setNarrationComplete(true)}

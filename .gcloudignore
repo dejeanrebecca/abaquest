@@ -10,4 +10,8 @@ dist/
 coverage/
 **/*.pptx
 .DS_Store
+
+# Explicitly DO NOT ignore .env.local so Cloud Build has access to the API keys
 !.env.local
+
+*.txt

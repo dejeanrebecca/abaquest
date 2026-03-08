@@ -25,3 +25,8 @@ gcloud run deploy $SERVICE_NAME `
   --memory 512Mi
 
 Write-Host "Deployment Complete!" -ForegroundColor Green
+
+# Clean up
+if (Test-Path "source.tgz") {
+    Remove-Item "source.tgz" -Force
+}

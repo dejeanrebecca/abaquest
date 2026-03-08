@@ -1,5 +1,5 @@
-
 import { InteractiveAbacus } from '../InteractiveAbacus';
+import { AudioNarration } from '../AudioNarration';
 
 interface Quest3ExplainerProps {
     onComplete: () => void;
@@ -24,6 +24,15 @@ export function Quest3Explainer({ onComplete }: Quest3ExplainerProps) {
                     <br />
                     Can you find where <strong>0</strong>, <strong>1</strong>, <strong>5</strong>, and <strong>9</strong> hide?
                 </p>
+
+                <div className="mb-8">
+                    <AudioNarration
+                        text="Every number has a special spot on the abacus! Can you find where zero, one, five, and nine hide?"
+                        audioKey="q3_explainer"
+                        speaker="abby"
+                        autoPlay
+                    />
+                </div>
 
                 {/* Visual Examples - Max 3 as requested */}
                 <div className="flex flex-col md:flex-row gap-8 mb-10 items-center justify-center">

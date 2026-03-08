@@ -37,6 +37,7 @@ export function PostTestCheckIn({ onComplete }: PostTestCheckInProps) {
                 <div className="bg-white rounded-3xl shadow-2xl p-10 border-4 border-purple-500">
                     <AudioNarration
                         text="You did a great job today! Before we finish, how are you feeling about the Junior Counter? Be honest — your feelings are important!"
+                        audioKey="post_test_checkin"
                         speaker="abby"
                         autoPlay
                     />

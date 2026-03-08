@@ -6,7 +6,8 @@ import { useElevenLabs } from '../hooks/useElevenLabs';
 
 export interface AudioNarrationProps {
   text: string;
-  // audioId?: string; // For future audio file integration
+  audioText?: string;
+  audioKey?: string; // Taps into static pre-generated audio maps
   speaker?: 'abby' | 'ameer' | 'ameerah' | 'mistress-creola' | 'narrator';
   autoPlay?: boolean;
   onComplete?: () => void;
@@ -16,7 +17,8 @@ export interface AudioNarrationProps {
 
 export function AudioNarration({
   text,
-  // audioId,
+  audioText,
+  audioKey,
   speaker = 'abby',
   autoPlay = false,
   onComplete,
@@ -31,10 +33,9 @@ export function AudioNarration({
   const handlePlayAudio = () => {
     setHasPlayed(true);
 
-    // Voice mapping could be added here later if needed
-    // const customVoiceId = speaker === 'abby' ? 'voice1' : 'voice2';
-
-    playAudio(text, () => {
+    // If an audioKey is provided, it plays the static `.mp3` file.
+    // Otherwise, it falls back to speech synthesis reading out the text.
+    playAudio(audioKey || audioText || text, () => {
       onComplete?.();
     });
   };

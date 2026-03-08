@@ -14,25 +14,29 @@ const DEMO_STEPS = [
         number: 0,
         title: "The Number Zero",
         description: "Zero means no beads are touching the white bar. It's empty!",
-        audioCheck: "Can you see zero?"
+        audioCheck: "Can you see zero?",
+        audioKey: 'q3_learn_0'
     },
     {
         number: 1,
         title: "The Number One",
         description: "For one, we push ONE lower bead up to the bar.",
-        audioCheck: "Beep! That's one!"
+        audioCheck: "Beep! That's one!",
+        audioKey: 'q3_learn_1'
     },
     {
         number: 5,
         title: "The Number Five",
         description: "Five is special! We bring the huge upper bead DOWN to the bar.",
-        audioCheck: "Whoosh! High five!"
+        audioCheck: "Whoosh! High five!",
+        audioKey: 'q3_learn_5'
     },
     {
         number: 9,
         title: "The Number Nine",
         description: "Nine is everything! Top bead down, all lower beads up. It's a party!",
-        audioCheck: "Full house!"
+        audioCheck: "Full house!",
+        audioKey: 'q3_learn_9'
     }
 ];
 
@@ -85,6 +89,7 @@ export function Quest3Learn({ onComplete }: Quest3LearnProps) {
                     <AudioNarration
                         key={`learn-audio-${currentStep.number}`}
                         text={currentStep.description}
+                        audioKey={currentStep.audioKey}
                         speaker="abby"
                         compact
                         autoPlay
