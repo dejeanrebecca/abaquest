@@ -2,54 +2,26 @@
 $PROJECT_ID = "abaquest"
 $SERVICE_NAME = "abaquest-frontend"
 $REGION = "us-central1"
-$IMAGE_TAG = "latest"
 
-$IMAGE_NAME = "gcr.io/$PROJECT_ID/$SERVICE_NAME`:$IMAGE_TAG"
+$IMAGE_NAME = "gcr.io/${PROJECT_ID}/${SERVICE_NAME}:latest"
 
-Write-Host "----------------------------------------" -ForegroundColor Cyan
-Write-Host "CONFIGURATION" -ForegroundColor Cyan
+Write-Host "----------------------------------------"
 Write-Host "Project ID:   $PROJECT_ID"
 Write-Host "Service Name: $SERVICE_NAME"
 Write-Host "Image Name:   $IMAGE_NAME"
-Write-Host "----------------------------------------" -ForegroundColor Cyan
+Write-Host "----------------------------------------"
 
-# Check if project exists/is accessible
-Write-Host "Checking access to project: $PROJECT_ID..." -ForegroundColor Cyan
-$ProjectCheck = gcloud projects describe $PROJECT_ID 2>&1
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Error: Cannot access project '$PROJECT_ID'." -ForegroundColor Red
-    Write-Host "Please ensure you have access to this project."
-    Write-Host "Available projects:"
-    gcloud projects list
-    exit 1
-}
-
-Write-Host "Starting deployment for $SERVICE_NAME to project $PROJECT_ID..." -ForegroundColor Cyan
-
-# 1. Enable Services (First time only)
-Write-Host "Ensuring required services are enabled..."
-gcloud services enable cloudbuild.googleapis.com run.googleapis.com containerregistry.googleapis.com
-
-# 2. Build and Push Container using Cloud Build
-Write-Host "Building container image: $IMAGE_NAME"
+# 1. Build and Push
+Write-Host "Building container image..."
 gcloud builds submit --tag $IMAGE_NAME .
 
-# 3. Create persistent storage bucket if missing
-$BUCKET_NAME = "$PROJECT_ID-abaquest-db"
-Write-Host "Ensuring DB storage bucket exists gs://$BUCKET_NAME..." -ForegroundColor Cyan
-gsutil mb -l $REGION "gs://$BUCKET_NAME" 2>$null
-
-# 4. Deploy to Cloud Run
-Write-Host "Deploying to Cloud Run: $SERVICE_NAME"
+# 2. Deploy
+Write-Host "Deploying to Cloud Run..."
 gcloud run deploy $SERVICE_NAME `
   --image $IMAGE_NAME `
   --region $REGION `
   --platform managed `
   --allow-unauthenticated `
-  --memory 512Mi `
-  --execution-environment gen2 `
-  --add-volume "name=db-vol,type=cloud-storage,bucket=$BUCKET_NAME" `
-  --add-volume-mount "volume=db-vol,mount-path=/app/data" `
-  --update-env-vars "DATA_DIR=/app/data"
+  --memory 512Mi
 
 Write-Host "Deployment Complete!" -ForegroundColor Green

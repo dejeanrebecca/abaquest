@@ -1,12 +1,7 @@
-import jsonServerPkg from 'json-server';
-const { create, router: _router, defaults } = jsonServerPkg;
-import path from 'path';
-import { fileURLToPath } from 'url';
-import express from 'express';
-import fs from 'fs';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const jsonServer = require('json-server');
+const path = require('path');
+const express = require('express');
+const fs = require('fs');
 
 // Log everything for Cloud Run debugging
 process.on('uncaughtException', (err) => {
@@ -18,9 +13,9 @@ process.on('unhandledRejection', (reason, promise) => {
     console.error('UNHANDLED REJECTION:', reason);
 });
 
-console.log('Server process starting... v2');
+console.log('Server process starting... v5-PRODUCTION');
 
-const server = create();
+const server = jsonServer.create();
 
 // Support external volume mounts for persistence on GCP
 const dataDir = process.env.DATA_DIR || '.';
@@ -33,7 +28,6 @@ console.log(`Database target path: ${dbPath}`);
 if (!fs.existsSync(dbPath)) {
     console.log(`Database not found at ${dbPath}. Seeding it now...`);
     try {
-        // Ensure directory exists if we are mounting a volume
         if (dataDir !== '.') {
             fs.mkdirSync(dataDir, { recursive: true });
         }
@@ -44,31 +38,38 @@ if (!fs.existsSync(dbPath)) {
     }
 }
 
-const router = jsonServer.router(dbPath);
-const middlewares = jsonServer.defaults();
-
-const port = process.env.PORT || 8080;
-
-// Set default middlewares (logger, static, cors and no-cache)
-server.use(middlewares);
-
-// Add custom routes before JSON Server router
+// 1. Health check - absolute priority
 server.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
+    console.log('Health check requested');
+    res.json({ 
+        status: 'ok', 
+        engine: 'json-server-0.17.4-v6',
+        db: dbPath,
+        time: new Date().toISOString()
+    });
 });
 
-// To handle POST, PUT and PATCH you need to use a body-parser
-server.use(jsonServer.bodyParser);
+const router = jsonServer.router(dbPath);
+const middlewares = jsonServer.defaults();
+const port = process.env.PORT || 8080;
 
-// Serve the static React build
-server.use(express.static(path.join(__dirname, 'build')));
+server.set('query parser', 'extended');
 
-// Mount the API on /api
+// 2. API Routes - mount before static catch-all
 server.use('/api', router);
 
-// Catch-all to serve index.html for React Router (if using client-side routing)
+// 3. Body Parser for POST/PUT
+server.use(jsonServer.bodyParser);
+
+// 4. Default middlewares (logger, cors, etc.)
+server.use(middlewares);
+
+// 5. Serve static files
+server.use(express.static(path.join(__dirname, 'build')));
+
+// Catch-all to serve index.html for React Router
 server.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
+    if (!req.path.startsWith('/api') && !req.path.startsWith('/health')) {
         res.sendFile(path.join(__dirname, 'build', 'index.html'));
     }
 });
