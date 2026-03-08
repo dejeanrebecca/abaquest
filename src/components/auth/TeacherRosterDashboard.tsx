@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { StudentProfile } from '../../types/quest';
@@ -30,7 +30,29 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     const [isEditingTeacherAvatar, setIsEditingTeacherAvatar] = useState(false);
 
     const currentTeacher = allProfiles.find(p => p.id === teacher.id) || teacher;
-    const classStudents = allProfiles.filter(p => p.role === 'student' || (!p.role && p.id !== teacher.id));
+
+    // Dynamically calculate class roster (all students in the system)
+    const classStudents = useMemo(() => {
+        return allProfiles.filter(p => (p.role === 'student' || !p.role) && p.id !== teacher.id);
+    }, [allProfiles, teacher.id]);
+
+    // Calculate aggregated interactions for the selected quest
+    const aggregatedInteractions = useMemo(() => {
+        return classStudents.reduce(
+            (acc, student) => {
+                const questData = student.progress?.questProgress?.[selectedQuest];
+                if (questData?.interactions) {
+                    acc.total += questData.interactions.total || 0;
+                    acc.preTest += questData.interactions.preTest || 0;
+                    acc.practice += questData.interactions.practice || 0;
+                    acc.postTest += questData.interactions.postTest || 0;
+                    acc.story += questData.interactions.story || 0;
+                }
+                return acc;
+            },
+            { total: 0, preTest: 0, practice: 0, postTest: 0, story: 0 }
+        );
+    }, [classStudents, selectedQuest]);
 
     const handleUpdateTeacherAvatar = async (newAvatar: string) => {
         const updatedTeacher = { ...currentTeacher, avatar: newAvatar };
@@ -42,22 +64,6 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             console.error('Failed to update teacher avatar:', error);
         }
     };
-
-    // Calculate aggregated interactions for the selected quest
-    const aggregatedInteractions = classStudents.reduce(
-        (acc, student) => {
-            const questData = student.progress?.questProgress?.[selectedQuest];
-            if (questData?.interactions) {
-                acc.total += questData.interactions.total || 0;
-                acc.preTest += questData.interactions.preTest || 0;
-                acc.practice += questData.interactions.practice || 0;
-                acc.postTest += questData.interactions.postTest || 0;
-                acc.story += questData.interactions.story || 0;
-            }
-            return acc;
-        },
-        { total: 0, preTest: 0, practice: 0, postTest: 0, story: 0 }
-    );
 
     const handleAddEmoji = (emoji: string) => {
         if (newPassword.length < 3) {
@@ -230,8 +236,9 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         document.body.removeChild(link);
     };
 
-    const calculateClassMetrics = () => {
-        const questAverages = ([1, 2, 3, 4] as QuestId[]).map(qId => {
+    // Dynamically calculate aggregated metrics for all quests
+    const classMetricsData = useMemo(() => {
+        return ([1, 2, 3, 4] as QuestId[]).map(qId => {
             let totalPre = 0;
             let totalPost = 0;
             let countPre = 0;
@@ -264,13 +271,12 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                 preTest: countPre > 0 ? Math.round(totalPre / countPre) : 0,
                 postTest: countPost > 0 ? Math.round(totalPost / countPost) : 0,
                 completedCount,
+                totalCount: classStudents.length,
                 maxPost,
                 totalCoins
             };
         });
-        return questAverages;
-    };
-    const classMetricsData = calculateClassMetrics();
+    }, [classStudents]);
 
     return (
         <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
@@ -318,8 +324,14 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         </AnimatePresence>
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold text-deep-blue">Welcome, {currentTeacher.name}!</h1>
-                        <p className="text-deep-blue/60">Manage your classroom</p>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold text-deep-blue">Welcome, {currentTeacher.name}!</h1>
+                            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-200 flex items-center gap-1 shadow-sm">
+                                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                                Live Class: {classStudents.length} Students
+                            </span>
+                        </div>
+                        <p className="text-deep-blue/60 mt-1">Manage your classroom analytics and student roster</p>
                     </div>
                 </div>
                 <Button variant="outline" onClick={onLogout} className="text-deep-blue border-deep-blue hover:bg-red-50 hover:text-red-600 hover:border-red-200">
@@ -478,7 +490,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-center font-bold text-slate-600">
-                                                    {data.completedCount}/{classStudents.length}
+                                                    {data.completedCount}/{data.totalCount}
                                                 </td>
                                                 <td className="p-4 text-center text-blue-600 font-semibold">
                                                     {data.preTest}%
