@@ -523,14 +523,14 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                             return (
                                 <>
                                     <div className="flex items-center gap-2 mb-6">
-                                        <div className="h-8 w-1 bg-blue-500 rounded-full"></div>
+                                        <div className="h-8 w-1 bg-green-500 rounded-full"></div>
                                         <h3 className="text-xl font-bold text-deep-blue">
-                                            Detailed Analysis: {['✏️ Quest 1', '🧩 Quest 2', '🔢 Quest 3', '➕ Quest 4'][selectedQuest - 1]}
+                                            Student Performance Overview (All Quests)
                                         </h3>
                                     </div>
 
                                     {/* Learning Curve Chart */}
-                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
+                                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
                                         <h4 className="text-lg font-bold text-deep-blue mb-4 text-center">Class Learning Progression (Gain %)</h4>
                                         <div className="h-80 w-full">
                                             {(() => {
@@ -544,7 +544,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                         }
                                                     });
                                                     return row;
-                                                }).filter(row => Object.keys(row).length > 1); // Only students with at least 1 quest started
+                                                }).filter(row => Object.keys(row).length > 1);
 
                                                 if (chartData.length === 0) {
                                                     return (
@@ -575,69 +575,79 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                         </div>
                                     </div>
 
-                                    {/* Student Table */}
+                                    {/* All Quests Student Table */}
                                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                                        <table className="w-full text-left">
-                                            <thead className="bg-slate-100 text-slate-600 uppercase text-xs font-bold border-b border-slate-200">
-                                                <tr>
-                                                    <th className="p-3">Student</th>
-                                                    <th className="p-3">Status</th>
-                                                    <th className="p-3 text-center">Pre-Test</th>
-                                                    <th className="p-3 text-center">Post-Test</th>
-                                                    <th className="p-3 text-center">Gain</th>
-                                                    <th className="p-3 text-center">Time</th>
-                                                    <th className="p-3 text-right">Completed</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-100">
-                                                {studentsWithProgress.map(({ student, progress: p }) => {
-                                                    const isCompleted = p?.completed;
-                                                    const isStarted = !!p?.startedAt;
-                                                    const pre = p?.preTestScore;
-                                                    const post = p?.postTestScore;
-                                                    const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
-                                                    const duration = calculateDuration(p?.startedAt, p?.completedAt);
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full text-left">
+                                                <thead className="bg-slate-50 text-slate-500 uppercase text-xs font-bold border-b border-slate-200">
+                                                    <tr>
+                                                        <th className="p-4 sticky left-0 bg-slate-50 z-10 w-48">Student</th>
+                                                        {([1, 2, 3, 4] as QuestId[]).map(qId => (
+                                                            <th key={qId} className="p-4 text-center min-w-[140px]">
+                                                                {['✏️ Q1', '🧩 Q2', '🔢 Q3', '➕ Q4'][qId - 1]}
+                                                            </th>
+                                                        ))}
+                                                        <th className="p-4 text-center">Total Coins</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-100">
+                                                    {classStudents.map(student => {
+                                                        const totalStudentCoins = [1, 2, 3, 4].reduce((sum, qId) => {
+                                                            return sum + (student.progress?.questProgress?.[qId as QuestId]?.coinsEarned || 0);
+                                                        }, 0);
 
-                                                    return (
-                                                        <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
-                                                            <td className="p-3">
-                                                                <div className="flex items-center gap-2">
-                                                                    <span className="text-xl">{student.avatar}</span>
-                                                                    <span className="font-bold text-deep-blue">{student.name}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="p-3">
-                                                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${isCompleted ? 'bg-green-100 text-green-700' :
-                                                                    isStarted ? 'bg-amber-100 text-amber-700' :
-                                                                        'bg-slate-100 text-slate-500'
-                                                                    }`}>
-                                                                    {isCompleted ? '✅ Done' : isStarted ? '⏳ In Progress' : '🔒 Not Started'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="p-3 text-center font-mono text-slate-600">
-                                                                {pre !== undefined ? `${pre}%` : '-'}
-                                                            </td>
-                                                            <td className="p-3 text-center font-mono font-bold text-deep-blue">
-                                                                {post !== undefined ? `${post}%` : '-'}
-                                                            </td>
-                                                            <td className="p-3 text-center">
-                                                                {gain !== null ? (
-                                                                    <span className={`font-bold ${gain > 0 ? 'text-green-600' : 'text-slate-400'}`}>
-                                                                        {gain > 0 ? `+${gain}%` : `${gain}%`}
-                                                                    </span>
-                                                                ) : '-'}
-                                                            </td>
-                                                            <td className="p-3 text-center text-sm text-slate-500">
-                                                                {duration}
-                                                            </td>
-                                                            <td className="p-3 text-right text-sm text-slate-500">
-                                                                {p?.completedAt ? new Date(p.completedAt).toLocaleDateString() : '-'}
-                                                            </td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
+                                                        return (
+                                                            <tr key={student.id} className="hover:bg-slate-50/50 transition-colors group">
+                                                                <td className="p-4 sticky left-0 bg-white group-hover:bg-slate-50/50 z-10 border-r border-slate-100 shadow-[2px_0_5px_rgba(0,0,0,0.02)]">
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-xl">{student.avatar}</span>
+                                                                        <span className="font-bold text-deep-blue">{student.name}</span>
+                                                                    </div>
+                                                                </td>
+                                                                {([1, 2, 3, 4] as QuestId[]).map(qId => {
+                                                                    const p = student.progress?.questProgress?.[qId];
+                                                                    const isCompleted = !!p?.completed;
+                                                                    const isStarted = !!p?.startedAt;
+                                                                    const pre = p?.preTestScore;
+                                                                    const post = p?.postTestScore;
+                                                                    const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
+
+                                                                    return (
+                                                                        <td key={qId} className="p-4 text-center">
+                                                                            <div className="flex flex-col items-center gap-1">
+                                                                                <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${isCompleted ? 'bg-green-100 text-green-700' :
+                                                                                    isStarted ? 'bg-amber-100 text-amber-700' :
+                                                                                        'bg-slate-100 text-slate-400'
+                                                                                    }`}>
+                                                                                    {isCompleted ? 'Done' : isStarted ? 'Solving' : 'Locked'}
+                                                                                </span>
+                                                                                {(post !== undefined) && (
+                                                                                    <div className="font-bold text-deep-blue text-sm">
+                                                                                        {post}%
+                                                                                        {gain !== null && (
+                                                                                            <span className={`text-[10px] ml-1 ${gain > 0 ? 'text-green-500' : 'text-slate-400'}`}>
+                                                                                                ({gain > 0 ? '+' : ''}{gain}%)
+                                                                                            </span>
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                                {!isStarted && <span className="text-slate-300">-</span>}
+                                                                            </div>
+                                                                        </td>
+                                                                    );
+                                                                })}
+                                                                <td className="p-4 text-center">
+                                                                    <div className="flex items-center justify-center gap-1 font-bold text-yellow-500">
+                                                                        <Coins className="w-4 h-4 fill-yellow-400" />
+                                                                        {totalStudentCoins}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </>
                             );
