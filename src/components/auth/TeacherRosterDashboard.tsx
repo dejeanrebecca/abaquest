@@ -111,26 +111,30 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         setIsSaving(true);
 
         try {
+            let updatedProfiles = [...allProfiles];
+            let studentToSave: StudentProfile;
+
             if (editingStudentId) {
                 // Edit existing student
-                const existingStudent = allProfiles.find(p => p.id === editingStudentId);
-                if (existingStudent) {
-                    const updatedStudent: StudentProfile = {
-                        ...existingStudent,
+                const existingIndex = allProfiles.findIndex(p => p.id === editingStudentId);
+                if (existingIndex !== -1) {
+                    studentToSave = {
+                        ...allProfiles[existingIndex],
                         name: newStudentName.trim(),
                         avatar: selectedAvatar,
                         emojiPass: [...newPassword],
                         progress: {
-                            ...existingStudent.progress,
+                            ...allProfiles[existingIndex].progress,
                             studentName: newStudentName.trim(),
                         }
                     };
-                    await studentService.saveProfile(updatedStudent);
-                    // Subscription in AuthScreen handles the UI update
+                    updatedProfiles[existingIndex] = studentToSave;
+                } else {
+                    throw new Error("Student not found");
                 }
             } else {
                 // Add new student
-                const newStudent: StudentProfile = {
+                studentToSave = {
                     id: `student_${Date.now()}`,
                     name: newStudentName.trim(),
                     avatar: selectedAvatar,
@@ -149,18 +153,27 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         questProgress: {} as any,
                     }
                 };
-                await studentService.saveProfile(newStudent);
-                // Subscription handles it
+                updatedProfiles.push(studentToSave);
             }
 
-            // Reset form
+            // OPTIMISTIC UPDATE: Update local state and close modal instantly
+            onUpdateProfiles(updatedProfiles);
             setIsEditingModalOpen(false);
             setNewStudentName('');
             setSelectedAvatar(AVATARS[0]);
             setNewPassword([]);
+            setIsSaving(false); 
+
+            // BACKGROUND SYNC: Save to Firestore without awaiting
+            studentService.saveProfile(studentToSave).catch(err => {
+                console.error('Background save failed:', err);
+                setError('Cloud sync failed, but local changes are saved.');
+                // In a production app, we might want to revert the local state here,
+                // but for now, we'll log it and let the user know.
+            });
+
         } catch (error) {
-            setError('Failed to save student to cloud. Please try again.');
-        } finally {
+            setError('Failed to prepare student data. Please try again.');
             setIsSaving(false);
         }
     };

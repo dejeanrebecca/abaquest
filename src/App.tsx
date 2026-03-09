@@ -46,11 +46,10 @@ function AppContent() {
           const mergedInitial = INITIAL_PROFILES.map(ip => {
             const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
             if (cloudVersion) {
-              return {
-                ...cloudVersion,
-                teacherId: ip.teacherId,
-                role: ip.role || 'student'
-              };
+              const merged = { ...cloudVersion };
+              if (ip.teacherId) merged.teacherId = ip.teacherId;
+              if (ip.role) merged.role = ip.role;
+              return merged;
             }
             return ip;
           });
@@ -144,6 +143,22 @@ function AppContent() {
 
   return (
     <>
+      {/* Database Status Warning */}
+      {dbError && (
+        <div className="fixed top-0 left-0 right-0 bg-red-600 text-white p-2 text-center text-xs font-bold z-[100] shadow-lg animate-in slide-in-from-top duration-300">
+          <div className="flex items-center justify-center gap-2">
+            <span className="opacity-75">⚠️</span>
+            <span>{dbError}</span>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="ml-4 underline hover:text-white/80"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {showSplash && (
           <SplashScreen key="splash" onComplete={() => setShowSplash(false)} />

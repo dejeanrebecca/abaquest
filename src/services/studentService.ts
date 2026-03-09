@@ -31,8 +31,11 @@ export const studentService = {
      */
     async saveProfile(profile: StudentProfile): Promise<void> {
         try {
+            // Firestore does not like undefined values. Transform to avoid crashes.
+            const cleanProfile = JSON.parse(JSON.stringify(profile));
+            
             // Use student ID as the document ID
-            await setDoc(doc(db, COLLECTION_NAME, profile.id), profile);
+            await setDoc(doc(db, COLLECTION_NAME, profile.id), cleanProfile);
         } catch (error) {
             console.error("Error saving profile to Firestore:", error);
             throw error;
