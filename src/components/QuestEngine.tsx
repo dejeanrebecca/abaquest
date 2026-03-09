@@ -12,13 +12,14 @@ interface QuestEngineContextType {
   completeQuest: (
     preTestScore: number,
     postTestScore: number,
-    interactions?: {
+    interactionData?: {
       total: number;
       preTest: number;
       practice: number;
       postTest: number;
       story: number;
-    }
+    },
+    rawInteractions?: any[]
   ) => void;
   isQuestUnlocked: (questId: QuestId) => boolean;
   loadProfile: (profile: StudentProfile) => void;
@@ -47,7 +48,6 @@ const INITIAL_PROGRESS: StudentProgress = {
 
 export function QuestEngineProvider({ children }: { children: ReactNode }) {
   const [studentProgress, setStudentProgress] = useState<StudentProgress>(INITIAL_PROGRESS);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Save to localStorage AND Firestore whenever progress changes
   const lastSyncRef = useRef<string>('');
@@ -165,7 +165,7 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
     }));
   };
 
-  const completeQuest = (
+  const completeQuest = async (
     preTestScore: number,
     postTestScore: number,
     interactionData?: {
@@ -174,27 +174,21 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
       practice: number;
       postTest: number;
       story: number;
-    }
+    },
+    rawInteractions?: any[]
   ) => {
     if (!currentQuest) return;
 
     const quest = QUESTS[currentQuest];
     const now = new Date().toISOString();
 
+    let updatedProgress: StudentProgress | null = null;
+
     setStudentProgress(prev => {
       const isAlreadyCompleted = prev.completedQuests.includes(currentQuest);
       const newCoins = isAlreadyCompleted ? 0 : quest.coinReward;
-      const existingProgress = prev.questProgress[currentQuest];
 
-      // Keep the best scores across attempts
-      const bestPreScore = isAlreadyCompleted && existingProgress
-        ? Math.max(existingProgress.preTestScore, preTestScore)
-        : preTestScore;
-      const bestPostScore = isAlreadyCompleted && existingProgress
-        ? Math.max(existingProgress.postTestScore, postTestScore)
-        : postTestScore;
-
-      return {
+      const newProgress = {
         ...prev,
         completedQuests: isAlreadyCompleted
           ? prev.completedQuests
@@ -208,15 +202,37 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
             ...prev.questProgress[currentQuest],
             completed: true,
             completedAt: now,
-            preTestScore: bestPreScore,
-            postTestScore: bestPostScore,
+            preTestScore: preTestScore, // Always replace with latest attempt
+            postTestScore: postTestScore, // Always replace with latest attempt
             coinsEarned: newCoins,
             ...(interactionData ? { interactions: interactionData } : {}),
+            rawInteractions: rawInteractions || [],
           },
         },
         currentQuestId: null,
       };
+      
+      updatedProgress = newProgress;
+      return newProgress;
     });
+
+    // CRITICAL: Immediate sync for quest completion to avoid the "sync delay" in Teacher Dashboard
+    if (updatedProgress && (updatedProgress as StudentProgress).studentId) {
+        try {
+            const profiles = await studentService.fetchProfiles();
+            const currentProfile = profiles.find(p => p.id === (updatedProgress as any).studentId);
+            if (currentProfile) {
+                await studentService.saveProfile({
+                    ...currentProfile,
+                    progress: updatedProgress as any
+                });
+                lastSyncRef.current = JSON.stringify(updatedProgress);
+                console.log("Immediate sync: Quest completion persisted to cloud");
+            }
+        } catch (error) {
+            console.error("Failed immediate sync on quest completion:", error);
+        }
+    }
   };
 
   const isQuestUnlocked = (questId: QuestId): boolean => {
@@ -283,7 +299,7 @@ export function QuestEngineProvider({ children }: { children: ReactNode }) {
         exitQuest,
       }}
     >
-      {isLoading ? null : children}
+      {children}
     </QuestEngineContext.Provider>
   );
 }

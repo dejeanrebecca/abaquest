@@ -1,22 +1,19 @@
 import { StudentProfile } from '../types/quest';
+import { studentService } from './studentService';
 
 type SyncCallback = () => void;
-
-// Base API URL respects the current origin to support both local dev and production
-const API_BASE = '/api/profiles';
 
 class DatabaseService {
     private listeners: SyncCallback[] = [];
 
-    constructor() {
-        // We can no longer rely on 'storage' events for cross-tab sync easily without websockets or polling.
-        // For simplicity in this iteration, we'll just expose the notify wrapper.
-    }
-
     public subscribe(callback: SyncCallback): () => void {
         this.listeners.push(callback);
+        const unsubscribe = studentService.subscribeToProfiles(() => {
+            this.notifyListeners();
+        });
         return () => {
             this.listeners = this.listeners.filter(cb => cb !== callback);
+            unsubscribe();
         };
     }
 
@@ -25,21 +22,14 @@ class DatabaseService {
     }
 
     public async init(): Promise<void> {
-        // json-server auto-inits from db.json. We just ensure we can reach it.
-        try {
-            await fetch(API_BASE);
-            console.log('Connected to backend JSON store.');
-        } catch (e) {
-            console.warn('Could not connect to backend JSON store. Is json-server running?');
-        }
+        // No-op for Firebase as it auto-initializes
+        console.log('Connected to Firebase/Firestore backend.');
     }
 
     // --- Students / Profiles ---
 
     public async getProfiles(): Promise<StudentProfile[]> {
-        const res = await fetch(API_BASE);
-        if (!res.ok) return [];
-        return await res.json();
+        return await studentService.fetchProfiles();
     }
 
     public async getTeachers(): Promise<StudentProfile[]> {
@@ -48,45 +38,27 @@ class DatabaseService {
     }
 
     public async getStudentsForTeacher(teacherId: string): Promise<StudentProfile[]> {
-        // json-server supports filtering via query params
-        const res = await fetch(`${API_BASE}?teacherId=${teacherId}`);
-        if (!res.ok) return [];
-        return await res.json();
+        // Currently we fetch all and filter client-side for simplicity, 
+        // matching the existing StudentProfile interface.
+        const profiles = await this.getProfiles();
+        return profiles.filter(p => p.teacherId === teacherId);
     }
 
     public async addProfile(profile: StudentProfile): Promise<void> {
-        await fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(profile)
-        });
-        this.notifyListeners();
+        await studentService.saveProfile(profile);
     }
 
     public async updateProfile(updatedProfile: StudentProfile): Promise<void> {
-        await fetch(`${API_BASE}/${updatedProfile.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedProfile)
-        });
-        this.notifyListeners();
+        await studentService.saveProfile(updatedProfile);
     }
 
     public async deleteProfile(profileId: string): Promise<void> {
-        await fetch(`${API_BASE}/${profileId}`, {
-            method: 'DELETE'
-        });
-        this.notifyListeners();
+        await studentService.deleteProfile(profileId);
     }
 
     public async updateProfilesBulk(profiles: StudentProfile[]): Promise<void> {
-        // json-server doesn't natively support bulk PUT to replace everything easily without custom routes.
-        // For this app, we iterate and update individually or just delete all and insert.
-        // For safety, we will update individually.
-        for (const p of profiles) {
-            await this.updateProfile(p);
-        }
-        this.notifyListeners();
+        // studentService handles batching if needed, but for now we reuse resetProfiles or loop
+        await studentService.resetProfiles(profiles);
     }
 }
 

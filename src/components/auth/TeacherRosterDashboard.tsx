@@ -60,7 +60,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         setIsEditingTeacherAvatar(false);
         try {
             await studentService.saveProfile(updatedTeacher);
-            onUpdateProfiles(allProfiles.map(p => p.id === updatedTeacher.id ? updatedTeacher : p));
+            // onUpdateProfiles is handled via onSnapshot now
         } catch (error) {
             console.error('Failed to update teacher avatar:', error);
         }
@@ -125,7 +125,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         }
                     };
                     await studentService.saveProfile(updatedStudent);
-                    onUpdateProfiles(allProfiles.map(p => p.id === updatedStudent.id ? updatedStudent : p));
+                    // Subscription in AuthScreen handles the UI update
                 }
             } else {
                 // Add new student
@@ -149,7 +149,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                     }
                 };
                 await studentService.saveProfile(newStudent);
-                onUpdateProfiles([...allProfiles, newStudent]);
+                // Subscription handles it
             }
 
             // Reset form
@@ -197,55 +197,94 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         return `${diffMins} min`;
     };
 
-    const handleExportCSV = (student: StudentProfile) => {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Student Name,Quest ID,Status,Pre-Test Score,Post-Test Score,Learning Gain,Time Spent,Date Completed\n";
-
-        [1, 2, 3, 4].forEach(qId => {
-            const progress = student.progress?.questProgress?.[qId as QuestId];
-            const isCompleted = progress?.completed;
-            const isStarted = !!progress?.startedAt;
-            const status = isCompleted ? 'Completed' : isStarted ? 'In Progress' : 'Not Started';
-
+    const handleExportJSON = (student: StudentProfile, qId?: QuestId) => {
+        // If qId is provided, export just that quest. Otherwise export all with progress.
+        const questsToExport = qId ? [qId] : ([1, 2, 3, 4] as QuestId[]).filter(id => !!student.progress?.questProgress?.[id]);
+        
+        const exportData = questsToExport.map(id => {
+            const progress = student.progress?.questProgress?.[id];
             const pre = progress?.preTestScore ?? 0;
             const post = progress?.postTestScore ?? 0;
-            const gain = (progress?.postTestScore !== undefined && progress?.preTestScore !== undefined) ? post - pre : 0;
-            const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
-            const date = progress?.completedAt ? new Date(progress.completedAt).toLocaleDateString() : '-';
+            const gain = post - pre;
+            
+            let highestNumber = 0;
+            if (progress?.rawInteractions) {
+                const builtNumbers = progress.rawInteractions
+                    .filter(i => i.number !== null && i.correct_flag === true)
+                    .map(i => i.number as number);
+                if (builtNumbers.length > 0) highestNumber = Math.max(...builtNumbers);
+            }
 
-            csvContent += [student.name, `Quest ${qId}`, status, pre, post, gain > 0 ? `+${gain}` : gain, duration, date].join(",") + "\n";
+            return {
+                student_name: student.name,
+                quest_id: id,
+                summary: {
+                    pre_test_score: pre,
+                    post_test_score: post,
+                    learning_gain: gain,
+                    highest_number_built: highestNumber,
+                    total_coins: progress?.coinsEarned ?? 0,
+                    total_interactions: progress?.interactions?.total ?? 0
+                },
+                interactions: progress?.rawInteractions ?? [],
+                export_date: new Date().toISOString()
+            };
         });
 
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const fileName = qId ? `${student.name}_quest${qId}_data.json` : `${student.name}_all_quests_data.json`;
+
         const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `${student.name}_progress_report.csv`);
+        link.setAttribute("href", dataUri);
+        link.setAttribute("download", fileName);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     };
 
-    const handleExportClassCSV = () => {
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += `Class Report - Quest ${selectedQuest}\n`;
-        csvContent += "Student Name,Status,Pre-Test,Post-Test,Learning Gain,Time Spent,Date Completed\n";
+    const handleExportClassJSON = () => {
+        const classData = classStudents.flatMap(student => {
+            const studentQuests = ([1, 2, 3, 4] as QuestId[]).filter(id => !!student.progress?.questProgress?.[id]);
+            
+            return studentQuests.map(id => {
+                const progress = student.progress?.questProgress?.[id];
+                const pre = progress?.preTestScore ?? 0;
+                const post = progress?.postTestScore ?? 0;
+                const gain = post - pre;
+                
+                let highestNumber = 0;
+                if (progress?.rawInteractions) {
+                    const builtNumbers = progress.rawInteractions
+                        .filter(i => i.number !== null && i.correct_flag === true)
+                        .map(i => i.number as number);
+                    if (builtNumbers.length > 0) highestNumber = Math.max(...builtNumbers);
+                }
 
-        classStudents.forEach(student => {
-            const progress = student.progress?.questProgress?.[selectedQuest];
-            const isCompleted = progress?.completed;
-            const isStarted = !!progress?.startedAt;
-            const status = isCompleted ? 'Completed' : isStarted ? 'In Progress' : 'Not Started';
-            const pre = progress?.preTestScore ?? 0;
-            const post = progress?.postTestScore ?? 0;
-            const gain = (progress?.postTestScore !== undefined && progress?.preTestScore !== undefined) ? post - pre : 0;
-            const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
-            const date = progress?.completedAt ? new Date(progress.completedAt).toLocaleDateString() : '-';
-
-            csvContent += [student.name, status, pre, post, gain > 0 ? `+${gain}` : gain, duration, date].join(",") + "\n";
+                return {
+                    student_name: student.name,
+                    quest_id: id,
+                    summary: {
+                        pre_test_score: pre,
+                        post_test_score: post,
+                        learning_gain: gain,
+                        highest_number_built: highestNumber,
+                        total_coins: progress?.coinsEarned ?? 0,
+                        total_interactions: progress?.interactions?.total ?? 0
+                    },
+                    interactions: progress?.rawInteractions ?? [],
+                    export_date: new Date().toISOString()
+                };
+            });
         });
 
+        const dataStr = JSON.stringify(classData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const fileName = `class_full_report_${Date.now()}.json`;
+
         const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `class_quest${selectedQuest}_report.csv`);
+        link.setAttribute("href", dataUri);
+        link.setAttribute("download", fileName);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -447,11 +486,11 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                             Class Analytics
                         </h2>
                         <button
-                            onClick={handleExportClassCSV}
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors"
+                            onClick={handleExportClassJSON}
+                            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors"
                         >
                             <Download className="w-4 h-4" />
-                            Export Class Report
+                            Export Learning Data (JSON)
                         </button>
                     </div>
 
@@ -556,11 +595,6 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
                     <div className="p-6">
                         {(() => {
-                            const studentsWithProgress = classStudents.map(s => {
-                                const p = s.progress?.questProgress?.[selectedQuest];
-                                return { student: s, progress: p };
-                            });
-                            const completedStudents = studentsWithProgress.filter(s => s.progress?.completed);
 
                             return (
                                 <>
@@ -816,11 +850,11 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
                                 <div className="mb-4 flex justify-end">
                                     <button
-                                        onClick={() => handleExportCSV(viewingStudent)}
-                                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors"
+                                        onClick={() => handleExportJSON(viewingStudent)}
+                                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-colors"
                                     >
                                         <Download className="w-4 h-4" />
-                                        Download Report (.csv)
+                                        Export Learning Data (JSON)
                                     </button>
                                 </div>
 

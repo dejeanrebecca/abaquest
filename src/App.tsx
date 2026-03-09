@@ -4,7 +4,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuestEngineProvider, useQuestEngine } from './components/QuestEngine';
 import { Library } from './components/screens/Library';
 import { Settings } from './components/screens/Settings';
-import { TeacherDashboard } from './components/screens/TeacherDashboard';
+import { TeacherDashboard } from './components/dashboard/TeacherDashboard';
 import { Navigation } from './components/Navigation';
 import { AbbyAvatar } from './components/AbbyAvatar';
 import { Quest1Naming } from './components/quests/Quest1Naming';
@@ -51,7 +51,7 @@ function AppContent() {
     };
 
     // Persist completion state with metrics
-    completeQuest(preScore, postScore, interactionMetrics);
+    completeQuest(preScore, postScore, interactionMetrics, interactions);
 
     // Return to library
     exitQuest();

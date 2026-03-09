@@ -135,35 +135,38 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     const [profiles, setProfiles] = useState<StudentProfile[]>(INITIAL_PROFILES);
 
     useEffect(() => {
-        // 1. Initial fetch from Firestore
+        const updateProfilesState = (cloudProfiles: StudentProfile[]) => {
+            const mergedInitial = INITIAL_PROFILES.map(ip => {
+                const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
+                if (cloudVersion) {
+                    return {
+                        ...cloudVersion,
+                        teacherId: ip.teacherId, 
+                        role: ip.role || 'student'
+                    };
+                }
+                return ip;
+            });
+
+            const customProfiles = cloudProfiles.filter(sp =>
+                !INITIAL_PROFILES.some(dp => dp.id === sp.id)
+            );
+
+            // Deduplicate by ID just in case
+            const allProfiles = [...mergedInitial, ...customProfiles];
+            const uniqueProfiles = Array.from(new Map(allProfiles.map(p => [p.id, p])).values());
+            
+            setProfiles(uniqueProfiles);
+            
+            // Backup to localStorage
+            localStorage.setItem('abaquest_students', JSON.stringify(uniqueProfiles));
+        };
+
         const initProfiles = async () => {
             setIsLoading(true);
             try {
                 const cloudProfiles = await studentService.fetchProfiles();
-
-                // Merge strategy:
-                // 1. For each initial profile, if a cloud version exists, use cloud progress/data
-                //    but PRESERVE the hardcoded teacherId and role from INITIAL_PROFILES.
-                const mergedInitial = INITIAL_PROFILES.map(ip => {
-                    const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
-                    if (cloudVersion) {
-                        return {
-                            ...cloudVersion,
-                            teacherId: ip.teacherId, // Force the hardcoded assignment
-                            role: ip.role || 'student'
-                        };
-                    }
-                    return ip;
-                });
-                const customProfiles = cloudProfiles.filter(sp =>
-                    !INITIAL_PROFILES.some(dp => dp.id === sp.id)
-                );
-
-                const finalProfiles = [...mergedInitial, ...customProfiles];
-                setProfiles(finalProfiles);
-
-                // Backup to localStorage for convenience (optional)
-                localStorage.setItem('abaquest_students', JSON.stringify(finalProfiles));
+                updateProfilesState(cloudProfiles);
             } catch (error) {
                 console.error("Failed to load profiles from cloud:", error);
             } finally {
@@ -175,21 +178,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
         // 2. Subscribe to real-time updates
         const unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
-            const mergedInitial = INITIAL_PROFILES.map(ip => {
-                const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
-                if (cloudVersion) {
-                    return {
-                        ...cloudVersion,
-                        teacherId: ip.teacherId,
-                        role: ip.role || 'student'
-                    };
-                }
-                return ip;
-            });
-            const customProfiles = cloudProfiles.filter(sp =>
-                !INITIAL_PROFILES.some(dp => dp.id === sp.id)
-            );
-            setProfiles([...mergedInitial, ...customProfiles]);
+            updateProfilesState(cloudProfiles);
         });
 
         return () => unsubscribe();
@@ -244,9 +233,9 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
             </header>
 
             {isLoading && (
-                <div className="flex flex-col items-center gap-4 mb-8">
-                    <Loader2 className="w-12 h-12 text-deep-blue animate-spin" />
-                    <p className="text-deep-blue font-medium animate-pulse">Syncing class data...</p>
+                <div className="fixed top-6 right-6 flex items-center gap-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-deep-blue/10 z-[60]">
+                    <Loader2 className="w-5 h-5 text-deep-blue animate-spin" />
+                    <span className="text-deep-blue text-sm font-bold animate-pulse">Syncing...</span>
                 </div>
             )}
 

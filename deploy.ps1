@@ -11,9 +11,22 @@ Write-Host "Service Name: $SERVICE_NAME"
 Write-Host "Image Name:   $IMAGE_NAME"
 Write-Host "----------------------------------------"
 
-# 1. Build and Push
-Write-Host "Building container image..."
-gcloud builds submit --tag $IMAGE_NAME .
+# 1. Read production env vars for the build
+$ENV_FILE = ".env.local"
+$BUILD_ARGS = @()
+
+if (Test-Path $ENV_FILE) {
+    Get-Content $ENV_FILE | ForEach-Object {
+        if ($_ -match "^VITE_FIREBASE_") {
+            $BUILD_ARGS += "--build-arg"
+            $BUILD_ARGS += $_
+        }
+    }
+}
+
+# 2. Build and Push
+Write-Host "Building container image with Firebase credentials..."
+gcloud builds submit --tag $IMAGE_NAME $BUILD_ARGS .
 
 # 2. Deploy
 Write-Host "Deploying to Cloud Run..."
