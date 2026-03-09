@@ -54,12 +54,13 @@ export const studentService = {
     /**
      * Listen for real-time updates to profiles
      */
-    subscribeToProfiles(callback: (profiles: StudentProfile[]) => void) {
+    subscribeToProfiles(callback: (profiles: StudentProfile[]) => void, onError?: (error: any) => void) {
         return onSnapshot(collection(db, COLLECTION_NAME), (snapshot) => {
             const profiles = snapshot.docs.map(doc => doc.data() as StudentProfile);
             callback(profiles);
         }, (error) => {
             console.error("Firestore subscription error:", error);
+            if (onError) onError(error);
         });
     },
 
@@ -91,6 +92,23 @@ export const studentService = {
             await batch.commit();
         } catch (error) {
             console.error("Error resetting profiles in Firestore:", error);
+            throw error;
+        }
+    },
+
+    /**
+     * Batch save multiple profiles (used for initial seeding)
+     */
+    async saveProfilesBatch(profiles: StudentProfile[]): Promise<void> {
+        try {
+            const batch = writeBatch(db);
+            profiles.forEach(profile => {
+                const docRef = doc(db, COLLECTION_NAME, profile.id);
+                batch.set(docRef, profile);
+            });
+            await batch.commit();
+        } catch (error) {
+            console.error("Error saving profiles batch:", error);
             throw error;
         }
     }

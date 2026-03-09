@@ -8,122 +8,13 @@ import { StudentProfile } from '../../types/quest';
 import { Button } from '../ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
+import { INITIAL_PROFILES } from '../../services/seedData';
 
 interface AuthScreenProps {
     onAuthenticated: (student: StudentProfile) => void;
 }
 
 
-const INITIAL_PROFILES: StudentProfile[] = [
-    {
-        id: 'teacher1',
-        name: 'Ms. Teacher',
-        avatar: '👩‍🏫',
-        emojiPass: ['🍎', '🍎', '🍎'],
-        gradeLevel: 'K',
-        role: 'teacher',
-        progress: {
-            studentName: 'Ms. Teacher',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 'teacher2',
-        name: 'Mr. Smith',
-        avatar: '👨‍🏫',
-        emojiPass: ['🚗', '🚗', '🚗'],
-        gradeLevel: 'K',
-        role: 'teacher',
-        progress: {
-            studentName: 'Mr. Smith',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's1',
-        name: 'Ameer',
-        avatar: '👦',
-        emojiPass: ['🐶', '🐶', '🐶'],
-        gradeLevel: 'K',
-        teacherId: 'teacher1',
-        progress: {
-            studentName: 'Ameer',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's2',
-        name: 'Ameerah',
-        avatar: '👧',
-        emojiPass: ['⭐', '⭐', '⭐'],
-        gradeLevel: 'K',
-        teacherId: 'teacher1',
-        progress: {
-            studentName: 'Ameerah',
-            emotionalState: 'excited',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's3',
-        name: 'Liam',
-        avatar: '👱‍♂️',
-        emojiPass: ['🚗', '🚗', '🚗'],
-        gradeLevel: 'K',
-        teacherId: 'teacher2',
-        progress: {
-            studentName: 'Liam',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's4',
-        name: 'Noah',
-        avatar: '👦🏽',
-        emojiPass: ['🍎', '🍎', '🍎'],
-        gradeLevel: 'K',
-        teacherId: 'teacher2',
-        progress: {
-            studentName: 'Noah',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    }
-];
 
 
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
@@ -165,7 +56,15 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
         const initProfiles = async () => {
             setIsLoading(true);
             try {
-                const cloudProfiles = await studentService.fetchProfiles();
+                let cloudProfiles = await studentService.fetchProfiles();
+                
+                // SEEDING: If database is completely empty, insert initial profiles
+                if (cloudProfiles.length === 0) {
+                    console.log("Database empty, seeding initial data...");
+                    await studentService.saveProfilesBatch(INITIAL_PROFILES);
+                    cloudProfiles = INITIAL_PROFILES;
+                }
+                
                 updateProfilesState(cloudProfiles);
             } catch (error) {
                 console.error("Failed to load profiles from cloud:", error);
@@ -319,11 +218,8 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                                     const updatedStudent = { ...selectedStudent, lastLogin: now };
 
 
-                                    if (updatedStudent.role === 'teacher') {
-                                        setView('teacher-dashboard');
-                                    } else {
-                                        onAuthenticated(updatedStudent);
-                                    }
+                                    // Always hand off to App.tsx regardless of role
+                                    onAuthenticated(updatedStudent);
 
                                     // Sync login timestamp to cloud in the background (non-blocking)
                                     studentService.saveProfile(updatedStudent).catch(error => {
