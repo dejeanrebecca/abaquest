@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataLoggerProvider, useDataLogger } from './components/DataLogger';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuestEngineProvider, useQuestEngine } from './components/QuestEngine';
 import { Library } from './components/screens/Library';
 import { Settings } from './components/screens/Settings';
-import { TeacherDashboard } from './components/dashboard/TeacherDashboard';
+import { TeacherRosterDashboard as TeacherDashboard } from './components/auth/TeacherRosterDashboard';
 import { Navigation } from './components/Navigation';
 import { AbbyAvatar } from './components/AbbyAvatar';
 import { Quest1Naming } from './components/quests/Quest1Naming';
@@ -13,10 +13,13 @@ import { Quest3Positioning } from './components/quests/Quest3Positioning';
 import { Quest4Freeze } from './components/quests/Quest4Freeze';
 import { Breadcrumbs } from './components/Breadcrumbs';
 import { SplashScreen } from './components/SplashScreen';
-import { QuestId } from './types/quest';
+import { QuestId, StudentProfile } from './types/quest';
 
 import { AuthScreen } from './components/auth/AuthScreen';
 import { AnimatePresence } from 'motion/react';
+import { studentService } from './services/studentService';
+import { INITIAL_PROFILES } from './services/seedData';
+
 
 
 
@@ -26,10 +29,57 @@ export type Screen = 'library' | 'settings' | 'dashboard';
 function AppContent() {
   const [showSplash, setShowSplash] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authenticatedUser, setAuthenticatedUser] = useState<StudentProfile | null>(null);
+  const [allProfiles, setAllProfiles] = useState<StudentProfile[]>([]);
   const [currentScreen, setCurrentScreen] = useState<Screen>('library');
+  const [dbError, setDbError] = useState<string | null>(null);
 
   const { currentQuest, startQuest, exitQuest, completeQuest, loadProfile } = useQuestEngine();
   const { interactions } = useDataLogger();
+
+  // Subscribe to all profiles for the teacher dashboard
+  useEffect(() => {
+    if (isAuthenticated) {
+      const unsubscribe = studentService.subscribeToProfiles(
+        (cloudProfiles) => {
+          // Merge initial baseline with cloud updates
+          const mergedInitial = INITIAL_PROFILES.map(ip => {
+            const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
+            if (cloudVersion) {
+              return {
+                ...cloudVersion,
+                teacherId: ip.teacherId,
+                role: ip.role || 'student'
+              };
+            }
+            return ip;
+          });
+
+          const customProfiles = cloudProfiles.filter(sp =>
+            !INITIAL_PROFILES.some(dp => dp.id === sp.id)
+          );
+
+          // Deduplicate by ID
+          const allProfilesMerged = [...mergedInitial, ...customProfiles];
+          const uniqueProfiles = Array.from(new Map(allProfilesMerged.map(p => [p.id, p])).values());
+
+          setAllProfiles(uniqueProfiles);
+          setDbError(null);
+
+          // If the current user is in the profiles, update them to keep them in sync
+          if (authenticatedUser) {
+            const updatedUser = uniqueProfiles.find(p => p.id === authenticatedUser.id);
+            if (updatedUser) setAuthenticatedUser(updatedUser);
+          }
+        },
+        (error) => {
+          console.error("App: Firestore error:", error);
+          setDbError(error.message || "Failed to connect to database");
+        }
+      );
+      return () => unsubscribe();
+    }
+  }, [isAuthenticated, authenticatedUser?.id]);
 
 
   const handleQuestSelect = (questId: QuestId) => {
@@ -37,11 +87,9 @@ function AppContent() {
   };
 
   const handleQuestComplete = (results?: { pre: number; post: number }) => {
-    // Determine scores (default to 100 if not provided, e.g. for non-scored quests)
     const preScore = results?.pre ?? 100;
     const postScore = results?.post ?? 100;
 
-    // Tally interactions
     const interactionMetrics = {
       total: interactions.length,
       preTest: interactions.filter((i: any) => i.interaction_type === 'pre_test').length,
@@ -50,60 +98,49 @@ function AppContent() {
       story: interactions.filter((i: any) => i.interaction_type === 'story').length,
     };
 
-    // Persist completion state with metrics
     completeQuest(preScore, postScore, interactionMetrics, interactions);
-
-    // Return to library
     exitQuest();
-    setCurrentScreen('library');
-  };
-
-
-  const handleHomeClick = () => {
-    if (currentQuest) {
-      exitQuest();
-    }
     setCurrentScreen('library');
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
+    setAuthenticatedUser(null);
     setCurrentScreen('library');
-    if (currentQuest) {
-      exitQuest();
+    exitQuest();
+  };
+
+  const handleHomeClick = () => {
+    if (authenticatedUser?.role === 'teacher') {
+      setCurrentScreen('dashboard');
+    } else {
+      setCurrentScreen('library');
     }
+    if (currentQuest) exitQuest();
   };
 
   const renderContent = () => {
-    // If a quest is active, render the quest screen
     if (currentQuest) {
-      switch (currentQuest) {
-        case 1:
-          return <Quest1Naming onComplete={handleQuestComplete} />;
-        case 2:
-          return <Quest2Parts onComplete={handleQuestComplete} />;
-        case 3:
-          return <Quest3Positioning onComplete={handleQuestComplete} />;
-        case 4:
-          return <Quest4Freeze onComplete={handleQuestComplete} />;
-        default:
-          return null;
-      }
+      const QuestComponent = {
+        1: Quest1Naming,
+        2: Quest2Parts,
+        3: Quest3Positioning,
+        4: Quest4Freeze,
+      }[currentQuest];
+
+      return <QuestComponent onComplete={handleQuestComplete} />;
     }
 
-    // Otherwise render the selected screen
     switch (currentScreen) {
       case 'library':
         return <Library onSelectQuest={handleQuestSelect} />;
       case 'settings':
         return <Settings />;
-      case 'dashboard':
-        // Teacher Dashboard is a full screen overlay, but we still respect the container
-        return <TeacherDashboard onBack={() => setCurrentScreen('settings')} />;
       default:
         return <Library onSelectQuest={handleQuestSelect} />;
     }
   };
+
 
   return (
     <>
@@ -115,13 +152,12 @@ function AppContent() {
 
       {!showSplash && !isAuthenticated && (
         <AuthScreen onAuthenticated={(student) => {
+          setAuthenticatedUser(student);
           loadProfile(student);
-          // Also set the name explicitly if needed, though loadProfile handles it
           setIsAuthenticated(true);
 
           if (student.role === 'teacher') {
             setCurrentScreen('dashboard');
-            // Force exit any active quest for teacher to ensure they land on the dashboard
             exitQuest();
           }
         }} />
@@ -132,10 +168,8 @@ function AppContent() {
       {!showSplash && isAuthenticated && (
         <div className="relative w-full min-h-screen bg-warm-neutral overflow-hidden">
 
-          {/* Tablet Frame - 1024x768 optimized */}
           <div className="mx-auto max-w-[1024px] min-h-screen relative shadow-2xl bg-white overflow-hidden flex flex-col">
 
-            {/* Global Breadcrumbs Navigation */}
             <Breadcrumbs
               currentScreen={currentScreen}
               currentQuest={currentQuest}
@@ -143,21 +177,23 @@ function AppContent() {
               onLogout={handleLogout}
             />
 
-            {/* Main Content Area */}
             <main className="pb-24 flex-1 bg-warm-neutral">
-              {currentScreen === 'dashboard'
-                ? <TeacherDashboard onBack={() => setCurrentScreen('library')} />
+              {currentScreen === 'dashboard' && authenticatedUser
+                ? <TeacherDashboard
+                  teacher={authenticatedUser}
+                  allProfiles={allProfiles}
+                  onUpdateProfiles={setAllProfiles}
+                  onLogout={handleLogout}
+                  dbError={dbError}
+                />
                 : renderContent()
               }
             </main>
 
-            {/* Bottom Navigation - Only show when NOT in a quest AND NOT a teacher */}
-            {!currentQuest && currentScreen !== 'dashboard' && (
+            {!currentQuest && currentScreen !== 'dashboard' && authenticatedUser?.role !== 'teacher' && (
               <Navigation currentScreen={currentScreen} onNavigate={setCurrentScreen} />
             )}
 
-
-            {/* Floating Abby Avatar */}
             <AbbyAvatar />
           </div>
         </div>

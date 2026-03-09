@@ -11,7 +11,6 @@ export function Settings() {
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [textSize, setTextSize] = useState([100]);
   const [language, setLanguage] = useState('english');
-  const [showTeacherDashboard, setShowTeacherDashboard] = useState(false);
 
   const languages = [
     { value: 'english', label: 'English', flag: '🇺🇸' },
@@ -19,11 +18,7 @@ export function Settings() {
     { value: 'french', label: 'Français', flag: '🇫🇷' },
   ];
 
-  // Import TeacherDashboard dynamically
-  if (showTeacherDashboard) {
-    const { TeacherDashboard } = require('./TeacherDashboard');
-    return <TeacherDashboard onBack={() => setShowTeacherDashboard(false)} />;
-  }
+  // No dynamic require here - we use the dashboard from the main app layout
 
   return (
     <motion.div
@@ -63,11 +58,14 @@ export function Settings() {
             </div>
 
             <Button
-              onClick={() => setShowTeacherDashboard(true)}
+              onClick={() => {
+                // Return to home which will show dashboard if role is teacher
+                window.location.href = '/';
+              }}
               className="w-full bg-white hover:bg-white/90 text-deep-blue py-4 rounded-2xl shadow-xl"
             >
               <BarChart2 className="w-5 h-5 mr-2" />
-              Open Dashboard
+              Go to Dashboard
             </Button>
           </motion.div>
 

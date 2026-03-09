@@ -12,7 +12,7 @@ export const INITIAL_PROFILES: StudentProfile[] = [
             studentName: 'Ms. Teacher',
             emotionalState: '',
             totalCoins: 0,
-            level: 99,
+            level: 1,
             xp: 0,
             completedQuests: [],
             currentQuestId: null,
@@ -30,7 +30,7 @@ export const INITIAL_PROFILES: StudentProfile[] = [
             studentName: 'Mr. Smith',
             emotionalState: '',
             totalCoins: 0,
-            level: 99,
+            level: 1,
             xp: 0,
             completedQuests: [],
             currentQuestId: null,
@@ -51,7 +51,7 @@ export const INITIAL_PROFILES: StudentProfile[] = [
             level: 1,
             xp: 0,
             completedQuests: [],
-            currentQuestId: 1,
+            currentQuestId: null,
             questProgress: {} as any,
         }
     },
@@ -69,7 +69,7 @@ export const INITIAL_PROFILES: StudentProfile[] = [
             level: 1,
             xp: 0,
             completedQuests: [],
-            currentQuestId: 1,
+            currentQuestId: null,
             questProgress: {} as any,
         }
     },
@@ -87,7 +87,7 @@ export const INITIAL_PROFILES: StudentProfile[] = [
             level: 1,
             xp: 0,
             completedQuests: [],
-            currentQuestId: 1,
+            currentQuestId: null,
             questProgress: {} as any,
         }
     },
@@ -105,7 +105,7 @@ export const INITIAL_PROFILES: StudentProfile[] = [
             level: 1,
             xp: 0,
             completedQuests: [],
-            currentQuestId: 1,
+            currentQuestId: null,
             questProgress: {} as any,
         }
     }

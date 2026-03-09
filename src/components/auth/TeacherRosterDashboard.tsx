@@ -12,12 +12,13 @@ interface TeacherDashboardProps {
     allProfiles: StudentProfile[];
     onUpdateProfiles: (profiles: StudentProfile[]) => void;
     onLogout: () => void;
+    dbError?: string | null;
 }
 
 const AVATARS = ['👦', '👧', '👦🏽', '👧🏽', '👱‍♂️', '👱‍♀️', '🧑‍🦱', '👩‍🦱', '👨‍🏫', '👩‍🏫', '🧑‍🏫', '🦸‍♂️', '🦸‍♀️'];
 const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸'];
 
-export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout }: TeacherDashboardProps) {
+export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout, dbError }: TeacherDashboardProps) {
     const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
     const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
     const [newStudentName, setNewStudentName] = useState('');
@@ -333,7 +334,24 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
     }, [classStudents]);
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
+        <div className="min-h-screen bg-warm-neutral pb-12">
+            {/* Database Status Warning */}
+            {dbError && (
+                <div className="bg-red-50 border-b border-red-200 p-4 sticky top-0 z-50">
+                    <div className="max-w-7xl mx-auto flex items-center gap-3 text-red-700 font-sans">
+                        <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                        <div className="flex-1">
+                            <p className="font-bold">Database Connection Issue</p>
+                            <p className="text-sm opacity-90">
+                                {dbError.includes('permission-denied') 
+                                    ? "Firestore may not be initialized. Please ask the project owner (becca@thebeeprint.com) to initialize Firestore in Native Mode (select US East 1 for best performance)." 
+                                    : dbError}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+            <div className="w-full max-w-6xl mx-auto p-4 md:p-8">
             <header className="flex justify-between items-center mb-10 bg-white p-6 rounded-3xl shadow-sm border-2 border-deep-blue/10">
                 <div className="flex items-center gap-4">
                     <div className="relative">
@@ -1037,5 +1055,6 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                 )}
             </AnimatePresence>
         </div>
-    );
+    </div>
+);
 }
