@@ -4,6 +4,7 @@ import { StudentSelect } from './StudentSelect';
 import { TeacherSelect } from './TeacherSelect';
 import { EmojiPassChallenge } from './EmojiPassChallenge';
 import { TeacherRosterDashboard } from './TeacherRosterDashboard';
+import { AdminDashboard } from './AdminDashboard';
 import { StudentProfile } from '../../types/quest';
 import { Button } from '../ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -17,8 +18,9 @@ interface AuthScreenProps {
 
 
 
+
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
-    const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard'>('teacher-select');
+    const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard' | 'admin-dashboard'>('teacher-select');
     const [selectedTeacher, setSelectedTeacher] = useState<StudentProfile | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
 
@@ -32,7 +34,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                 if (cloudVersion) {
                     return {
                         ...cloudVersion,
-                        teacherId: ip.teacherId, 
+                        teacherId: ip.teacherId,
                         role: ip.role || 'student'
                     };
                 }
@@ -46,9 +48,9 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
             // Deduplicate by ID just in case
             const allProfiles = [...mergedInitial, ...customProfiles];
             const uniqueProfiles = Array.from(new Map(allProfiles.map(p => [p.id, p])).values());
-            
+
             setProfiles(uniqueProfiles);
-            
+
             // Backup to localStorage
             localStorage.setItem('abaquest_students', JSON.stringify(uniqueProfiles));
         };
@@ -57,14 +59,14 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
             setIsLoading(true);
             try {
                 let cloudProfiles = await studentService.fetchProfiles();
-                
+
                 // SEEDING: If database is completely empty, insert initial profiles
                 if (cloudProfiles.length === 0) {
                     console.log("Database empty, seeding initial data...");
                     await studentService.saveProfilesBatch(INITIAL_PROFILES);
                     cloudProfiles = INITIAL_PROFILES;
                 }
-                
+
                 updateProfilesState(cloudProfiles);
             } catch (error) {
                 console.error("Failed to load profiles from cloud:", error);
@@ -94,7 +96,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
         setView('confirm');
     };
 
-    const teachers = profiles.filter(p => p.role === 'teacher');
+    const teachers = profiles.filter(p => p.role === 'teacher' || p.role === 'admin');
     const classStudents = profiles.filter(p => p.teacherId === selectedTeacher?.id);
 
     return (
@@ -218,8 +220,13 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                                     const updatedStudent = { ...selectedStudent, lastLogin: now };
 
 
-                                    // Always hand off to App.tsx regardless of role
-                                    onAuthenticated(updatedStudent);
+                                    if (updatedStudent.role === 'admin') {
+                                        setView('admin-dashboard');
+                                    } else if (updatedStudent.role === 'teacher') {
+                                        setView('teacher-dashboard');
+                                    } else {
+                                        onAuthenticated(updatedStudent);
+                                    }
 
                                     // Sync login timestamp to cloud in the background (non-blocking)
                                     studentService.saveProfile(updatedStudent).catch(error => {
@@ -248,7 +255,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
                                 onUpdateProfiles={async (newProfiles) => {
                                     // Identify what changed and sync it
-                                    // This is a bit brute-force but ensures sync. 
+                                    // This is a bit brute-force but ensures sync.
                                     // Better approach is handled inside TeacherRosterDashboard itself
                                     setProfiles(newProfiles);
                                 }}
@@ -256,6 +263,29 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                                     setSelectedStudent(null);
                                     setView('teacher-select');
                                 }}
+                                onBackToAdmin={selectedStudent.role === 'admin' ? () => setView('admin-dashboard') : undefined}
+                            />
+                        )}
+                    </motion.div>
+                ) : view === 'admin-dashboard' ? (
+                    <motion.div
+                        key="admin-dashboard"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="w-full fixed inset-0 bg-slate-100 z-50 overflow-y-auto"
+                    >
+                        {selectedStudent && (
+                            <AdminDashboard
+                                allProfiles={profiles}
+                                onUpdateProfiles={async (newProfiles) => {
+                                    setProfiles(newProfiles);
+                                }}
+                                onLogout={() => {
+                                    setSelectedStudent(null);
+                                    setView('teacher-select');
+                                }}
+                                onManageClass={() => setView('teacher-dashboard')}
                             />
                         )}
                     </motion.div>

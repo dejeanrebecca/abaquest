@@ -160,7 +160,10 @@ export function Quest4Freeze({ onComplete }: Quest4FreezeProps) {
             coinsEarned={50} // simplified
             learningGain={Math.round(((postTestScore - preTestScore) / 4) * 100)}
             summary="You learned that adding zero changes nothing! The number stays frozen!"
-            onNext={() => onComplete({ pre: preTestScore, post: postTestScore })}
+            onNext={() => onComplete({
+              pre: Math.round((preTestScore / 4) * 100),
+              post: Math.round((postTestScore / 4) * 100)
+            })}
             nextButtonText="Back to Adventure Map 🗺️"
           />
         )}

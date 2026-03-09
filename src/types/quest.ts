@@ -61,7 +61,7 @@ export interface StudentProfile {
   avatar: string; // Emoji char
   emojiPass: string[]; // Array of 3 emojis
   gradeLevel: 'K' | '1-2';
-  role?: 'student' | 'teacher'; // Default is 'student'
+  role?: 'student' | 'teacher' | 'admin'; // Default is 'student'
   teacherId?: string; // ID of the teacher this student belongs to
   lastLogin?: string; // ISO timestamp
   progress: StudentProgress;
