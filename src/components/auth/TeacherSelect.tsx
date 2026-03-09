@@ -22,7 +22,7 @@ export function TeacherSelect({ teachers, onSelect }: TeacherSelectProps) {
                 >
                     <div className="text-6xl mb-4">{teacher.avatar}</div>
                     <h3 className="text-2xl font-bold text-deep-blue">{teacher.name}</h3>
-                    <p className="text-sm text-gray-500 mt-2">Teacher</p>
+                    <p className="text-sm text-gray-500 mt-2">{teacher.role === 'admin' ? 'Super Admin' : 'Teacher'}</p>
                 </motion.button>
             ))}
         </div>

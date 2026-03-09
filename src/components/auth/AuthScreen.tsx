@@ -4,6 +4,7 @@ import { StudentSelect } from './StudentSelect';
 import { TeacherSelect } from './TeacherSelect';
 import { EmojiPassChallenge } from './EmojiPassChallenge';
 import { TeacherRosterDashboard } from './TeacherRosterDashboard';
+import { AdminDashboard } from './AdminDashboard';
 import { StudentProfile } from '../../types/quest';
 import { Button } from '../ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -15,6 +16,24 @@ interface AuthScreenProps {
 
 
 const INITIAL_PROFILES: StudentProfile[] = [
+    {
+        id: 'admin1',
+        name: 'Ameerah Bello',
+        avatar: '👩‍🏫',
+        emojiPass: ['🔑', '🔑', '🔑'],
+        gradeLevel: 'K',
+        role: 'admin',
+        progress: {
+            studentName: 'Ameerah Bello',
+            emotionalState: '',
+            totalCoins: 0,
+            level: 99,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: null,
+            questProgress: {} as any,
+        }
+    },
     {
         id: 'teacher1',
         name: 'Ms. Teacher',
@@ -127,7 +146,7 @@ const INITIAL_PROFILES: StudentProfile[] = [
 
 
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
-    const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard'>('teacher-select');
+    const [view, setView] = useState<'teacher-select' | 'student-select' | 'confirm' | 'challenge' | 'teacher-dashboard' | 'admin-dashboard'>('teacher-select');
     const [selectedTeacher, setSelectedTeacher] = useState<StudentProfile | null>(null);
     const [selectedStudent, setSelectedStudent] = useState<StudentProfile | null>(null);
 
@@ -206,7 +225,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
         setView('confirm');
     };
 
-    const teachers = profiles.filter(p => p.role === 'teacher');
+    const teachers = profiles.filter(p => p.role === 'teacher' || p.role === 'admin');
     const classStudents = profiles.filter(p => p.teacherId === selectedTeacher?.id);
 
     return (
@@ -330,7 +349,9 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                                     const updatedStudent = { ...selectedStudent, lastLogin: now };
 
 
-                                    if (updatedStudent.role === 'teacher') {
+                                    if (updatedStudent.role === 'admin') {
+                                        setView('admin-dashboard');
+                                    } else if (updatedStudent.role === 'teacher') {
                                         setView('teacher-dashboard');
                                     } else {
                                         onAuthenticated(updatedStudent);
@@ -363,7 +384,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
                                 onUpdateProfiles={async (newProfiles) => {
                                     // Identify what changed and sync it
-                                    // This is a bit brute-force but ensures sync. 
+                                    // This is a bit brute-force but ensures sync.
                                     // Better approach is handled inside TeacherRosterDashboard itself
                                     setProfiles(newProfiles);
                                 }}
@@ -371,6 +392,29 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                                     setSelectedStudent(null);
                                     setView('teacher-select');
                                 }}
+                                onBackToAdmin={selectedStudent.role === 'admin' ? () => setView('admin-dashboard') : undefined}
+                            />
+                        )}
+                    </motion.div>
+                ) : view === 'admin-dashboard' ? (
+                    <motion.div
+                        key="admin-dashboard"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="w-full fixed inset-0 bg-slate-100 z-50 overflow-y-auto"
+                    >
+                        {selectedStudent && (
+                            <AdminDashboard
+                                allProfiles={profiles}
+                                onUpdateProfiles={async (newProfiles) => {
+                                    setProfiles(newProfiles);
+                                }}
+                                onLogout={() => {
+                                    setSelectedStudent(null);
+                                    setView('teacher-select');
+                                }}
+                                onManageClass={() => setView('teacher-dashboard')}
                             />
                         )}
                     </motion.div>

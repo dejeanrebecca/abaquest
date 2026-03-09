@@ -7,7 +7,7 @@ import { InteractiveAbacus } from '../InteractiveAbacus';
 import { AudioNarration } from '../AudioNarration';
 
 interface Quest3PreTestProps {
-    onComplete: () => void;
+    onComplete: (answers: boolean[]) => void;
     isPostTest?: boolean;
 }
 
@@ -47,6 +47,8 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
         setCurrentOptions(getThreeOptions(testQuestions[currentQuestion].target));
     }, [currentQuestion]);
 
+    const [answers, setAnswers] = useState<boolean[]>([]);
+
     const handleAnswer = (selectedNumber: number, isSkip: boolean = false) => {
         if (showFeedback) return;
 
@@ -64,6 +66,8 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
             student_response: isSkip ? 'I_dont_know_yet' : selectedNumber.toString(),
         });
 
+        const newAnswers = [...answers, isCorrect];
+        setAnswers(newAnswers);
         setShowFeedback(isSkip ? 'skip' : (isCorrect ? 'correct' : 'wrong'));
 
         setTimeout(() => {
@@ -71,7 +75,7 @@ export function Quest3PreTest({ onComplete, isPostTest = false }: Quest3PreTestP
                 setCurrentQuestion(currentQuestion + 1);
                 setShowFeedback(null);
             } else {
-                onComplete();
+                onComplete(newAnswers);
             }
         }, 1500);
     };

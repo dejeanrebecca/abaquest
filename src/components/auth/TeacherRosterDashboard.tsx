@@ -2,28 +2,29 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { StudentProfile } from '../../types/quest';
-import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp, Edit2 } from 'lucide-react';
+import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp, Edit2, ShieldCheck } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { QuestId } from '../../types/quest';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { normalizeScore } from '../../utils/quest';
 
 interface TeacherDashboardProps {
     teacher: StudentProfile;
     allProfiles: StudentProfile[];
     onUpdateProfiles: (profiles: StudentProfile[]) => void;
     onLogout: () => void;
+    onBackToAdmin?: () => void; // Optional callback for hybrid users
 }
 
 const AVATARS = ['👦', '👧', '👦🏽', '👧🏽', '👱‍♂️', '👱‍♀️', '🧑‍🦱', '👩‍🦱', '👨‍🏫', '👩‍🏫', '🧑‍🏫', '🦸‍♂️', '🦸‍♀️'];
-const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸'];
+const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸', '🔑', '🎈'];
 
-export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout }: TeacherDashboardProps) {
+export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles, onLogout, onBackToAdmin }: TeacherDashboardProps) {
     const [isEditingModalOpen, setIsEditingModalOpen] = useState(false);
     const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
     const [newStudentName, setNewStudentName] = useState('');
     const [selectedAvatar, setSelectedAvatar] = useState(AVATARS[0]);
     const [newPassword, setNewPassword] = useState<string[]>([]);
-    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [viewingStudent, setViewingStudent] = useState<StudentProfile | null>(null);
     const [selectedQuest, setSelectedQuest] = useState<QuestId>(1);
@@ -107,60 +108,65 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         }
 
         setError('');
-        setIsSaving(true);
+        const previousProfiles = [...allProfiles];
+        let updatedProfiles = [...allProfiles];
+        let studentToSave: StudentProfile | null = null;
 
-        try {
-            if (editingStudentId) {
-                // Edit existing student
-                const existingStudent = allProfiles.find(p => p.id === editingStudentId);
-                if (existingStudent) {
-                    const updatedStudent: StudentProfile = {
-                        ...existingStudent,
-                        name: newStudentName.trim(),
-                        avatar: selectedAvatar,
-                        emojiPass: [...newPassword],
-                        progress: {
-                            ...existingStudent.progress,
-                            studentName: newStudentName.trim(),
-                        }
-                    };
-                    await studentService.saveProfile(updatedStudent);
-                    onUpdateProfiles(allProfiles.map(p => p.id === updatedStudent.id ? updatedStudent : p));
-                }
-            } else {
-                // Add new student
-                const newStudent: StudentProfile = {
-                    id: `student_${Date.now()}`,
+        if (editingStudentId) {
+            // Edit existing student
+            const existingStudent = allProfiles.find(p => p.id === editingStudentId);
+            if (existingStudent) {
+                studentToSave = {
+                    ...existingStudent,
                     name: newStudentName.trim(),
                     avatar: selectedAvatar,
                     emojiPass: [...newPassword],
-                    gradeLevel: 'K',
-                    role: 'student',
-                    teacherId: teacher.id,
                     progress: {
+                        ...existingStudent.progress,
                         studentName: newStudentName.trim(),
-                        emotionalState: 'happy',
-                        totalCoins: 0,
-                        level: 1,
-                        xp: 0,
-                        completedQuests: [],
-                        currentQuestId: 1,
-                        questProgress: {} as any,
                     }
                 };
-                await studentService.saveProfile(newStudent);
-                onUpdateProfiles([...allProfiles, newStudent]);
+                updatedProfiles = allProfiles.map(p => p.id === studentToSave!.id ? studentToSave! : p);
             }
+        } else {
+            // Add new student
+            studentToSave = {
+                id: `student_${Date.now()}`,
+                name: newStudentName.trim(),
+                avatar: selectedAvatar,
+                emojiPass: [...newPassword],
+                gradeLevel: 'K',
+                role: 'student',
+                teacherId: teacher.id,
+                progress: {
+                    studentName: newStudentName.trim(),
+                    emotionalState: 'happy',
+                    totalCoins: 0,
+                    level: 1,
+                    xp: 0,
+                    completedQuests: [],
+                    currentQuestId: 1,
+                    questProgress: {} as any,
+                }
+            };
+            updatedProfiles = [...allProfiles, studentToSave];
+        }
 
-            // Reset form
-            setIsEditingModalOpen(false);
-            setNewStudentName('');
-            setSelectedAvatar(AVATARS[0]);
-            setNewPassword([]);
+        if (!studentToSave) return;
+
+        // Optimistic update
+        onUpdateProfiles(updatedProfiles);
+        setIsEditingModalOpen(false);
+        setNewStudentName('');
+        setSelectedAvatar(AVATARS[0]);
+        setNewPassword([]);
+
+        try {
+            await studentService.saveProfile(studentToSave);
         } catch (error) {
-            setError('Failed to save student to cloud. Please try again.');
-        } finally {
-            setIsSaving(false);
+            setError('Failed to save student to cloud.');
+            onUpdateProfiles(previousProfiles);
+            alert('Failed to sync student data. Roster has been rolled back.');
         }
     };
 
@@ -207,8 +213,8 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             const isStarted = !!progress?.startedAt;
             const status = isCompleted ? 'Completed' : isStarted ? 'In Progress' : 'Not Started';
 
-            const pre = progress?.preTestScore ?? 0;
-            const post = progress?.postTestScore ?? 0;
+            const pre = normalizeScore(progress?.preTestScore, qId as QuestId);
+            const post = normalizeScore(progress?.postTestScore, qId as QuestId);
             const gain = (progress?.postTestScore !== undefined && progress?.preTestScore !== undefined) ? post - pre : 0;
             const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
             const date = progress?.completedAt ? new Date(progress.completedAt).toLocaleDateString() : '-';
@@ -234,8 +240,8 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             const isCompleted = progress?.completed;
             const isStarted = !!progress?.startedAt;
             const status = isCompleted ? 'Completed' : isStarted ? 'In Progress' : 'Not Started';
-            const pre = progress?.preTestScore ?? 0;
-            const post = progress?.postTestScore ?? 0;
+            const pre = normalizeScore(progress?.preTestScore, selectedQuest);
+            const post = normalizeScore(progress?.postTestScore, selectedQuest);
             const gain = (progress?.postTestScore !== undefined && progress?.preTestScore !== undefined) ? post - pre : 0;
             const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
             const date = progress?.completedAt ? new Date(progress.completedAt).toLocaleDateString() : '-';
@@ -265,13 +271,14 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
             classStudents.forEach(student => {
                 const progress = student.progress?.questProgress?.[qId];
                 if (progress?.preTestScore !== undefined) {
-                    totalPre += progress.preTestScore;
+                    totalPre += normalizeScore(progress.preTestScore, qId);
                     countPre++;
                 }
                 if (progress?.postTestScore !== undefined) {
-                    totalPost += progress.postTestScore;
+                    const normalizedPost = normalizeScore(progress.postTestScore, qId);
+                    totalPost += normalizedPost;
                     countPost++;
-                    if (progress.postTestScore > maxPost) maxPost = progress.postTestScore;
+                    if (normalizedPost > maxPost) maxPost = normalizedPost;
                 }
                 if (progress?.completed) {
                     completedCount++;
@@ -349,10 +356,22 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                         <p className="text-deep-blue/60 mt-1">Manage your classroom analytics and student roster</p>
                     </div>
                 </div>
-                <Button variant="outline" onClick={onLogout} className="text-deep-blue border-deep-blue hover:bg-red-50 hover:text-red-600 hover:border-red-200">
-                    <LogOut className="w-5 h-5 mr-2" />
-                    Logout
-                </Button>
+                <div className="flex items-center gap-4">
+                    {onBackToAdmin && (
+                        <Button
+                            variant="default"
+                            onClick={onBackToAdmin}
+                            className="bg-brand-blue hover:bg-brand-blue text-white rounded-2xl shadow-md border-none px-6"
+                        >
+                            <ShieldCheck className="w-5 h-5 mr-2" />
+                            Admin View
+                        </Button>
+                    )}
+                    <Button variant="outline" onClick={onLogout} className="text-deep-blue border-deep-blue hover:bg-red-50 hover:text-red-600 hover:border-red-200 rounded-2xl">
+                        <LogOut className="w-5 h-5 mr-2" />
+                        Logout
+                    </Button>
+                </div>
             </header>
 
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-deep-blue/5">
@@ -556,12 +575,6 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
                     <div className="p-6">
                         {(() => {
-                            const studentsWithProgress = classStudents.map(s => {
-                                const p = s.progress?.questProgress?.[selectedQuest];
-                                return { student: s, progress: p };
-                            });
-                            const completedStudents = studentsWithProgress.filter(s => s.progress?.completed);
-
                             return (
                                 <>
                                     <div className="flex items-center gap-2 mb-6">
@@ -582,7 +595,9 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                     ([1, 2, 3, 4] as QuestId[]).forEach(qId => {
                                                         const p = student.progress?.questProgress?.[qId];
                                                         if (p?.preTestScore !== undefined && p?.postTestScore !== undefined) {
-                                                            row[`q${qId}`] = p.postTestScore - p.preTestScore;
+                                                            const normPre = normalizeScore(p.preTestScore, qId);
+                                                            const normPost = normalizeScore(p.postTestScore, qId);
+                                                            row[`q${qId}`] = normPost - normPre;
                                                         }
                                                     });
                                                     return row;
@@ -650,8 +665,8 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                                                     const p = student.progress?.questProgress?.[qId];
                                                                     const isCompleted = !!p?.completed;
                                                                     const isStarted = !!p?.startedAt;
-                                                                    const pre = p?.preTestScore;
-                                                                    const post = p?.postTestScore;
+                                                                    const pre = normalizeScore(p?.preTestScore, qId);
+                                                                    const post = normalizeScore(p?.postTestScore, qId);
                                                                     const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
 
                                                                     return (
@@ -993,9 +1008,8 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                                 <Button
                                     onClick={handleSaveStudent}
                                     className="px-8 py-6 text-lg rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg shadow-green-500/30"
-                                    disabled={isSaving}
                                 >
-                                    {isSaving ? <Loader2 className="w-6 h-6 animate-spin" /> : "Save Student"}
+                                    Save Student
                                 </Button>
                             </div>
                         </motion.div>

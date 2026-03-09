@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { hashBeadPattern } from '../../utils/auth';
 import { ArrowLeft, RefreshCw, Trophy, Star, Coins, Calendar, X, BarChart2 } from 'lucide-react';
 import { DbService, useDbSync } from '../../services/db.service';
+import { normalizeScore } from '../../utils/quest';
 
 interface TeacherDashboardProps {
     onBack: () => void;
@@ -58,8 +59,8 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
             const progress = student.progress?.questProgress?.[qId as QuestId];
             const statusInfo = getQuestStatus(student, qId.toString());
 
-            const pre = progress?.preTestScore ?? 0;
-            const post = progress?.postTestScore ?? 0;
+            const pre = normalizeScore(progress?.preTestScore, qId as QuestId);
+            const post = normalizeScore(progress?.postTestScore, qId as QuestId);
             const gain = (progress?.postTestScore !== undefined && progress?.preTestScore !== undefined)
                 ? post - pre
                 : 0;
@@ -247,8 +248,8 @@ export function TeacherDashboard({ onBack }: TeacherDashboardProps) {
                                                     const { status, color, icon } = getQuestStatus(selectedStudent, qId.toString());
                                                     const progress = selectedStudent.progress?.questProgress?.[qId as QuestId];
 
-                                                    const pre = progress?.preTestScore;
-                                                    const post = progress?.postTestScore;
+                                                    const pre = normalizeScore(progress?.preTestScore, qId as QuestId);
+                                                    const post = normalizeScore(progress?.postTestScore, qId as QuestId);
                                                     const gain = (post !== undefined && pre !== undefined) ? post - pre : null;
                                                     const duration = calculateDuration(progress?.startedAt, progress?.completedAt);
 

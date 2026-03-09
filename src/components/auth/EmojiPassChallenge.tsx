@@ -11,7 +11,7 @@ interface EmojiPassChallengeProps {
     onBack: () => void;
 }
 
-const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸'];
+const EMOJI_GRID = ['🐶', '🐱', '🍎', '🚗', '⭐', '☀️', '🌙', '🌳', '🌸', '🔑', '🎈'];
 
 export function EmojiPassChallenge({ student, onSuccess, onBack }: EmojiPassChallengeProps) {
     const [enteredPass, setEnteredPass] = useState<string[]>([]);
@@ -144,8 +144,8 @@ export function EmojiPassChallenge({ student, onSuccess, onBack }: EmojiPassChal
                         onClick={handleDelete}
                         disabled={status !== 'idle' || enteredPass.length === 0}
                         className={`w-20 h-20 flex items-center justify-center rounded-2xl border-2 transition-colors ${enteredPass.length > 0 && status === 'idle'
-                                ? 'bg-red-50 text-red-500 hover:bg-red-100 border-red-200 hover:border-red-400'
-                                : 'bg-gray-50 text-gray-300 border-transparent'
+                            ? 'bg-red-50 text-red-500 hover:bg-red-100 border-red-200 hover:border-red-400'
+                            : 'bg-gray-50 text-gray-300 border-transparent'
                             }`}
                     >
                         <Delete className="w-10 h-10" />
