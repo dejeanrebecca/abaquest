@@ -1,11 +1,11 @@
 node_modules
-dist
 build
+dist
+.env
+.env.*
+!.env.local
+*.log
 .git
 .github
-.DS_Store
-*.md
-coverage
-
-scripts/
-*.txt
+# Ensure individual env files are ignored except what we specifically whitelist
+# production.env will be created by deploy.ps1 and should NOT be ignored

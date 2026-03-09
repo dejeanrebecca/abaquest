@@ -40,6 +40,7 @@ export interface QuestProgress {
     postTest: number;
     story: number;
   };
+  rawInteractions?: any[]; // Full interaction log for research export
 }
 
 export interface StudentProgress {

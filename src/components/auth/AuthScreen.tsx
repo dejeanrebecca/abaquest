@@ -9,140 +9,14 @@ import { StudentProfile } from '../../types/quest';
 import { Button } from '../ui/button';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
+import { INITIAL_PROFILES } from '../../services/seedData';
 
 interface AuthScreenProps {
     onAuthenticated: (student: StudentProfile) => void;
 }
 
 
-const INITIAL_PROFILES: StudentProfile[] = [
-    {
-        id: 'admin1',
-        name: 'Ameerah Bello',
-        avatar: '👩‍🏫',
-        emojiPass: ['🔑', '🔑', '🔑'],
-        gradeLevel: 'K',
-        role: 'admin',
-        progress: {
-            studentName: 'Ameerah Bello',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 'teacher1',
-        name: 'Ms. Teacher',
-        avatar: '👩‍🏫',
-        emojiPass: ['🍎', '🍎', '🍎'],
-        gradeLevel: 'K',
-        role: 'teacher',
-        progress: {
-            studentName: 'Ms. Teacher',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 'teacher2',
-        name: 'Mr. Smith',
-        avatar: '👨‍🏫',
-        emojiPass: ['🚗', '🚗', '🚗'],
-        gradeLevel: 'K',
-        role: 'teacher',
-        progress: {
-            studentName: 'Mr. Smith',
-            emotionalState: '',
-            totalCoins: 0,
-            level: 99,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: null,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's1',
-        name: 'Ameer',
-        avatar: '👦',
-        emojiPass: ['🐶', '🐶', '🐶'],
-        gradeLevel: 'K',
-        teacherId: 'teacher1',
-        progress: {
-            studentName: 'Ameer',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's2',
-        name: 'Ameerah',
-        avatar: '👧',
-        emojiPass: ['⭐', '⭐', '⭐'],
-        gradeLevel: 'K',
-        teacherId: 'teacher1',
-        progress: {
-            studentName: 'Ameerah',
-            emotionalState: 'excited',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's3',
-        name: 'Liam',
-        avatar: '👱‍♂️',
-        emojiPass: ['🚗', '🚗', '🚗'],
-        gradeLevel: 'K',
-        teacherId: 'teacher2',
-        progress: {
-            studentName: 'Liam',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    },
-    {
-        id: 's4',
-        name: 'Noah',
-        avatar: '👦🏽',
-        emojiPass: ['🍎', '🍎', '🍎'],
-        gradeLevel: 'K',
-        teacherId: 'teacher2',
-        progress: {
-            studentName: 'Noah',
-            emotionalState: 'happy',
-            totalCoins: 0,
-            level: 1,
-            xp: 0,
-            completedQuests: [],
-            currentQuestId: 1,
-            questProgress: {} as any,
-        }
-    }
-];
+
 
 
 export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
@@ -154,46 +28,7 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
     const [profiles, setProfiles] = useState<StudentProfile[]>(INITIAL_PROFILES);
 
     useEffect(() => {
-        // 1. Initial fetch from Firestore
-        const initProfiles = async () => {
-            setIsLoading(true);
-            try {
-                const cloudProfiles = await studentService.fetchProfiles();
-
-                // Merge strategy:
-                // 1. For each initial profile, if a cloud version exists, use cloud progress/data
-                //    but PRESERVE the hardcoded teacherId and role from INITIAL_PROFILES.
-                const mergedInitial = INITIAL_PROFILES.map(ip => {
-                    const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
-                    if (cloudVersion) {
-                        return {
-                            ...cloudVersion,
-                            teacherId: ip.teacherId, // Force the hardcoded assignment
-                            role: ip.role || 'student'
-                        };
-                    }
-                    return ip;
-                });
-                const customProfiles = cloudProfiles.filter(sp =>
-                    !INITIAL_PROFILES.some(dp => dp.id === sp.id)
-                );
-
-                const finalProfiles = [...mergedInitial, ...customProfiles];
-                setProfiles(finalProfiles);
-
-                // Backup to localStorage for convenience (optional)
-                localStorage.setItem('abaquest_students', JSON.stringify(finalProfiles));
-            } catch (error) {
-                console.error("Failed to load profiles from cloud:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        initProfiles();
-
-        // 2. Subscribe to real-time updates
-        const unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
+        const updateProfilesState = (cloudProfiles: StudentProfile[]) => {
             const mergedInitial = INITIAL_PROFILES.map(ip => {
                 const cloudVersion = cloudProfiles.find(sp => sp.id === ip.id);
                 if (cloudVersion) {
@@ -205,10 +40,46 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                 }
                 return ip;
             });
+
             const customProfiles = cloudProfiles.filter(sp =>
                 !INITIAL_PROFILES.some(dp => dp.id === sp.id)
             );
-            setProfiles([...mergedInitial, ...customProfiles]);
+
+            // Deduplicate by ID just in case
+            const allProfiles = [...mergedInitial, ...customProfiles];
+            const uniqueProfiles = Array.from(new Map(allProfiles.map(p => [p.id, p])).values());
+
+            setProfiles(uniqueProfiles);
+
+            // Backup to localStorage
+            localStorage.setItem('abaquest_students', JSON.stringify(uniqueProfiles));
+        };
+
+        const initProfiles = async () => {
+            setIsLoading(true);
+            try {
+                let cloudProfiles = await studentService.fetchProfiles();
+
+                // SEEDING: If database is completely empty, insert initial profiles
+                if (cloudProfiles.length === 0) {
+                    console.log("Database empty, seeding initial data...");
+                    await studentService.saveProfilesBatch(INITIAL_PROFILES);
+                    cloudProfiles = INITIAL_PROFILES;
+                }
+
+                updateProfilesState(cloudProfiles);
+            } catch (error) {
+                console.error("Failed to load profiles from cloud:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        initProfiles();
+
+        // 2. Subscribe to real-time updates
+        const unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
+            updateProfilesState(cloudProfiles);
         });
 
         return () => unsubscribe();
@@ -263,9 +134,9 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
             </header>
 
             {isLoading && (
-                <div className="flex flex-col items-center gap-4 mb-8">
-                    <Loader2 className="w-12 h-12 text-deep-blue animate-spin" />
-                    <p className="text-deep-blue font-medium animate-pulse">Syncing class data...</p>
+                <div className="fixed top-6 right-6 flex items-center gap-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm border border-deep-blue/10 z-[60]">
+                    <Loader2 className="w-5 h-5 text-deep-blue animate-spin" />
+                    <span className="text-deep-blue text-sm font-bold animate-pulse">Syncing...</span>
                 </div>
             )}
 
