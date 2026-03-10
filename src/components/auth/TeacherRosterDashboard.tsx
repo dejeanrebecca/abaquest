@@ -1078,5 +1078,6 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
                     )}
                 </AnimatePresence>
             </div>
-            );
+        </div>
+    );
 }
