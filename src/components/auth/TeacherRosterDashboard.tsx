@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../ui/button';
 import { StudentProfile } from '../../types/quest';
-import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp, Edit2, ShieldCheck } from 'lucide-react';
+import { LogOut, Plus, Trash2, X, AlertCircle, Loader2, BarChart2, Trophy, Coins, Download, TrendingUp, Edit2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { QuestId } from '../../types/quest';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -109,25 +109,24 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
         }
 
         setError('');
-        const previousProfiles = [...allProfiles];
         let updatedProfiles = [...allProfiles];
         let studentToSave: StudentProfile | null = null;
 
         if (editingStudentId) {
             // Edit existing student
-            const existingStudent = allProfiles.find(p => p.id === editingStudentId);
-            if (existingStudent) {
+            const existingIndex = allProfiles.findIndex(p => p.id === editingStudentId);
+            if (existingIndex !== -1) {
                 studentToSave = {
-                    ...existingStudent,
+                    ...allProfiles[existingIndex],
                     name: newStudentName.trim(),
                     avatar: selectedAvatar,
                     emojiPass: [...newPassword],
                     progress: {
-                        ...existingStudent.progress,
+                        ...allProfiles[existingIndex].progress,
                         studentName: newStudentName.trim(),
                     }
                 };
-                updatedProfiles = allProfiles.map(p => p.id === studentToSave!.id ? studentToSave! : p);
+                updatedProfiles[existingIndex] = studentToSave;
             }
         } else {
             // Add new student
@@ -155,20 +154,20 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
         if (!studentToSave) return;
 
-        // Optimistic update
+        // OPTIMISTIC UPDATE: Update local state and close modal instantly
         onUpdateProfiles(updatedProfiles);
         setIsEditingModalOpen(false);
         setNewStudentName('');
         setSelectedAvatar(AVATARS[0]);
         setNewPassword([]);
 
-        try {
-            await studentService.saveProfile(studentToSave);
-        } catch (error) {
-            setError('Failed to save student to cloud.');
-            onUpdateProfiles(previousProfiles);
-            alert('Failed to sync student data. Roster has been rolled back.');
-        }
+        // BACKGROUND SYNC: Save to Firestore without awaiting to keep UI snappy
+        studentService.saveProfile(studentToSave).catch(err => {
+            console.error('Background save failed:', err);
+            setError('Cloud sync failed, but local changes are saved.');
+            // Note: We could roll back here, but for research/testing, keeping 
+            // the local state is often preferred unless it's a critical failure.
+        });
     };
 
     const handleDeleteStudent = async (studentId: string) => {

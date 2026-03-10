@@ -16,9 +16,9 @@ $ENV_FILE = ".env.local"
 $PROD_ENV = "production.env"
 
 if (Test-Path $ENV_FILE) {
-    Write-Host "Syncing credentials to $PROD_ENV..."
-    # Create a temporary file that isn't in .gitignore
-    Get-Content $ENV_FILE | Out-File -FilePath $PROD_ENV -Encoding utf8
+    # Create a temporary file that isn't in .gitignore - using NoBOM UTF8 for Docker/Linux compatibility
+    $content = Get-Content $ENV_FILE -Raw
+    [System.IO.File]::WriteAllText((Join-Path (Get-Location) $PROD_ENV), $content)
 } else {
     Write-Warning "No .env.local found! Build may fail to initialize Firebase."
 }
