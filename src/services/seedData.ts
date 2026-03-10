@@ -2,6 +2,24 @@ import { StudentProfile } from '../types/quest';
 
 export const INITIAL_PROFILES: StudentProfile[] = [
     {
+        id: 'admin1',
+        name: 'Ameerah Bello',
+        avatar: '🔑',
+        emojiPass: ['🔑', '🔑', '🔑'],
+        gradeLevel: 'K',
+        role: 'admin',
+        progress: {
+            studentName: 'Ameerah Bello',
+            emotionalState: '',
+            totalCoins: 0,
+            level: 1,
+            xp: 0,
+            completedQuests: [],
+            currentQuestId: null,
+            questProgress: {} as any,
+        }
+    },
+    {
         id: 'teacher1',
         name: 'Ms. Teacher',
         avatar: '👩‍🏫',
