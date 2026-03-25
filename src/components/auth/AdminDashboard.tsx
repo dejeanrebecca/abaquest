@@ -48,7 +48,12 @@ export function AdminDashboard({ allProfiles, onUpdateProfiles, onLogout, onMana
 
         // Optimistic update: Update local state immediately
         const previousProfiles = [...allProfiles];
-        onUpdateProfiles([...allProfiles, profile]);
+        const updatedProfiles = [...allProfiles, profile];
+        onUpdateProfiles(updatedProfiles);
+
+        // Sync to localStorage
+        localStorage.setItem('abaquest_students', JSON.stringify(updatedProfiles));
+
         setIsAddingTeacher(false);
         setNewTeacher({ name: '', avatar: '👨‍🏫', emojiPass: ['🍎', '🍎', '🍎'] });
 
@@ -67,7 +72,9 @@ export function AdminDashboard({ allProfiles, onUpdateProfiles, onLogout, onMana
 
         try {
             await studentService.deleteProfile(teacherId);
-            onUpdateProfiles(allProfiles.filter(p => p.id !== teacherId));
+            const updatedProfiles = allProfiles.filter(p => p.id !== teacherId);
+            onUpdateProfiles(updatedProfiles);
+            localStorage.setItem('abaquest_students', JSON.stringify(updatedProfiles));
         } catch (error) {
             console.error("Failed to delete teacher:", error);
         }

@@ -114,5 +114,16 @@ export const studentService = {
             console.error("Error saving profiles batch:", error);
             throw error;
         }
+    },
+
+    /**
+     * Check if Firebase is likely configured with real keys
+     */
+    isConfigured(): boolean {
+        const config = (db as any)._app?.options;
+        if (!config || !config.apiKey || config.apiKey === "YOUR_API_KEY" || config.apiKey === "your-api-key") {
+            return false;
+        }
+        return true;
     }
 };
