@@ -58,18 +58,36 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
         const initProfiles = async () => {
             setIsLoading(true);
             try {
-                let cloudProfiles = await studentService.fetchProfiles();
+                const isFirebaseConfigured = studentService.isConfigured();
+                let cloudProfiles: StudentProfile[] = [];
 
-                // SEEDING: If database is completely empty, insert initial profiles
-                if (cloudProfiles.length === 0) {
-                    console.log("Database empty, seeding initial data...");
-                    await studentService.saveProfilesBatch(INITIAL_PROFILES);
-                    cloudProfiles = INITIAL_PROFILES;
+                if (isFirebaseConfigured) {
+                    cloudProfiles = await studentService.fetchProfiles();
+
+                    // SEEDING: If database is completely empty, insert initial profiles
+                    if (cloudProfiles.length === 0) {
+                        console.log("Database empty, seeding initial data...");
+                        await studentService.saveProfilesBatch(INITIAL_PROFILES);
+                        cloudProfiles = INITIAL_PROFILES;
+                    }
+                } else {
+                    console.warn("Firebase not correctly configured. Using localStorage fallback.");
+                    const localData = localStorage.getItem('abaquest_students');
+                    if (localData) {
+                        cloudProfiles = JSON.parse(localData);
+                    } else {
+                        cloudProfiles = INITIAL_PROFILES;
+                    }
                 }
 
                 updateProfilesState(cloudProfiles);
             } catch (error) {
-                console.error("Failed to load profiles from cloud:", error);
+                console.error("Failed to load profiles:", error);
+                // Fallback on error
+                const localData = localStorage.getItem('abaquest_students');
+                if (localData) {
+                    updateProfilesState(JSON.parse(localData));
+                }
             } finally {
                 setIsLoading(false);
             }
@@ -77,10 +95,13 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
 
         initProfiles();
 
-        // 2. Subscribe to real-time updates
-        const unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
-            updateProfilesState(cloudProfiles);
-        });
+        // 2. Subscribe to real-time updates (only if configured)
+        let unsubscribe = () => { };
+        if (studentService.isConfigured()) {
+            unsubscribe = studentService.subscribeToProfiles((cloudProfiles) => {
+                updateProfilesState(cloudProfiles);
+            });
+        }
 
         return () => unsubscribe();
     }, []);

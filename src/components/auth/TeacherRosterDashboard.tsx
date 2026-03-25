@@ -156,6 +156,7 @@ export function TeacherRosterDashboard({ teacher, allProfiles, onUpdateProfiles,
 
         // OPTIMISTIC UPDATE: Update local state and close modal instantly
         onUpdateProfiles(updatedProfiles);
+        localStorage.setItem('abaquest_students', JSON.stringify(updatedProfiles));
         setIsEditingModalOpen(false);
         setNewStudentName('');
         setSelectedAvatar(AVATARS[0]);
