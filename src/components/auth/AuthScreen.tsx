@@ -64,11 +64,14 @@ export function AuthScreen({ onAuthenticated }: AuthScreenProps) {
                 if (isFirebaseConfigured) {
                     cloudProfiles = await studentService.fetchProfiles();
 
-                    // SEEDING: If database is completely empty, insert initial profiles
-                    if (cloudProfiles.length === 0) {
-                        console.log("Database empty, seeding initial data...");
+                    // SEEDING: If database is completely empty AND seeding is enabled, insert initial profiles
+                    const isSeedingAllowed = import.meta.env.VITE_ALLOW_SEEDING === 'true';
+                    if (cloudProfiles.length === 0 && isSeedingAllowed) {
+                        console.log("Database empty, seeding allowed. Seeding initial data...");
                         await studentService.saveProfilesBatch(INITIAL_PROFILES);
                         cloudProfiles = INITIAL_PROFILES;
+                    } else if (cloudProfiles.length === 0) {
+                        console.log("Database empty, but seeding is disabled (VITE_ALLOW_SEEDING != true).");
                     }
                 } else {
                     console.warn("Firebase not correctly configured. Using localStorage fallback.");

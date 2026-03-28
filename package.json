@@ -69,8 +69,10 @@
             "build": "vite build",
             "preview": "vite preview",
             "start": "node server.cjs",
-            "deploy:dev": "pwsh ./deploy.ps1 -Environment dev",
-            "deploy:uat": "pwsh ./deploy.ps1 -Environment uat",
-            "deploy:prod": "pwsh ./deploy.ps1 -Environment prod"
+            "deploy:dev": "node scripts/run.js deploy dev",
+            "deploy:uat": "node scripts/run.js deploy uat",
+            "deploy:prod": "node scripts/run.js deploy prod",
+            "check": "node scripts/run.js check",
+            "query": "node scripts/db-query.cjs"
       }
 }

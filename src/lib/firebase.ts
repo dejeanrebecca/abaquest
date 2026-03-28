@@ -11,4 +11,18 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+
+// Dynamic database selection based on environment
+const getDatabaseId = () => {
+    // Check if we are in a browser environment
+    if (typeof window !== 'undefined') {
+        const hostname = window.location.hostname;
+        if (hostname.includes('uat') || hostname.includes('abaquest-app-uat')) {
+            return 'database-uat';
+        }
+    }
+    // Fallback to environment variable (build-time) or default
+    return import.meta.env.VITE_FIREBASE_DATABASE_ID || "(default)";
+};
+
+export const db = getFirestore(app, getDatabaseId());

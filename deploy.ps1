@@ -6,10 +6,14 @@ param(
 
 # Configuration
 $PROJECT_ID = "abaquest"
-$SERVICE_NAME = "abaquest-app-$Environment"
+if ($Environment -eq 'prod') {
+    $SERVICE_NAME = "abaquest-app"
+} else {
+    $SERVICE_NAME = "abaquest-app-$Environment"
+}
 $REGION = "us-central1"
 
-$IMAGE_NAME = "gcr.io/$PROJECT_ID/abaquest-frontend-$Environment:latest"
+$IMAGE_NAME = "gcr.io/$PROJECT_ID/abaquest-frontend-${Environment}:latest"
 
 Write-Host "----------------------------------------"
 Write-Host "Target Environment: $Environment"
@@ -33,7 +37,7 @@ if (Test-Path $ENV_FILE) {
 # 2. Build and Push
 Write-Host "Building container image on Cloud Build..."
 # Note: Dockerfile will look for production.env
-gcloud builds submit --tag $IMAGE_NAME .
+gcloud builds submit --config=cloudbuild.yaml --substitutions=_IMAGE_NAME=$IMAGE_NAME .
 
 # 3. Deploy
 Write-Host "Deploying to Cloud Run..."
